@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Spark 官方插件仓库",
-  "zipball_url": "https://github.com/spark-launcher/spark-plugins/archive/refs/heads/main.zip",
+  "zipball_url": "https://github.com/MrHan-Yd/spark-plugins/archive/refs/heads/master.zip",
   "updated": "2026-08-25T10:00:00Z",
   "plugins": [
     {
@@ -9,7 +9,7 @@
       "name": "JSON 格式化",
       "description": "粘贴 JSON，格式化为可展开收起的树形视图",
       "author": "Spark",
-      "homepage": "https://github.com/spark-launcher/spark-plugins/tree/main/json-formatter",
+      "homepage": "https://github.com/MrHan-Yd/spark-plugins/tree/master/json-formatter",
       "icon": null,
       "runtime": "webview",
       "latest": "0.1.0",
