@@ -1,6 +1,6 @@
 {
   "id": "com.spark.json-formatter",
-  "name": "JSON",
+  "name": "JSON 格式化",
   "version": "0.1.0",
   "api_version": 2,
   "runtime": "webview",

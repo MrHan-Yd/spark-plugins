@@ -460,6 +460,7 @@
   .toggle-arrow.leaf { visibility: hidden; }
 
   .syn-k { color: var(--syn-key); }
+  .syn-idx { color: var(--text-dim); }
   .syn-colon { color: var(--syn-punct); margin: 0 4px 0 1px; }
   .syn-s { color: var(--syn-str); }
   .syn-n { color: var(--syn-num); }
@@ -738,7 +739,19 @@ function escapeHtml(str) {
   }[m]));
 }
 
+// 渲染节点数上限：超出后停止展开渲染，避免大 JSON 卡死界面
+const MAX_RENDER_NODES = 20000;
+let renderBudget = MAX_RENDER_NODES;
+
 function buildTreeNode(val, key, path, depth, isLast) {
+  if (renderBudget <= 0) {
+    const skipped = document.createElement("div");
+    skipped.className = "collapsed-preview";
+    skipped.textContent = "… 节点过多，剩余部分已省略渲染";
+    return skipped;
+  }
+  renderBudget--;
+
   const node = document.createElement("div");
   node.className = "tree-node";
 
@@ -754,11 +767,16 @@ function buildTreeNode(val, key, path, depth, isLast) {
   toggle.innerHTML = isContainer ? ARROW_ICON : "";
   row.appendChild(toggle);
 
-  // Key
+  // Key（数组子项为数字序号，对象子项为字符串键名）
   if (key !== null) {
     const keyEl = document.createElement("span");
-    keyEl.className = "syn-k";
-    keyEl.textContent = JSON.stringify(key);
+    if (typeof key === "number") {
+      keyEl.className = "syn-idx";
+      keyEl.textContent = key;
+    } else {
+      keyEl.className = "syn-k";
+      keyEl.textContent = JSON.stringify(key);
+    }
     row.appendChild(keyEl);
 
     const colon = document.createElement("span");
@@ -804,7 +822,7 @@ function buildTreeNode(val, key, path, depth, isLast) {
     childrenContainer.className = "node-children";
 
     entries.forEach(([k, v], idx) => {
-      const child = buildTreeNode(v, type === "array" ? null : k, path.concat(k), depth + 1, idx === size - 1);
+      const child = buildTreeNode(v, k, path.concat(k), depth + 1, idx === size - 1);
       childrenContainer.appendChild(child);
     });
 
@@ -901,14 +919,32 @@ function getCollapsedPreview(val, type) {
 
 function getJsonPath(path) {
   if (!path.length) return "$";
-  return "$" + path.map(p => typeof p === "number" ? `[${p}]` : `.${p}`).join("");
+  return "$" + path.map(p => {
+    if (typeof p === "number") return `[${p}]`;
+    if (/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(p)) return `.${p}`;
+    return `[${JSON.stringify(p)}]`;
+  }).join("");
 }
 
 function countTotalNodes(val) {
-  const t = getType(val);
-  if (t === "array") return val.reduce((acc, cur) => acc + countTotalNodes(cur), val.length);
-  if (t === "object") return Object.keys(val).reduce((acc, k) => acc + countTotalNodes(val[k]), Object.keys(val).length);
-  return 1;
+  // 显式栈迭代，超深嵌套不会栈溢出
+  let count = 0;
+  const stack = [val];
+  while (stack.length) {
+    const cur = stack.pop();
+    const t = getType(cur);
+    if (t === "array") {
+      count += cur.length;
+      for (const v of cur) stack.push(v);
+    } else if (t === "object") {
+      const keys = Object.keys(cur);
+      count += keys.length;
+      for (const k of keys) stack.push(cur[k]);
+    } else {
+      count++;
+    }
+  }
+  return count;
 }
 
 function formatByteSize(bytes) {
@@ -962,6 +998,7 @@ function triggerParse() {
     currentMin = JSON.stringify(currentParsed);
 
     $tree.innerHTML = "";
+    renderBudget = MAX_RENDER_NODES;
     $tree.appendChild(buildTreeNode(currentParsed, null, [], 0, true));
 
     const totalNodes = countTotalNodes(currentParsed);
@@ -977,6 +1014,8 @@ function triggerParse() {
     `;
   } catch (err) {
     currentParsed = null;
+    currentPretty = "";
+    currentMin = "";
     $nodeStats.textContent = "解析异常";
     $liveBadge.className = "badge-live error";
     $liveStatusText.textContent = "语法错误";
@@ -1030,9 +1069,13 @@ async function copyToClipboard(text, successMsg = "已复制到剪贴板") {
     ta.style.opacity = "0";
     document.body.appendChild(ta);
     ta.select();
-    document.execCommand("copy");
+    const ok = document.execCommand("copy");
     document.body.removeChild(ta);
-    showToast(successMsg);
+    if (ok) {
+      showToast(successMsg);
+    } else {
+      showToast("复制失败");
+    }
   } catch (_) {
     showToast("复制失败");
   }
