@@ -6,8 +6,8 @@
     </linearGradient>
   </defs>
   <rect x="0" y="0" width="128" height="128" rx="28" ry="28" fill="url(#bg)"/>
-  <!-- viewBox 24x24 括号路径在 4..20 居中，缩放 3.2 倍并精确定位在 (25.6, 25.6) -->
-  <g transform="translate(25.6, 25.6) scale(3.2)" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- viewBox 24x24 括号路径横向 2..22、纵向 4..18（中心 y=11），缩放 3.2 倍；y 偏移 +3.2 补偿使中心落在 64 -->
+  <g transform="translate(25.6, 28.8) scale(3.2)" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M8 4H6a2 2 0 0 0-2 2v3a2 2 0 0 1-2 2 2 2 0 0 1 2 2v3a2 2 0 0 0 2 2h2"/>
     <path d="M16 4h2a2 2 0 0 1 2 2v3a2 2 0 0 0 2 2 2 2 0 0 0-2 2v3a2 2 0 0 1-2 2h-2"/>
   </g>
