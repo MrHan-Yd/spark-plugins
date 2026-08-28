@@ -1,0 +1,37 @@
+{
+  "id": "com.spark.compare",
+  "name": "内容对比",
+  "version": "0.1.0",
+  "api_version": 2,
+  "runtime": "webview",
+  "main": "index.html",
+  "icon": "icon.svg",
+  "author": "Spark",
+  "description": "文本输入即对比、差异逐行逐字精确高亮；文件 MD5/SHA 哈希对比；图片并排/堆叠/闪烁/像素级差异",
+  "permissions": ["clipboard"],
+  "features": [
+    {
+      "type": "keyword",
+      "keyword": "diff",
+      "title": "内容对比",
+      "subtitle": "文本逐字精确高亮 · 文件哈希 · 图片像素级对比",
+      "mode": "page",
+      "placeholder": "粘贴或拖入文本，差异实时高亮…"
+    },
+    {
+      "type": "keyword",
+      "keyword": "对比",
+      "title": "内容对比",
+      "subtitle": "文本逐字精确高亮 · 文件哈希 · 图片像素级对比",
+      "mode": "page",
+      "placeholder": "粘贴或拖入文本，差异实时高亮…"
+    }
+  ],
+  "window": {
+    "width": 1120,
+    "height": 720,
+    "minWidth": 560,
+    "minHeight": 400,
+    "resizable": true
+  }
+}

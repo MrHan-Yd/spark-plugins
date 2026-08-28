@@ -1,0 +1,2802 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>内容对比</title>
+<style>
+/* ================= 现代视觉体系 & 变量系统 ================= */
+:root {
+  --row-h: 20px;
+  --topbar-h: 54px;
+  --status-h: 32px;
+  --radius-sm: 6px;
+  --radius-md: 9px;
+  --radius-lg: 13px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", system-ui, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --mono: "JetBrains Mono", "Cascadia Code", "Fira Code", Consolas, Menlo, Monaco, monospace;
+}
+
+[data-theme="dark"] {
+  --bg: #090c10;
+  --bg-subtle: #0d1117;
+  --surface: rgba(18, 22, 34, 0.78);
+  --surface-elevated: #161b26;
+  --surface-card: rgba(22, 27, 40, 0.85);
+  --surface-card-hover: rgba(30, 37, 54, 0.95);
+  --surface-glass: rgba(13, 17, 26, 0.72);
+  --surface-input: #0e121a;
+
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --border-focus: #6366f1;
+  --border-hover: rgba(99, 102, 241, 0.4);
+
+  --text: #f0f3f8;
+  --text-muted: #8b95a8;
+  --text-dim: #545e75;
+
+  --primary: #6366f1;
+  --primary-hover: #4f46e5;
+  --primary-light: rgba(99, 102, 241, 0.16);
+  --primary-glow: rgba(99, 102, 241, 0.35);
+  --sel-bg: rgba(129, 140, 248, 0.38);
+
+  --ins-bg: rgba(34, 197, 94, 0.13);
+  --ins-word: rgba(34, 197, 94, 0.36);
+  --ins-text: #4ade80;
+
+  --del-bg: rgba(239, 68, 68, 0.13);
+  --del-bar: #ef4444;
+  --del-word: rgba(239, 68, 68, 0.40);
+  --del-text: #f87171;
+
+  --mod-bar: #f59e0b;
+  --warn-bg: rgba(245, 158, 11, 0.15);
+  --warn-border: rgba(245, 158, 11, 0.40);
+  --ph-bg: rgba(255, 255, 255, 0.015);
+  --gutter-bg: #0c1017;
+  --gutter-text: #424d63;
+  --gutter-border: rgba(255, 255, 255, 0.05);
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.45);
+
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --bg: #f8fafc;
+  --bg-subtle: #f1f5f9;
+  --surface: rgba(255, 255, 255, 0.85);
+  --surface-elevated: #ffffff;
+  --surface-card: rgba(255, 255, 255, 0.9);
+  --surface-card-hover: #ffffff;
+  --surface-glass: rgba(255, 255, 255, 0.78);
+  --surface-input: #ffffff;
+
+  --border: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.14);
+  --border-focus: #4f46e5;
+  --border-hover: rgba(79, 70, 229, 0.35);
+
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --text-dim: #94a3b8;
+
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-light: rgba(79, 70, 229, 0.10);
+  --primary-glow: rgba(79, 70, 229, 0.25);
+  --sel-bg: rgba(79, 70, 229, 0.20);
+
+  --ins-bg: rgba(34, 197, 94, 0.13);
+  --ins-word: rgba(22, 163, 74, 0.28);
+  --ins-text: #15803d;
+
+  --del-bg: rgba(239, 68, 68, 0.11);
+  --del-bar: #dc2626;
+  --del-word: rgba(220, 38, 38, 0.28);
+  --del-text: #b91c1c;
+
+  --mod-bar: #d97706;
+  --warn-bg: rgba(217, 119, 6, 0.12);
+  --warn-border: rgba(217, 119, 6, 0.35);
+  --ph-bg: rgba(15, 23, 42, 0.02);
+  --gutter-bg: #f8fafc;
+  --gutter-text: #94a3b8;
+  --gutter-border: rgba(0, 0, 0, 0.06);
+
+  --shadow-sm: 0 1px 4px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 6px 18px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 16px 36px rgba(15, 23, 42, 0.12);
+
+  color-scheme: light;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--sans);
+  font-size: 13px;
+  background-color: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: -15%;
+  right: -10%;
+  width: 550px;
+  height: 550px;
+  background: radial-gradient(circle, var(--primary-glow) 0%, transparent 68%);
+  opacity: 0.35;
+  filter: blur(70px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  bottom: -15%;
+  left: -10%;
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(34, 197, 94, 0.15) 0%, transparent 70%);
+  opacity: 0.25;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 选区：只换背景不改字色——改字色在红绿差异底色上会又暗又花；
+   背景要够实，否则会和红绿行底混成浑浊色 */
+::selection { background: var(--sel-bg); }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(140, 150, 170, 0.25); border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(140, 150, 170, 0.45); }
+
+button { font-family: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+button:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+
+.app { position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; }
+
+/* ================= 顶栏 ================= */
+.topbar {
+  height: var(--topbar-h);
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  background: var(--surface-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+}
+
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-logo {
+  width: 32px; height: 32px;
+  display: grid; place-items: center;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  box-shadow: 0 3px 12px var(--primary-glow);
+  color: #fff;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.brand-logo:hover { transform: scale(1.06) rotate(-3deg); }
+.brand-logo svg { width: 18px; height: 18px; }
+
+.brand-text { display: flex; flex-direction: column; }
+.brand-name { font-size: 13.5px; font-weight: 700; letter-spacing: -0.2px; line-height: 1.2; }
+.brand-subtitle { font-size: 10.5px; color: var(--text-muted); }
+
+.topbar-center { display: flex; align-items: center; }
+/* 子元素 margin 代替容器 gap：pill 收起动画要把间距一起压到 0，容器 gap 做不到 */
+.topbar-center > * + * { margin-left: 8px; }
+
+.segmented {
+  display: flex;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 3px;
+  gap: 2px;
+}
+.segmented button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.segmented button svg { width: 13px; height: 13px; opacity: 0.7; }
+.segmented button:hover { color: var(--text); }
+.segmented button.active {
+  background: var(--surface-elevated);
+  color: var(--text);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+.segmented button.active svg { opacity: 1; color: var(--primary); }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  background: var(--surface-card);
+  color: var(--text-muted);
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  overflow: hidden;
+  white-space: nowrap;
+  transition:
+    max-width 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+    margin-left 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+    padding 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+    border-width 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.16s ease,
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+/* 内容不跟随挤压：收起时保持自然宽度只被裁切，不重排不换行（否则动画发糊） */
+.pill > * { flex: none; }
+.pill .pill-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  transition: all 0.2s ease;
+}
+.pill:hover { border-color: var(--border-hover); color: var(--text); transform: translateY(-1px); }
+.pill.on { border-color: var(--primary); background: var(--primary-light); color: var(--primary); font-weight: 600; }
+.pill.on .pill-dot { background: var(--primary); box-shadow: 0 0 6px var(--primary-glow); }
+
+/* 模式切换收起：display:none 无法过渡，宽度由 JS 写内联 max-width（自然宽 → 0 → 自然宽），
+   这里只负责边距/内边距/边框/透明度同步压平，过渡结束后 JS 再补 hidden */
+.pill.collapse {
+  margin-left: 0;
+  padding-left: 0;
+  padding-right: 0;
+  border-width: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.actions { display: flex; align-items: center; gap: 6px; }
+.divider-v { width: 1px; height: 18px; background: var(--border); margin: 0 4px; }
+
+.icon-btn {
+  width: 32px; height: 32px;
+  display: grid; place-items: center;
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  transition: all 0.18s ease;
+}
+.icon-btn svg { width: 16px; height: 16px; }
+.icon-btn:hover {
+  background: var(--surface-card);
+  border-color: var(--border);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+.icon-btn:active { transform: translateY(0); }
+
+/* 差异数徽标（文本模式，顶栏右侧） */
+.diff-count {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 11px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  border: 1px solid transparent;
+  transition: all 0.18s ease;
+}
+.diff-count.has {
+  background: var(--warn-bg);
+  border-color: var(--warn-border);
+  color: var(--mod-bar);
+}
+.diff-count.same {
+  background: var(--ins-bg);
+  border-color: var(--ins-word);
+  color: var(--ins-text);
+}
+.diff-count.has:hover { transform: translateY(-1px); filter: brightness(1.12); }
+
+/* ================= 文本对比区：输入框即对比区 ================= */
+.textzone {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  padding: 10px 14px 8px 14px;
+  gap: 8px;
+  position: relative;
+}
+
+.editor-card {
+  flex: 1 1 50%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.25s;
+}
+.editor-card:focus-within {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+.pane-head {
+  height: 36px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  background: var(--bg-subtle);
+  border-bottom: 1px solid var(--border);
+}
+.pane-dot { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto; }
+.editor-card[data-side="left"] .pane-dot { background: #ef4444; box-shadow: 0 0 6px rgba(239, 68, 68, 0.4); }
+.editor-card[data-side="right"] .pane-dot { background: #22c55e; box-shadow: 0 0 6px rgba(34, 197, 94, 0.4); }
+
+.pane-label { font-size: 12px; font-weight: 600; color: var(--text); letter-spacing: -0.1px; }
+
+.file-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 170px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-strong);
+  font-size: 11px;
+  color: var(--text-muted);
+  transition: all 0.15s;
+}
+.file-chip[hidden] { display: none; }
+.file-chip svg { width: 12px; height: 12px; flex: 0 0 auto; color: var(--primary); }
+.chip-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip-x {
+  border: none; background: transparent;
+  color: var(--text-dim); font-size: 12px;
+  line-height: 1; padding: 0 2px; cursor: pointer;
+  border-radius: 4px;
+}
+.chip-x:hover { color: var(--text); }
+
+.pane-actions { margin-left: auto; display: flex; gap: 6px; }
+
+.mini-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.mini-btn svg { width: 11px; height: 11px; opacity: 0.8; }
+.mini-btn:hover { background: var(--surface-elevated); color: var(--text); border-color: var(--border-hover); }
+
+/* 编辑体：行号槽 + (高亮垫层 + textarea) */
+.ta-body { flex: 1; min-height: 0; display: flex; position: relative; }
+
+.gutter {
+  flex: 0 0 46px;
+  position: relative;
+  overflow: hidden;
+  background: var(--gutter-bg);
+  border-right: 1px solid var(--gutter-border);
+}
+.gutter-inner {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  padding: 8px 10px 8px 0;
+  white-space: pre;
+  line-height: var(--row-h);
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--gutter-text);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  will-change: transform;
+}
+.gnum { color: inherit; }
+.gnum.g-del { color: var(--del-text); font-weight: 600; }
+.gnum.g-ins { color: var(--ins-text); font-weight: 600; }
+.gnum.g-mod { color: var(--mod-bar); font-weight: 600; }
+
+.ta-wrap { flex: 1; min-width: 0; position: relative; background: var(--surface-input); }
+
+.hl {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.hl-inner {
+  padding: 8px 14px 8px 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: var(--row-h);
+  white-space: pre;
+  tab-size: 2;
+  width: max-content;
+  min-width: 100%;
+  will-change: transform;
+}
+
+textarea {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  border: none;
+  resize: none;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: var(--row-h);
+  padding: 8px 14px 8px 10px;
+  white-space: pre;
+  tab-size: 2;
+  caret-color: var(--primary);
+  user-select: text;
+}
+textarea::placeholder { color: var(--text-dim); }
+
+.hl-line {
+  height: var(--row-h);
+  line-height: var(--row-h);
+  white-space: pre;
+}
+.hl-line.l-del, .hl-line.l-mod-l { background: var(--del-bg); }
+.hl-line.l-ins, .hl-line.l-mod-r { background: var(--ins-bg); }
+.hl-line.cur { outline: 1.5px solid var(--primary); outline-offset: -1.5px; }
+
+/* 词级差异高亮：只上实底色块。不能加边框/内边距——会改变行内布局，
+   使高亮层与 textarea 的文字错位，色块就不再贴合真正差异的字符 */
+.w-del { background: var(--del-word); border-radius: 3px; }
+.w-ins { background: var(--ins-word); border-radius: 3px; }
+
+.editor-card.dropping {
+  outline: 2px dashed var(--primary);
+  outline-offset: -4px;
+  background: var(--primary-light);
+}
+
+.grip-v {
+  flex: 0 0 6px;
+  cursor: col-resize;
+  background: transparent;
+  position: relative;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+.grip-v::after {
+  content: "";
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 2px; height: 32px;
+  transform: translate(-50%, -50%);
+  border-radius: 2px;
+  background: var(--border-strong);
+  transition: all 0.15s;
+}
+.grip-v:hover::after, .grip-v.active::after {
+  background: var(--primary);
+  height: 48px;
+  width: 3px;
+  box-shadow: 0 0 8px var(--primary-glow);
+}
+
+/* 差异导航胶囊 */
+.nav-pill {
+  position: absolute;
+  right: 28px;
+  bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-lg);
+  z-index: 10;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.nav-pill button {
+  width: 26px; height: 26px;
+  display: grid; place-items: center;
+  border: none; background: transparent;
+  color: var(--text-muted);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.nav-pill button:hover { background: var(--surface-card-hover); color: var(--text); }
+.nav-pill button svg { width: 14px; height: 14px; }
+.nav-pos {
+  min-width: 48px;
+  text-align: center;
+  font-size: 11.5px;
+  font-weight: 600;
+  font-family: var(--mono);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ================= 文件对比区 ================= */
+.filezone {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 14px;
+  gap: 10px;
+}
+
+.slots { flex: 0 0 auto; display: flex; align-items: stretch; gap: 10px; }
+
+.slot {
+  flex: 1 1 50%;
+  min-width: 0;
+  min-height: 96px;
+  border: 1.5px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+}
+.slot:hover { border-color: var(--border-hover); box-shadow: var(--shadow-sm); }
+.slot.filled { border-style: solid; }
+.slot.dropping { border-color: var(--primary); background: var(--primary-light); }
+
+.slot-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-muted);
+  padding: 14px;
+  text-align: center;
+}
+.slot-empty svg { width: 26px; height: 26px; opacity: 0.65; }
+.slot-hint { font-size: 12.5px; font-weight: 600; color: var(--text); }
+.slot-sub { font-size: 11px; color: var(--text-dim); }
+
+.slot-file {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--surface-card);
+}
+.sf-icon {
+  flex: 0 0 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-md);
+  background: var(--primary-light);
+  color: var(--primary);
+}
+.sf-icon svg { width: 20px; height: 20px; }
+.sf-meta { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.sf-name { font-size: 12.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sf-info { font-size: 11px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sf-progress {
+  height: 4px;
+  margin-top: 3px;
+  border-radius: 2px;
+  background: var(--bg-subtle);
+  overflow: hidden;
+}
+.sf-bar {
+  height: 100%;
+  width: 0%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--primary), #8b5cf6);
+  transition: width 0.15s linear;
+}
+.sf-x {
+  flex: 0 0 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.sf-x:hover { color: var(--del-text); border-color: var(--del-bar); background: var(--del-bg); }
+
+.vs-badge {
+  align-self: center;
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 5px 11px;
+  box-shadow: var(--shadow-sm);
+}
+
+.file-result {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: auto;
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 12px;
+}
+
+.verdict {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 600;
+}
+.verdict svg { width: 18px; height: 18px; flex: 0 0 auto; }
+.verdict.ok { background: var(--ins-bg); color: var(--ins-text); }
+.verdict.bad { background: var(--del-bg); color: var(--del-text); }
+.verdict.neutral { background: var(--bg-subtle); color: var(--text-muted); }
+.verdict-sub { font-size: 11.5px; font-weight: 400; opacity: 0.85; }
+
+.hash-rows { flex: 0 0 auto; display: flex; flex-direction: column; gap: 6px; }
+.hash-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 12px;
+  background: var(--surface-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.hash-row:hover { border-color: var(--border-hover); }
+.hash-alg {
+  flex: 0 0 62px;
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.hash-val { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); user-select: text; }
+.hash-mark { flex: 0 0 auto; font-weight: 800; font-family: var(--sans); }
+.hash-mark.match { color: var(--ins-text); }
+.hash-mark.miss { color: var(--del-text); }
+.hash-mark.na { color: var(--text-dim); font-weight: 400; }
+
+.img-panel { flex: 1; min-height: 320px; display: flex; flex-direction: column; gap: 8px; }
+
+.img-toolbar { flex: 0 0 auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.img-ctl { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--text-muted); }
+.img-ctl input[type="range"] { width: 130px; accent-color: var(--primary); cursor: pointer; }
+.img-ctl select {
+  font-family: inherit;
+  font-size: 11.5px;
+  color: var(--text);
+  background: var(--surface-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 3px 6px;
+  cursor: pointer;
+}
+.img-stat { font-family: var(--mono); font-size: 11.5px; color: var(--text); font-variant-numeric: tabular-nums; }
+
+.img-stage {
+  flex: 1;
+  min-height: 260px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-input);
+  overflow: auto;
+  display: flex;
+}
+.img-stage.checker {
+  background-image:
+    linear-gradient(45deg, rgba(128, 128, 128, 0.14) 25%, transparent 25%, transparent 75%, rgba(128, 128, 128, 0.14) 75%),
+    linear-gradient(45deg, rgba(128, 128, 128, 0.14) 25%, transparent 25%, transparent 75%, rgba(128, 128, 128, 0.14) 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
+}
+.img-stage.black { background: #000; }
+
+.img-pane {
+  flex: 1 1 50%;
+  min-width: 0;
+  display: grid;
+  place-items: center;
+  padding: 10px;
+  overflow: auto;
+}
+.img-pane + .img-pane { border-left: 1px solid var(--border); }
+.img-pane img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.img-pane .pane-tag {
+  position: absolute;
+  top: 8px; left: 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 1px 8px;
+  pointer-events: none;
+}
+.img-pane { position: relative; }
+
+.img-stack {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  padding: 10px;
+}
+.img-stack img { grid-area: 1 / 1; max-width: 100%; max-height: 100%; object-fit: contain; }
+.img-stack img.top { mix-blend-mode: normal; }
+.img-stack.blend img.top { mix-blend-mode: difference; }
+
+.img-diff {
+  margin: auto;
+  max-width: none;
+  image-rendering: pixelated;
+}
+
+.img-meta { flex: 0 0 auto; font-size: 11.5px; color: var(--text-muted); font-family: var(--mono); }
+.img-warn { color: var(--mod-bar); font-weight: 600; }
+
+.text-bridge { flex: 0 0 auto; display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--radius-md); }
+.text-bridge .tb-text { flex: 1; font-size: 12px; color: var(--text-muted); }
+
+.cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 14px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--primary);
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.cta-btn:hover { background: var(--primary); color: #fff; box-shadow: 0 2px 10px var(--primary-glow); }
+.cta-btn svg { width: 13px; height: 13px; }
+
+/* ================= 状态栏 ================= */
+.statusbar {
+  height: var(--status-h);
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  background: var(--surface-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border);
+}
+.stat-tag { display: inline-flex; align-items: center; gap: 5px; font-variant-numeric: tabular-nums; }
+.stat-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 11px;
+}
+.stat-badge.ins { background: var(--ins-bg); color: var(--ins-text); }
+.stat-badge.del { background: var(--del-bg); color: var(--del-text); }
+.stat-badge.sim { background: var(--primary-light); color: var(--primary); }
+.stat-badge.same { background: var(--ins-bg); color: var(--ins-text); }
+
+.statusbar .spacer { flex: 1; }
+.st-note { color: var(--text-dim); }
+
+/* ================= Toast ================= */
+.toast {
+  position: fixed;
+  left: 50%; bottom: 48px;
+  transform: translate(-50%, 12px) scale(0.96);
+  padding: 8px 18px;
+  border-radius: var(--radius-full);
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  font-size: 12.5px;
+  font-weight: 500;
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0) scale(1); }
+.toast.error { border-color: rgba(239, 68, 68, 0.4); color: #f87171; }
+
+body.resizing-col { cursor: col-resize; }
+body.resizing-col * { cursor: inherit !important; user-select: none !important; }
+
+/* ---- 过渡动画 ----
+   只动 background/outline/transform/opacity——高亮层内任何影响行内宽度的属性都会导致与 textarea 错位 */
+@keyframes hlIn { from { background-color: transparent; } }
+.hl-line.l-del, .hl-line.l-mod-l, .hl-line.l-ins, .hl-line.l-mod-r { animation: hlIn 0.22s ease; }
+@keyframes wIn { from { background-color: transparent; } }
+.w-del, .w-ins { animation: wIn 0.22s ease; }
+@keyframes curIn { from { outline-color: transparent; } }
+.hl-line.cur { animation: curIn 0.18s ease; }
+@keyframes zoneIn { from { opacity: 0; transform: translateY(6px); } }
+.zone-in { animation: zoneIn 0.24s cubic-bezier(0.4, 0, 0.2, 1); }
+
+/* 主题切换平滑过渡 */
+html, body { transition: background-color 0.25s ease, color 0.25s ease; }
+.gutter, .ta-wrap { transition: background-color 0.25s ease, border-color 0.25s ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- 顶栏 -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-logo" title="Spark Compare">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">内容对比</span>
+        <span class="brand-subtitle">Text · File · Image Diff</span>
+      </div>
+    </div>
+
+    <div class="topbar-center">
+      <div class="segmented" role="tablist" title="对比类型">
+        <button id="modeText" class="active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7V5h16v2M12 5v14m-3 0h6"/></svg>
+          文本对比
+        </button>
+        <button id="modeFile">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+          文件 / 图片
+        </button>
+      </div>
+
+      <button class="pill" id="pillWs" title="行首尾空格不计入对比；中间连续空格按一个算（a·b 与 a··b 相同），但「有没有空格」仍算差异">
+        <span class="pill-dot"></span>
+        <span>忽略空白</span>
+      </button>
+      <button class="pill" id="pillCase" title="英文字母大小写差异不计入对比（ABC 与 abc 视为相同）">
+        <span class="pill-dot"></span>
+        <span>忽略大小写</span>
+      </button>
+    </div>
+
+    <div class="actions">
+      <button class="diff-count" id="diffCount" hidden title="点击跳转到下一处差异 (Alt+↓)"></button>
+      <button class="icon-btn" id="btnCopyDiff" title="复制完整差异补丁 (Patch)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>
+      </button>
+      <button class="icon-btn" id="btnSwap" title="交换两侧内容">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14m0 0-3.2-3.2M18 8l-3.2 3.2"/><path d="M20 16H6m0 0 3.2-3.2M6 16l3.2 3.2"/></svg>
+      </button>
+      <button class="icon-btn" id="btnClear" title="清空所有内容">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      </button>
+      <span class="divider-v"></span>
+      <button class="icon-btn" id="btnTheme" title="切换明暗主题">
+        <svg id="icoTheme" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- 文本对比：两个输入框本身就是对比结果 -->
+  <main class="textzone" id="textZone">
+    <div class="editor-card" id="paneLeft" data-side="left">
+      <div class="pane-head">
+        <span class="pane-dot"></span>
+        <span class="pane-label">原文本</span>
+        <button class="file-chip" id="chipLeft" hidden title="移除文件标记">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+          <span class="chip-name"></span>
+          <span class="chip-x">×</span>
+        </button>
+        <div class="pane-actions">
+          <button class="mini-btn" data-act="clip" data-side="left" title="从剪贴板填入">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+            剪贴板
+          </button>
+        </div>
+      </div>
+      <div class="ta-body">
+        <div class="gutter"><div class="gutter-inner" id="gutLeftInner"></div></div>
+        <div class="ta-wrap">
+          <div class="hl" aria-hidden="true"><div class="hl-inner" id="hlLeftInner"></div></div>
+          <textarea id="taLeft" spellcheck="false" wrap="off" placeholder="粘贴或拖入原文本，差异将实时高亮在此…"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="grip-v" id="gripV" title="拖动调整左右宽度，双击等分复位"></div>
+
+    <div class="editor-card" id="paneRight" data-side="right">
+      <div class="pane-head">
+        <span class="pane-dot"></span>
+        <span class="pane-label">新文本</span>
+        <button class="file-chip" id="chipRight" hidden title="移除文件标记">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+          <span class="chip-name"></span>
+          <span class="chip-x">×</span>
+        </button>
+        <div class="pane-actions">
+          <button class="mini-btn" data-act="clip" data-side="right" title="从剪贴板填入">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+            剪贴板
+          </button>
+        </div>
+      </div>
+      <div class="ta-body">
+        <div class="gutter"><div class="gutter-inner" id="gutRightInner"></div></div>
+        <div class="ta-wrap">
+          <div class="hl" aria-hidden="true"><div class="hl-inner" id="hlRightInner"></div></div>
+          <textarea id="taRight" spellcheck="false" wrap="off" placeholder="粘贴或拖入新文本，差异将实时高亮在此…"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-pill" id="navPill" hidden>
+      <button id="navPrev" title="上一处差异 (Alt+↑)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
+      </button>
+      <span class="nav-pos" id="navPos">–</span>
+      <button id="navNext" title="下一处差异 (Alt+↓)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+    </div>
+  </main>
+
+  <!-- 文件 / 图片对比 -->
+  <main class="filezone" id="fileZone" hidden>
+    <div class="slots" id="slots">
+      <div class="slot" id="slotA" data-slot="A" title="点击选择文件，或直接拖入">
+        <div class="slot-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <div class="slot-hint">文件 A</div>
+          <div class="slot-sub">点击选择或拖入任意文件</div>
+        </div>
+        <div class="slot-file" id="fileA" hidden>
+          <div class="sf-icon" id="sfIconA"></div>
+          <div class="sf-meta">
+            <div class="sf-name" id="sfNameA"></div>
+            <div class="sf-info" id="sfInfoA"></div>
+            <div class="sf-progress" id="sfProgA"><div class="sf-bar" id="sfBarA"></div></div>
+          </div>
+          <button class="sf-x" id="sfXA" title="移除该文件">×</button>
+        </div>
+      </div>
+
+      <span class="vs-badge">VS</span>
+
+      <div class="slot" id="slotB" data-slot="B" title="点击选择文件，或直接拖入">
+        <div class="slot-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <div class="slot-hint">文件 B</div>
+          <div class="slot-sub">点击选择或拖入任意文件</div>
+        </div>
+        <div class="slot-file" id="fileB" hidden>
+          <div class="sf-icon" id="sfIconB"></div>
+          <div class="sf-meta">
+            <div class="sf-name" id="sfNameB"></div>
+            <div class="sf-info" id="sfInfoB"></div>
+            <div class="sf-progress" id="sfProgB"><div class="sf-bar" id="sfBarB"></div></div>
+          </div>
+          <button class="sf-x" id="sfXB" title="移除该文件">×</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="file-result" id="fileResult" hidden>
+      <div class="verdict neutral" id="verdict"></div>
+      <div class="hash-rows" id="hashRows"></div>
+      <div class="img-panel" id="imgPanel" hidden>
+        <div class="img-toolbar">
+          <div class="segmented" id="imgModes">
+            <button data-m="side" class="active">并排</button>
+            <button data-m="stack">堆叠</button>
+            <button data-m="blink">闪烁</button>
+            <button data-m="diff">像素差异</button>
+          </div>
+          <div class="img-ctl" id="imgCtl"></div>
+        </div>
+        <div class="img-stage checker" id="imgStage"></div>
+        <div class="img-meta" id="imgMeta"></div>
+      </div>
+      <div class="text-bridge" id="textBridge" hidden>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color:var(--primary);flex:0 0 auto"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+        <span class="tb-text">两个都是文本文件，可以逐行逐字对比内容差异</span>
+        <button class="cta-btn" id="btnOpenText">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>
+          打开文本对比
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- 底部状态栏 -->
+  <footer class="statusbar">
+    <span class="stat-tag" id="stVerdict">0 处差异</span>
+    <span class="stat-badge ins" id="stAddBadge">+0 行</span>
+    <span class="stat-badge del" id="stDelBadge">−0 行</span>
+    <span class="stat-badge sim" id="stSimBadge" title="两侧公共字符占两侧总字符的比例">相似度 100%</span>
+    <span class="stat-tag" id="stLines"></span>
+    <div class="spacer"></div>
+    <span class="stat-tag st-note" id="stNote"></span>
+  </footer>
+</div>
+
+<!-- 浮动通知 -->
+<div class="toast" id="toast"></div>
+<input type="file" id="slotInput" hidden>
+
+<script>
+"use strict";
+
+/* ---------- DOM 引用 ---------- */
+const $ = (id) => document.getElementById(id);
+const $taLeft = $("taLeft");
+const $taRight = $("taRight");
+const $hlLeftInner = $("hlLeftInner");
+const $hlRightInner = $("hlRightInner");
+const $gutLeftInner = $("gutLeftInner");
+const $gutRightInner = $("gutRightInner");
+const $textZone = $("textZone");
+const $fileZone = $("fileZone");
+const $gripV = $("gripV");
+const $navPill = $("navPill");
+const $navPos = $("navPos");
+const $stVerdict = $("stVerdict");
+const $stAddBadge = $("stAddBadge");
+const $stDelBadge = $("stDelBadge");
+const $stSimBadge = $("stSimBadge");
+const $stLines = $("stLines");
+const $stNote = $("stNote");
+const $toast = $("toast");
+const $slotInput = $("slotInput");
+const $chipLeft = $("chipLeft");
+const $chipRight = $("chipRight");
+const $diffCount = $("diffCount");
+
+/* ---------- 常量与状态 ---------- */
+const ROW_H = 20;                    // 单行高度 px（textarea 与高亮垫层必须一致）
+const HL_LINE_CAP = 12000;           // 高亮垫层最大渲染行数
+const EQ_CHUNK = 256;                // eq 折叠块切片行数：编辑只命中一片，其余片按内容复用
+const MAX_TEXT_BYTES = 10 * 1024 * 1024;
+const MAX_HASH_BYTES = 200 * 1024 * 1024;
+const SHA_WHOLE_LIMIT = 64 * 1024 * 1024;
+const MAX_IMG_BYTES = 50 * 1024 * 1024;
+const HASH_CHUNK = 4 * 1024 * 1024;
+const IMG_PIXEL_CAP = 4096;
+
+const ICON_SUN = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>';
+const ICON_MOON = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+
+const TEXT_EXTS = new Set(["txt","md","markdown","json","js","mjs","cjs","ts","jsx","tsx","css","scss","less","html","htm","xml","yml","yaml","csv","tsv","log","ini","conf","config","properties","py","rb","php","java","kt","c","h","cpp","hpp","cs","go","rs","swift","sh","bat","cmd","ps1","sql","toml","vue","svelte","diff","patch"]);
+const IMG_EXTS = new Set(["png","jpg","jpeg","gif","webp","bmp","ico","svg","avif"]);
+
+const state = {
+  mode: "text",
+  ignoreWs: false,
+  ignoreCase: false,
+  data: null,
+  navIndex: -1,
+  curMarks: [],
+  rowEls: { left: [], right: [] },
+  renderBlocks: { left: [], right: [] },
+  renderGut: { left: [], right: [] },
+  fileNames: { left: "", right: "" },
+  files: { A: null, B: null },
+  imgMode: "side",
+  img: null,
+  imgReq: 0,
+  blinkTimer: 0,
+  blinkPlay: true,
+  stackOp: 50,
+  stackBlend: "normal",
+  diffTol: 0,
+};
+
+/* ---------- 主题系统 ---------- */
+function setTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  $("icoTheme").innerHTML = theme === "dark" ? ICON_SUN : ICON_MOON;
+  try { localStorage.setItem("spark_compare_theme", theme); } catch (_) {}
+}
+(function initTheme() {
+  let saved = null;
+  try { saved = localStorage.getItem("spark_compare_theme"); } catch (_) {}
+  setTheme(saved === "light" ? "light" : "dark");
+})();
+
+/* __ENGINE_BEGIN__ */
+/* ---------- diff 核心算法引擎（纯函数，零依赖） ---------- */
+
+function normalizeNewlines(text) {
+  return text.replace(/\r\n?/g, "\n");
+}
+
+function splitLines(text) {
+  const lines = normalizeNewlines(text).split("\n");
+  if (lines.length > 1 && lines[lines.length - 1] === "") lines.pop();
+  return lines;
+}
+
+function lineKey(line, ignoreWs, ignoreCase) {
+  let s = line;
+  if (ignoreWs) s = s.replace(/\s+/g, " ").trim();
+  if (ignoreCase) s = s.toLowerCase();
+  return s;
+}
+
+// 相似度兜底：无词级 segs 的行对，掐头去尾估算两侧公共字符数（不重叠）。
+function commonEndsLen(la, lb) {
+  const n = Math.min(la.length, lb.length);
+  let p = 0;
+  while (p < n && la[p] === lb[p]) p++;
+  let s = 0;
+  while (s < n - p && la[la.length - 1 - s] === lb[lb.length - 1 - s]) s++;
+  return p + s;
+}
+
+// Myers O(ND) 最短编辑脚本；超过 cap 步返回 null（调用方降级）。
+function myersOps(a, b, cap) {
+  const N = a.length;
+  const M = b.length;
+  const ops = [];
+  if (N === 0 || M === 0) {
+    for (let i = 0; i < N; i++) ops.push({ t: "del", ai: i, bi: -1 });
+    for (let j = 0; j < M; j++) ops.push({ t: "ins", ai: -1, bi: j });
+    return ops;
+  }
+  const maxD = N + M;
+  const limit = Math.min(cap == null ? maxD : cap, maxD);
+  const off = maxD;
+  const V = new Int32Array(2 * maxD + 1);
+  const rows = [];
+  let D = -1;
+  for (let d = 0; d <= limit; d++) {
+    const row = new Int32Array(d + 1);
+    for (let k = -d; k <= d; k += 2) {
+      let x;
+      if (k === -d || (k !== d && V[off + k - 1] < V[off + k + 1])) {
+        x = V[off + k + 1];
+      } else {
+        x = V[off + k - 1] + 1;
+      }
+      let y = x - k;
+      while (x < N && y < M && a[x] === b[y]) { x++; y++; }
+      V[off + k] = x;
+      row[(k + d) >> 1] = x;
+      if (x >= N && y >= M) { D = d; break; }
+    }
+    rows.push(row);
+    if (D >= 0) break;
+  }
+  if (D === -1) return null;
+  let x = N;
+  let y = M;
+  for (let d = D; d >= 1; d--) {
+    const prev = rows[d - 1];
+    const k = x - y;
+    let down;
+    if (k === -d) down = true;
+    else if (k === d) down = false;
+    else down = prev[(k - 1 + d - 1) >> 1] < prev[(k + 1 + d - 1) >> 1];
+    if (down) {
+      const xStart = prev[(k + 1 + d - 1) >> 1];
+      const yStart = xStart - k;
+      for (let i = x - 1; i >= xStart; i--) ops.push({ t: "eq", ai: i, bi: i - k });
+      ops.push({ t: "ins", ai: -1, bi: yStart - 1 });
+      x = xStart;
+      y = yStart - 1;
+    } else {
+      const xStart = prev[(k - 1 + d - 1) >> 1] + 1;
+      const yStart = xStart - k;
+      for (let i = x - 1; i >= xStart; i--) ops.push({ t: "eq", ai: i, bi: i - k });
+      ops.push({ t: "del", ai: xStart - 1, bi: -1 });
+      x = xStart - 1;
+      y = yStart;
+    }
+  }
+  while (x > 0) { ops.push({ t: "eq", ai: x - 1, bi: y - 1 }); x--; y--; }
+  ops.reverse();
+  return ops;
+}
+
+// 词级切分：空白 / 单词 / CJK 及其他单字符
+function tokenize(line) {
+  return line.match(/\s+|\w+|[^\s\w]/g) || [];
+}
+
+function normalizeOps(ops) {
+  const out = [];
+  let dels = [];
+  let inses = [];
+  const flush = () => {
+    for (const o of dels) out.push(o);
+    for (const o of inses) out.push(o);
+    dels = [];
+    inses = [];
+  };
+  for (const op of ops) {
+    if (op.t === "eq") { flush(); out.push(op); }
+    else if (op.t === "del") dels.push(op);
+    else inses.push(op);
+  }
+  flush();
+  return out;
+}
+
+// 等价最短编辑脚本归一化：eq 后面紧跟着内容相同的 ins 时，把 ins 左移贴上去。
+// 否则 "123"→"133" 会被解读成「删 2、末尾补 3」，高亮落在行尾而不是中间那个 3。
+function slideOps(ops, a, b) {
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (let i = 0; i < ops.length - 1; i++) {
+      const o = ops[i];
+      const n = ops[i + 1];
+      if (o.t === "eq" && n.t === "ins" && o.bi < n.bi && b[o.bi] === b[n.bi]) {
+        ops[i] = { t: "ins", ai: -1, bi: o.bi };
+        ops[i + 1] = { t: "eq", ai: o.ai, bi: n.bi };
+        changed = true;
+      }
+    }
+  }
+}
+
+function pushSeg(arr, text, kind) {
+  const last = arr[arr.length - 1];
+  if (last && last.kind === kind) last.text += text;
+  else arr.push({ text, kind });
+}
+
+// 对一段连续「删+插」区做字符级二次 diff，把高亮缩到真正不同的字符上
+// （如 "World" → "Worldx" 只标 "x"）；超长或步数超限时返回 null 降回词级。
+function refineRun(dToks, iToks) {
+  const s = dToks.join("");
+  const t = iToks.join("");
+  if (!s || !t) return null;
+  if (s.length + t.length > 1600) return null;
+  const sa = s.split("");
+  const sb = t.split("");
+  const ops = myersOps(sa, sb, 600);
+  if (ops === null) return null;
+  slideOps(ops, sa, sb);
+  const aSegs = [];
+  const bSegs = [];
+  for (const op of ops) {
+    if (op.t === "eq") {
+      pushSeg(aSegs, s[op.ai], "eq");
+      pushSeg(bSegs, t[op.bi], "eq");
+    } else if (op.t === "del") {
+      pushSeg(aSegs, s[op.ai], "del");
+    } else {
+      pushSeg(bSegs, t[op.bi], "ins");
+    }
+  }
+  return { aSegs, bSegs };
+}
+
+function wordDiff(la, lb, cap) {
+  const ta = tokenize(la);
+  const tb = tokenize(lb);
+  if (ta.length === 0 && tb.length === 0) return null;
+  const ops = myersOps(ta, tb, cap == null ? 800 : cap);
+  if (ops === null) return null;
+  slideOps(ops, ta, tb);
+  const aSegs = [];
+  const bSegs = [];
+  let i = 0;
+  while (i < ops.length) {
+    if (ops[i].t === "eq") {
+      pushSeg(aSegs, ta[ops[i].ai], "eq");
+      pushSeg(bSegs, tb[ops[i].bi], "eq");
+      i++;
+      continue;
+    }
+    const dToks = [];
+    const iToks = [];
+    while (i < ops.length && ops[i].t !== "eq") {
+      if (ops[i].t === "del") dToks.push(ta[ops[i].ai]);
+      else iToks.push(tb[ops[i].bi]);
+      i++;
+    }
+    const fine = refineRun(dToks, iToks);
+    if (fine) {
+      for (const s of fine.aSegs) pushSeg(aSegs, s.text, s.kind);
+      for (const s of fine.bSegs) pushSeg(bSegs, s.text, s.kind);
+    } else {
+      for (const t of dToks) pushSeg(aSegs, t, "del");
+      for (const t of iToks) pushSeg(bSegs, t, "ins");
+    }
+  }
+  return { aSegs, bSegs };
+}
+
+function unifiedText(ops, a, b) {
+  const out = [];
+  for (const op of ops) {
+    if (op.t === "eq") out.push("  " + a[op.ai]);
+    else if (op.t === "del") out.push("- " + a[op.ai]);
+    else out.push("+ " + b[op.bi]);
+  }
+  return out.join("\n");
+}
+
+// 放引擎段内：worker 只加载引擎代码，这两个预算常量必须随引擎一起进去
+const WORD_BUDGET = 600;             // 词级 diff 的行对数预算
+const WORD_MAX_LEN = 3000;           // 参与词级 diff 的行对长度上限
+
+// 行级 diff 总入口：掐头去尾 + Myers，产出每行状态/词级 segs/差异块。
+function computeDiff(aRaw, bRaw, opts) {
+  const t0 = performance.now();
+  const ignoreWs = !!(opts && opts.ignoreWs);
+  const ignoreCase = !!(opts && opts.ignoreCase);
+  const a = aRaw === "" ? [] : splitLines(aRaw);
+  const b = bRaw === "" ? [] : splitLines(bRaw);
+  const ka = a.map((l) => lineKey(l, ignoreWs, ignoreCase));
+  const kb = b.map((l) => lineKey(l, ignoreWs, ignoreCase));
+
+  const ops = [];
+  let pre = 0;
+  while (pre < ka.length && pre < kb.length && ka[pre] === kb[pre]) pre++;
+  let suf = 0;
+  while (
+    suf < ka.length - pre && suf < kb.length - pre &&
+    ka[ka.length - 1 - suf] === kb[kb.length - 1 - suf]
+  ) suf++;
+
+  for (let i = 0; i < pre; i++) ops.push({ t: "eq", ai: i, bi: i });
+
+  const midALen = ka.length - pre - suf;
+  const midBLen = kb.length - pre - suf;
+  let midOps = null;
+  let rough = false;
+  if (Math.max(midALen, midBLen) > 5000) {
+    rough = true;
+  } else {
+    const midKa = ka.slice(pre, pre + midALen);
+    const midKb = kb.slice(pre, pre + midBLen);
+    midOps = myersOps(midKa, midKb, 1500);
+    if (midOps === null) rough = true;
+    else slideOps(midOps, midKa, midKb);
+  }
+  if (midOps === null) {
+    for (let i = 0; i < midALen; i++) ops.push({ t: "del", ai: pre + i, bi: -1 });
+    for (let j = 0; j < midBLen; j++) ops.push({ t: "ins", ai: -1, bi: pre + j });
+  } else {
+    for (const op of midOps) {
+      ops.push({
+        t: op.t,
+        ai: op.ai < 0 ? -1 : op.ai + pre,
+        bi: op.bi < 0 ? -1 : op.bi + pre,
+      });
+    }
+  }
+  for (let i = ka.length - suf; i < ka.length; i++) {
+    ops.push({ t: "eq", ai: i, bi: i - ka.length + kb.length });
+  }
+
+  const nops = normalizeOps(ops);
+
+  const statusA = new Array(a.length).fill("");
+  const statusB = new Array(b.length).fill("");
+  const segsA = new Array(a.length).fill(null);
+  const segsB = new Array(b.length).fill(null);
+  const blocks = [];
+  let added = 0, removed = 0, wdBudget = WORD_BUDGET;
+  // 相似度 = 两侧匹配字符 / 两侧总字符（difflib ratio 公式 2M/T）：
+  // 相同行整行计入，mod 行对取 segs 公共段，超预算的行对掐头去尾粗估
+  let simMatched = 0;
+  let simTotal = 0;
+  for (const l of a) simTotal += l.length;
+  for (const l of b) simTotal += l.length;
+  let simScan = 200000;
+  let i = 0;
+  while (i < nops.length) {
+    if (nops[i].t === "eq") {
+      simMatched += a[nops[i].ai].length + b[nops[i].bi].length;
+      statusA[nops[i].ai] = "eq";
+      statusB[nops[i].bi] = "eq";
+      i++;
+      continue;
+    }
+    const dels = [];
+    const inses = [];
+    while (i < nops.length && nops[i].t !== "eq") {
+      if (nops[i].t === "del") dels.push(nops[i].ai);
+      else inses.push(nops[i].bi);
+      i++;
+    }
+    const n = Math.min(dels.length, inses.length);
+    for (let q = 0; q < n; q++) {
+      statusA[dels[q]] = "mod";
+      statusB[inses[q]] = "mod";
+      const la = a[dels[q]];
+      const lb = b[inses[q]];
+      let s = null;
+      if (wdBudget > 0 && la.length + lb.length <= WORD_MAX_LEN) {
+        s = wordDiff(la, lb);
+        if (s) {
+          segsA[dels[q]] = s.aSegs;
+          segsB[inses[q]] = s.bSegs;
+          wdBudget--;
+          for (const seg of s.aSegs) if (seg.kind === "eq") simMatched += 2 * seg.text.length;
+        }
+      }
+      if (!s && simScan > 0) {
+        simScan -= Math.min(la.length, lb.length);
+        if (simScan >= 0) simMatched += 2 * commonEndsLen(la, lb);
+        else simScan = 0;
+      }
+    }
+    for (let q = n; q < dels.length; q++) statusA[dels[q]] = "del";
+    for (let q = n; q < inses.length; q++) statusB[inses[q]] = "ins";
+    removed += dels.length;
+    added += inses.length;
+    blocks.push({
+      aLine: dels.length ? dels[0] : -1,
+      bLine: inses.length ? inses[0] : -1,
+      aCount: dels.length,
+      bCount: inses.length,
+    });
+  }
+
+  return {
+    a, b, statusA, statusB, segsA, segsB, blocks,
+    added, removed,
+    sim: simTotal === 0 ? 100 : Math.round((simMatched / simTotal) * 1000) / 10,
+    rough,
+    elapsed: performance.now() - t0,
+    unified: unifiedText(nops, a, b),
+  };
+}
+/* __ENGINE_END__ */
+
+/* __MD5_BEGIN__ */
+/* ---------- 纯 JS 增量 MD5（webview 无原生 MD5，分块读取大文件必需） ---------- */
+const MD5_K = new Int32Array(64);
+for (let i = 0; i < 64; i++) MD5_K[i] = Math.floor(Math.abs(Math.sin(i + 1)) * 4294967296) | 0;
+const MD5_S = [
+  7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
+  5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20,
+  4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23,
+  6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21,
+];
+
+function md5New() {
+  return { a0: 1732584193, b0: -271733879, c0: -1732584194, d0: 271733878, len: 0, buf: new Uint8Array(64), bl: 0 };
+}
+
+function md5Block(st, m, off) {
+  const M = new Int32Array(16);
+  for (let i = 0; i < 16; i++) {
+    M[i] = m[off + i * 4] | (m[off + i * 4 + 1] << 8) | (m[off + i * 4 + 2] << 16) | (m[off + i * 4 + 3] << 24);
+  }
+  let A = st.a0, B = st.b0, C = st.c0, D = st.d0;
+  for (let i = 0; i < 64; i++) {
+    let F, g;
+    if (i < 16) { F = (B & C) | (~B & D); g = i; }
+    else if (i < 32) { F = (D & B) | (~D & C); g = (5 * i + 1) % 16; }
+    else if (i < 48) { F = B ^ C ^ D; g = (3 * i + 5) % 16; }
+    else { F = C ^ (B | ~D); g = (7 * i) % 16; }
+    F = (F + A + MD5_K[i] + M[g]) | 0;
+    const s = MD5_S[i];
+    const nb = (B + ((F << s) | (F >>> (32 - s)))) | 0;
+    A = D; D = C; C = B; B = nb;
+  }
+  st.a0 = (st.a0 + A) | 0;
+  st.b0 = (st.b0 + B) | 0;
+  st.c0 = (st.c0 + C) | 0;
+  st.d0 = (st.d0 + D) | 0;
+}
+
+function md5Update(st, u8) {
+  let i = 0;
+  if (st.bl) {
+    const take = Math.min(64 - st.bl, u8.length);
+    st.buf.set(u8.subarray(0, take), st.bl);
+    st.bl += take;
+    i = take;
+    if (st.bl === 64) { md5Block(st, st.buf, 0); st.bl = 0; }
+  }
+  for (; i + 64 <= u8.length; i += 64) md5Block(st, u8, i);
+  if (i < u8.length) {
+    st.buf.set(u8.subarray(i), 0);
+    st.bl = u8.length - i;
+  }
+  st.len += u8.length;
+}
+
+function md5Hex(st) {
+  const bitLen = st.len * 8;
+  const padLen = st.bl < 56 ? 56 - st.bl : 120 - st.bl;
+  const pad = new Uint8Array(padLen + 8);
+  pad[0] = 0x80;
+  const dv = new DataView(pad.buffer);
+  dv.setUint32(padLen, bitLen >>> 0, true);
+  dv.setUint32(padLen + 4, Math.floor(bitLen / 4294967296), true);
+  md5Update(st, pad);
+  let out = "";
+  for (const v of [st.a0, st.b0, st.c0, st.d0]) {
+    for (let i = 0; i < 4; i++) out += ((v >>> (i * 8)) & 255).toString(16).padStart(2, "0");
+  }
+  return out;
+}
+/* __MD5_END__ */
+
+/* ---------- 通用工具 ---------- */
+function el(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+}
+
+function formatSize(n) {
+  if (n < 1024) return n + " B";
+  if (n < 1024 * 1024) return (n / 1024).toFixed(1) + " KB";
+  return (n / 1024 / 1024).toFixed(1) + " MB";
+}
+
+function extOf(name) {
+  const i = name.lastIndexOf(".");
+  return i < 0 ? "" : name.slice(i + 1).toLowerCase();
+}
+
+function isImageFile(file) {
+  if (file.type && file.type.startsWith("image/")) return true;
+  return IMG_EXTS.has(extOf(file.name));
+}
+
+function isTextFile(file) {
+  if (file.type && file.type.startsWith("text/")) return true;
+  if (["application/json", "application/xml", "application/javascript", "application/x-yaml", "application/toml"].indexOf(file.type) >= 0) return true;
+  return TEXT_EXTS.has(extOf(file.name));
+}
+
+function blobToArrayBuffer(blob) {
+  if (blob.arrayBuffer) return blob.arrayBuffer();
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = () => reject(r.error || new Error("read fail"));
+    r.readAsArrayBuffer(blob);
+  });
+}
+
+function bufToHex(ab) {
+  const u8 = new Uint8Array(ab);
+  let out = "";
+  for (let i = 0; i < u8.length; i++) out += u8[i].toString(16).padStart(2, "0");
+  return out;
+}
+
+async function readClipboardText() {
+  if (window.spark && spark.clipboard && spark.clipboard.readText) {
+    try {
+      const t = await spark.clipboard.readText();
+      if (typeof t === "string") return t;
+    } catch (_) {}
+  }
+  try { return await navigator.clipboard.readText(); } catch (_) {}
+  return null;
+}
+
+async function copyText(text) {
+  if (window.spark && spark.clipboard && spark.clipboard.writeText) {
+    try { await spark.clipboard.writeText(text); return true; } catch (_) {}
+  }
+  try { await navigator.clipboard.writeText(text); return true; } catch (_) {}
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand("copy");
+    ta.remove();
+    return !!ok;
+  } catch (_) { return false; }
+}
+
+function showToast(msg, isError) {
+  $toast.textContent = msg;
+  $toast.classList.toggle("error", !!isError);
+  $toast.classList.add("show");
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(() => $toast.classList.remove("show"), 2200);
+}
+
+/* ---------- 文本模式：实时高亮渲染 ---------- */
+
+// 收到一份 diff 结果后应用到界面（worker 回包或同步兜底共用）
+function applyDiffResult(d) {
+  lastDiffAt = performance.now();
+  state.data = d;
+  state.navIndex = -1;
+  state.hlTruncated = 0;
+  clearCurrent();
+  renderBackdrop("left");
+  renderBackdrop("right");
+  renderStatus();
+}
+
+/* ---------- 异步 diff 调度 ----------
+   computeDiff 全程在 Worker 里跑，主线程只收结果做渲染，输入不再被计算阻塞。
+   在途期间又发生编辑时只记一个 dirty 标记，算完立即用最新值补算，不排队不积压。
+   worker 构建/运行失败（如 CSP 限制）自动退回同步计算，功能不受影响。 */
+let diffWorker = null;
+let diffBroken = false;   // worker 失效 → 永久降级为同步
+let diffBusy = false;     // 有计算在途
+let diffDirty = false;    // 在途期间输入又变了
+let diffInflight = null;  // 在途任务对应的输入快照
+let lastDiffAt = 0;       // 界面上一次拿到结果的时间（输入节流用）
+
+(function buildDiffWorker() {
+  let src = null;
+  try {
+    for (const s of document.querySelectorAll("script")) {
+      const t = s.textContent || "";
+      if (t.indexOf("/* __ENGINE_BEGIN__ */") >= 0) { src = t; break; }
+    }
+    if (!src) return;
+    const begin = src.indexOf("/* __ENGINE_BEGIN__ */");
+    const end = src.indexOf("/* __ENGINE_END__ */");
+    if (begin < 0 || end <= begin) return;
+    const workerSrc =
+      src.slice(begin, end) +
+      "self.onmessage=function(e){var d=e.data;try{self.postMessage({res:computeDiff(d.a,d.b,d.o)})}" +
+      "catch(err){self.postMessage({err:String((err&&err.message)||err)})}};";
+    const w = new Worker(URL.createObjectURL(new Blob([workerSrc], { type: "application/javascript" })));
+    w.onmessage = function (e) {
+      diffBusy = false;
+      const f = diffInflight;
+      diffInflight = null;
+      if (!f) return;
+      if (e.data.err) { diffBroken = true; recomputeSync(); return; }
+      const k = state.lastKey;
+      const stale = diffDirty || !k || k.l !== f.l || k.r !== f.r || k.ws !== f.ws || k.cs !== f.cs;
+      diffDirty = false;
+      if (stale) { diffDispatch(); return; }
+      applyDiffResult(e.data.res);
+    };
+    w.onerror = function () {
+      diffBroken = true;
+      try { w.terminate(); } catch (_) {}
+      if (diffBusy) { diffBusy = false; diffInflight = null; diffDirty = false; recomputeSync(); }
+    };
+    diffWorker = w;
+  } catch (_) { diffWorker = null; }
+})();
+
+function recomputeSync() {
+  applyDiffResult(computeDiff($taLeft.value, $taRight.value, {
+    ignoreWs: state.ignoreWs, ignoreCase: state.ignoreCase,
+  }));
+}
+
+function diffDispatch() {
+  lastDiffAt = performance.now();
+  diffInflight = { l: $taLeft.value, r: $taRight.value, ws: state.ignoreWs, cs: state.ignoreCase };
+  diffBusy = true;
+  diffWorker.postMessage({
+    a: diffInflight.l, b: diffInflight.r,
+    o: { ignoreWs: state.ignoreWs, ignoreCase: state.ignoreCase },
+  });
+}
+
+function recompute() {
+  const l = $taLeft.value, r = $taRight.value;
+  const k = state.lastKey;
+  if (k && k.l === l && k.r === r && k.ws === state.ignoreWs && k.cs === state.ignoreCase) return;
+  state.lastKey = { l, r, ws: state.ignoreWs, cs: state.ignoreCase };
+  if (l === "" && r === "") {
+    // 全空：本地直接出空结果，不等 worker 往返，高亮随删除即时消失
+    diffBusy = false; diffInflight = null; diffDirty = false;
+    applyDiffResult(computeDiff("", "", { ignoreWs: false, ignoreCase: false }));
+    return;
+  }
+  if (!diffWorker || diffBroken) { recomputeSync(); return; }
+  if (diffBusy) { diffDirty = true; return; }
+  diffDispatch();
+}
+
+function renderBackdrop(side) {
+  const d = state.data;
+  const lines = side === "left" ? d.a : d.b;
+  const status = side === "left" ? d.statusA : d.statusB;
+  const segs = side === "left" ? d.segsA : d.segsB;
+  const inner = side === "left" ? $hlLeftInner : $hlRightInner;
+  const gut = side === "left" ? $gutLeftInner : $gutRightInner;
+  const modCls = side === "left" ? "l-mod-l" : "l-mod-r";
+
+  // —— 先构造块描述（不碰 DOM），块内容即复用 key ——
+  // eq 区按 EQ_CHUNK 切片：编辑一处通常只落在其中一片
+  const descs = [];
+  const gdescs = [];
+  const cap = Math.min(lines.length, HL_LINE_CAP);
+  let i = 0;
+  while (i < cap) {
+    if (status[i] === "eq") {
+      let j = i;
+      while (j < cap && status[j] === "eq") j++;
+      for (let s = i; s < j; s += EQ_CHUNK) {
+        const e = Math.min(s + EQ_CHUNK, j);
+        let text = "";
+        for (let k = s; k < e; k++) {
+          const t = lines[k];
+          text += (k > s ? "\n" : "") + (t.length > 20000 ? t.slice(0, 20000) + " …" : t);
+        }
+        descs.push({ k: "e" + (e - s) + "\u0000" + text, eq: true, from: s, to: e });
+        gdescs.push({ k: "g" + (s + 1) + ":" + e, num: true, from: s, to: e });
+      }
+      i = j;
+      continue;
+    }
+    const st = status[i];
+    let text = lines[i];
+    if (text.length > 20000) text = text.slice(0, 20000) + " …";
+    const sg = segs[i];
+    let key;
+    if (sg) {
+      key = "l" + st + "\u0000S";
+      for (const seg of sg) key += "\u0000" + seg.kind + "\u0001" + seg.text;
+    } else {
+      key = "l" + st + "\u0000T" + text;
+    }
+    descs.push({ k: key, eq: false, st, text, sg, idx: i });
+    gdescs.push({ k: "gl" + st + ":" + (i + 1), num: false, st, n: i + 1 });
+    i++;
+  }
+
+  // —— 按 key 复用上一轮的 DOM 节点：大文本编辑时绝大多数块原样保留，
+  // 只重建真正变化的块，消除每次重算的全量重建与重排版卡顿 ——
+  const take = (pool, k) => {
+    const arr = pool.get(k);
+    if (!arr || !arr.length) return null;
+    const n = arr.pop();
+    if (!arr.length) pool.delete(k);
+    return n;
+  };
+  const bodyPool = new Map();
+  for (const b of state.renderBlocks[side]) {
+    const arr = bodyPool.get(b.k);
+    if (arr) arr.push(b.el); else bodyPool.set(b.k, [b.el]);
+  }
+  const gutPool = new Map();
+  for (const b of state.renderGut[side]) {
+    const arr = gutPool.get(b.k);
+    if (arr) arr.push(b.el); else gutPool.set(b.k, [b.el]);
+  }
+
+  const buildBody = (dsc) => {
+    if (dsc.eq) {
+      const run = el("div", "hl-run", dsc.text);
+      run.style.height = (dsc.to - dsc.from) * ROW_H + "px";
+      return run;
+    }
+    let cls = "hl-line";
+    if (dsc.st === "del") cls = "hl-line l-del";
+    else if (dsc.st === "ins") cls = "hl-line l-ins";
+    else if (dsc.st === "mod") cls = "hl-line " + modCls;
+    const line = el("div", cls);
+    if (dsc.sg) {
+      for (const seg of dsc.sg) {
+        if (seg.kind === "eq") line.appendChild(document.createTextNode(seg.text));
+        else line.appendChild(el("span", seg.kind === "del" ? "w-del" : "w-ins", seg.text));
+      }
+    } else if (dsc.text !== "") {
+      line.textContent = dsc.text;
+    }
+    return line;
+  };
+  const buildGut = (dsc) => {
+    if (dsc.num) {
+      const nums = [];
+      for (let k = dsc.from; k < dsc.to; k++) nums.push(k + 1);
+      return document.createTextNode(nums.join("\n"));
+    }
+    return el("span", "gnum g-" + dsc.st, String(dsc.n));
+  };
+
+  const frag = document.createDocumentFragment();
+  const gf = document.createDocumentFragment();
+  const rowEls = new Array(cap);
+  const newBlocks = [];
+  const newGut = [];
+  let gutSep = false;
+  for (const dsc of descs) {
+    const reused = take(bodyPool, dsc.k);
+    const node = reused || buildBody(dsc);
+    // 复用节点禁掉入场动画：内容没变就不重播淡入，只有真正新建（内容变了）才动效
+    if (reused) node.style.animation = "none";
+    frag.appendChild(node);
+    newBlocks.push({ k: dsc.k, el: node });
+    if (!dsc.eq) rowEls[dsc.idx] = node;
+  }
+  for (const dsc of gdescs) {
+    if (gutSep) gf.appendChild(document.createTextNode("\n"));
+    gutSep = true;
+    const node = take(gutPool, dsc.k) || buildGut(dsc);
+    gf.appendChild(node);
+    newGut.push({ k: dsc.k, el: node });
+  }
+
+  inner.textContent = "";
+  inner.appendChild(frag);
+  gut.textContent = "";
+  gut.appendChild(gf);
+  state.renderBlocks[side] = newBlocks;
+  state.renderGut[side] = newGut;
+  state.rowEls[side] = rowEls;
+  state.hlTruncated = Math.max(state.hlTruncated || 0, lines.length - cap);
+  applyScrollTransform(side === "left" ? $taLeft : $taRight);
+}
+
+function applyScrollTransform(ta) {
+  const left = ta === $taLeft;
+  const inner = left ? $hlLeftInner : $hlRightInner;
+  const gut = left ? $gutLeftInner : $gutRightInner;
+  inner.style.transform = "translate(" + (-ta.scrollLeft) + "px," + (-ta.scrollTop) + "px)";
+  gut.style.transform = "translateY(" + (-ta.scrollTop) + "px)";
+}
+
+let scrollGuard = false;
+function wireScroll(ta, other) {
+  ta.addEventListener("scroll", () => {
+    applyScrollTransform(ta);
+    if (!scrollGuard) {
+      scrollGuard = true;
+      other.scrollTop = ta.scrollTop;
+      other.scrollLeft = ta.scrollLeft;
+      applyScrollTransform(other);
+      requestAnimationFrame(() => { scrollGuard = false; });
+    }
+  });
+}
+
+function clearCurrent() {
+  for (const n of state.curMarks) n.classList.remove("cur");
+  state.curMarks = [];
+}
+
+function markCurrent(blk) {
+  clearCurrent();
+  const mark = (els, start, count) => {
+    if (start < 0) return;
+    const end = Math.min(start + Math.max(1, count), els.length, start + 400);
+    for (let i = start; i < end; i++) {
+      const n = els[i];
+      if (!n) continue;
+      n.classList.add("cur");
+      state.curMarks.push(n);
+    }
+  };
+  mark(state.rowEls.left, blk.aLine, blk.aCount);
+  mark(state.rowEls.right, blk.bLine, blk.bCount);
+}
+
+function gotoBlock(idx) {
+  const d = state.data;
+  if (!d || d.blocks.length === 0) return;
+  const i = ((idx % d.blocks.length) + d.blocks.length) % d.blocks.length;
+  state.navIndex = i;
+  const blk = d.blocks[i];
+  const align = (ta, line) => {
+    if (line < 0) return;
+    const max = Math.max(0, ta.scrollHeight - ta.clientHeight);
+    ta.scrollTop = Math.min(max, Math.max(0, line * ROW_H - ta.clientHeight / 2 + ROW_H / 2));
+  };
+  align($taLeft, blk.aLine);
+  align($taRight, blk.bLine);
+  markCurrent(blk);
+  $navPos.textContent = (i + 1) + "/" + d.blocks.length;
+}
+
+function navStep(dir) {
+  const d = state.data;
+  if (!d || d.blocks.length === 0) { showToast("暂无差异可跳转"); return; }
+  const next = state.navIndex < 0 ? (dir > 0 ? 0 : d.blocks.length - 1) : state.navIndex + dir;
+  gotoBlock(next);
+}
+
+function renderStatus() {
+  const d = state.data;
+  const notes = [];
+  if (state.mode === "file") {
+    renderFileStatus();
+    return;
+  }
+  const hasL = $taLeft.value !== "";
+  const hasR = $taRight.value !== "";
+  const has = hasL || hasR;
+  const blocks = d ? d.blocks.length : 0;
+  $stAddBadge.hidden = false;
+  $stDelBadge.hidden = false;
+  $stSimBadge.hidden = false;
+  if (d && has && blocks === 0) {
+    $stVerdict.textContent = "✓ 内容完全一致";
+    $stVerdict.className = "stat-tag";
+    $stVerdict.style.color = "var(--ins-text)";
+    $stVerdict.style.fontWeight = "600";
+  } else {
+    $stVerdict.textContent = (d ? blocks : 0) + " 处差异";
+    $stVerdict.className = "stat-tag";
+    $stVerdict.style.color = "";
+    $stVerdict.style.fontWeight = "";
+  }
+  $stAddBadge.textContent = "+" + (d ? d.added : 0) + " 行";
+  $stDelBadge.textContent = "−" + (d ? d.removed : 0) + " 行";
+  const sim = d ? d.sim : 100;
+  $stSimBadge.textContent = "相似度 " + (sim <= 0 ? "0" : sim >= 10 ? String(Math.round(sim)) : sim.toFixed(1)) + "%";
+  if (!has) {
+    $diffCount.hidden = true;
+  } else if (blocks === 0) {
+    $diffCount.hidden = false;
+    $diffCount.className = "diff-count same";
+    $diffCount.textContent = "✓ 内容一致";
+  } else {
+    $diffCount.hidden = false;
+    $diffCount.className = "diff-count has";
+    $diffCount.textContent = blocks + " 处差异";
+  }
+  $stLines.textContent = has ? "左 " + d.a.length + " 行 · 右 " + d.b.length + " 行" : "";
+  if (d && d.rough) notes.push("内容过大，按整块对比");
+  if (d && state.hlTruncated > 0) notes.push("内容过大，仅高亮前 " + HL_LINE_CAP + " 行");
+  $stNote.textContent = notes.join(" · ");
+  $navPill.hidden = !(has && d && blocks > 0);
+  if ($navPill.hidden === false && state.navIndex < 0) $navPos.textContent = "1/" + blocks;
+}
+
+/* ---------- 文件模式 ---------- */
+// 顶栏 pill 显隐动画：display:none 没有过渡，先加 .collapse 把宽度/边距/透明度压平，
+// 过渡结束后再补 hidden（不残留 0 尺寸可聚焦的按钮）；展开时反向播放
+function setPillCollapse(pill, hide) {
+  clearTimeout(pill._collapseTimer);
+  if (hide) {
+    if (pill.hidden) return;
+    pill._naturalW = pill.offsetWidth + 1;
+    pill.style.maxWidth = pill._naturalW + "px";
+    void pill.offsetWidth;  // 先提交自然宽度，再压向 0，过渡全程贴住内容不空转
+    pill.style.maxWidth = "0px";
+    pill.classList.add("collapse");
+    pill._collapseTimer = setTimeout(() => { pill.hidden = true; }, 280);
+  } else {
+    if (pill.hidden) {
+      pill.hidden = false;
+      pill.style.maxWidth = "0px";
+      void pill.offsetWidth;  // 以收起态先参与布局，展开才有过渡
+    }
+    if (pill._naturalW) pill.style.maxWidth = pill._naturalW + "px";
+    pill.classList.remove("collapse");
+  }
+}
+
+function setMode(mode) {
+  state.mode = mode;
+  $("modeText").classList.toggle("active", mode === "text");
+  $("modeFile").classList.toggle("active", mode === "file");
+  $textZone.hidden = mode !== "text";
+  $fileZone.hidden = mode !== "file";
+  setPillCollapse($("pillWs"), mode !== "text");
+  setPillCollapse($("pillCase"), mode !== "text");
+  $("btnCopyDiff").hidden = mode !== "text";
+  $diffCount.hidden = mode !== "text";
+  const zone = mode === "text" ? $textZone : $fileZone;
+  zone.classList.remove("zone-in");
+  void zone.offsetWidth;
+  zone.classList.add("zone-in");
+  if (mode === "file") renderFileResult();
+  else renderStatus();
+}
+
+function stopBlink() {
+  clearInterval(state.blinkTimer);
+  state.blinkTimer = 0;
+}
+
+function clearImages() {
+  stopBlink();
+  state.imgReq++;  // 使仍在进行的图片加载请求失效
+  if (state.img) {
+    try { URL.revokeObjectURL(state.img.a.url); } catch (_) {}
+    try { URL.revokeObjectURL(state.img.b.url); } catch (_) {}
+  }
+  state.img = null;
+}
+
+function setSlotFile(slot, file) {
+  if (!file) return;
+  if (file.size > MAX_HASH_BYTES) { showToast("文件超过 200MB，无法对比", true); return; }
+  clearImages();
+  state.files[slot] = {
+    file,
+    name: file.name,
+    size: file.size,
+    type: file.type || "",
+    md5: null,
+    sha1: null,
+    sha256: null,
+    shaSkipped: false,
+    hashing: true,
+    progress: 0,
+    error: "",
+  };
+  renderSlots();
+  renderFileResult();
+  hashEntry(state.files[slot]);
+}
+
+async function hashEntry(e) {
+  try {
+    const st = md5New();
+    for (let off = 0; off < e.size; off += HASH_CHUNK) {
+      const buf = await blobToArrayBuffer(e.file.slice(off, Math.min(e.size, off + HASH_CHUNK)));
+      md5Update(st, new Uint8Array(buf));
+      e.progress = Math.min(1, (off + HASH_CHUNK) / e.size);
+      renderSlots();
+    }
+    e.md5 = md5Hex(st);
+    if (e.size <= SHA_WHOLE_LIMIT && window.crypto && crypto.subtle) {
+      const whole = await blobToArrayBuffer(e.file);
+      e.sha1 = bufToHex(await crypto.subtle.digest("SHA-1", whole));
+      e.sha256 = bufToHex(await crypto.subtle.digest("SHA-256", whole));
+    } else {
+      e.shaSkipped = true;
+    }
+    e.hashing = false;
+    e.progress = 1;
+  } catch (err) {
+    e.hashing = false;
+    e.error = "哈希计算失败";
+  }
+  renderSlots();
+  renderFileResult();
+}
+
+function slotEls(slot) {
+  return slot === "A"
+    ? { card: $("slotA"), box: $("fileA"), icon: $("sfIconA"), name: $("sfNameA"), info: $("sfInfoA"), prog: $("sfProgA"), bar: $("sfBarA") }
+    : { card: $("slotB"), box: $("fileB"), icon: $("sfIconB"), name: $("sfNameB"), info: $("sfInfoB"), prog: $("sfProgB"), bar: $("sfBarB") };
+}
+
+function renderSlots() {
+  for (const slot of ["A", "B"]) {
+    const e = state.files[slot];
+    const n = slotEls(slot);
+    n.card.classList.toggle("filled", !!e);
+    n.box.hidden = !e;
+    if (e) {
+      n.icon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>';
+      n.name.textContent = e.name;
+      n.name.title = e.name;
+      n.info.textContent = formatSize(e.size) + (e.type ? " · " + e.type : "") + (e.hashing ? " · 计算哈希中…" : (e.error ? " · " + e.error : ""));
+      n.prog.hidden = !e.hashing;
+      n.bar.style.width = Math.round(e.progress * 100) + "%";
+    }
+  }
+}
+
+function clearSlot(slot) {
+  clearImages();
+  state.files[slot] = null;
+  renderSlots();
+  renderFileResult();
+}
+
+function filesComplete() {
+  const A = state.files.A, B = state.files.B;
+  return A && B && !A.hashing && !B.hashing && !A.error && !B.error;
+}
+
+function renderFileStatus() {
+  const A = state.files.A, B = state.files.B;
+  $stAddBadge.hidden = true;
+  $stDelBadge.hidden = true;
+  $stSimBadge.hidden = true;
+  $stLines.textContent = "";
+  if (!A && !B) { $stVerdict.textContent = "选择文件后自动对比"; return; }
+  if (!A || !B) { $stVerdict.textContent = "已选择 " + ((A ? 1 : 0) + (B ? 1 : 0)) + "/2 个文件"; return; }
+  if (A.hashing || B.hashing) { $stVerdict.textContent = "正在计算哈希…"; return; }
+  if (A.error || B.error) { $stVerdict.textContent = "哈希计算失败"; return; }
+  if (A.size === B.size && A.md5 === B.md5) $stVerdict.textContent = "✓ 两个文件完全相同";
+  else $stVerdict.textContent = "两个文件不同";
+}
+
+async function renderFileResult() {
+  renderFileStatus();
+  const A = state.files.A, B = state.files.B;
+  const panel = $("fileResult");
+  if (!A || !B) { panel.hidden = true; return; }
+  panel.hidden = false;
+
+  const vd = $("verdict");
+  vd.className = "verdict neutral";
+  if (A.hashing || B.hashing) {
+    vd.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg><span>正在计算哈希…（大文件需要几秒）</span>';
+  } else if (A.error || B.error) {
+    vd.classList.add("bad");
+    vd.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg><span>哈希计算失败，请重试</span>';
+  } else {
+    const same = A.size === B.size && A.md5 === B.md5;
+    vd.classList.add(same ? "ok" : "bad");
+    const sub = same
+      ? "大小与 MD5 均一致"
+      : (A.size !== B.size ? "大小不同（" + formatSize(A.size) + " vs " + formatSize(B.size) + "）" : "大小相同，但内容哈希不同");
+    vd.innerHTML = (same
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>')
+      + "<span><b>" + (same ? "两个文件完全相同" : "两个文件不同") + "</b>　" + sub + "</span>";
+  }
+
+  renderHashRows();
+
+  const bothImg = isImageFile(A.file) && isImageFile(B.file) && A.size <= MAX_IMG_BYTES && B.size <= MAX_IMG_BYTES;
+  const bothText = !bothImg && isTextFile(A.file) && isTextFile(B.file) && A.size <= MAX_TEXT_BYTES && B.size <= MAX_TEXT_BYTES;
+  $("imgPanel").hidden = !bothImg;
+  $("textBridge").hidden = !bothText;
+
+  if (bothImg && filesComplete()) {
+    const req = ++state.imgReq;
+    try {
+      const [ia, ib] = await Promise.all([loadImageEl(A.file), loadImageEl(B.file)]);
+      if (req !== state.imgReq) {
+        try { URL.revokeObjectURL(ia.url); } catch (_) {}
+        try { URL.revokeObjectURL(ib.url); } catch (_) {}
+        return;
+      }
+      if (state.img) {
+        try { URL.revokeObjectURL(state.img.a.url); } catch (_) {}
+        try { URL.revokeObjectURL(state.img.b.url); } catch (_) {}
+      }
+      state.img = { a: ia, b: ib };
+      applyImgMode();
+    } catch (err) {
+      $("imgMeta").innerHTML = '<span class="img-warn">图片解码失败：' + (err && err.message ? err.message : "格式不受支持") + "</span>";
+      $("imgStage").innerHTML = "";
+    }
+  }
+}
+
+function renderHashRows() {
+  const A = state.files.A, B = state.files.B;
+  const box = $("hashRows");
+  box.textContent = "";
+  const mk = (alg, va, vb, ok) => {
+    const row = el("div", "hash-row");
+    row.title = "点击复制 " + alg;
+    const mark = el("span", "hash-mark " + (ok == null ? "na" : ok ? "match" : "miss"), ok == null ? "–" : ok ? "✓" : "✗");
+    const val = el("span", "hash-val");
+    val.textContent = va == null ? "（未计算）" : va;
+    if (va && vb && va !== vb) val.title = "B: " + vb;
+    row.append(el("span", "hash-alg", alg), val, mark);
+    row.addEventListener("click", async () => {
+      if (!va) return;
+      const okc = await copyText(va);
+      showToast(okc ? "已复制 " + alg : "复制失败", !okc);
+    });
+    return row;
+  };
+  const alg = (e, k) => (e && !e.hashing && !e.error ? e[k] : null);
+  box.append(
+    mk("MD5", A.md5, B.md5, A.md5 && B.md5 ? A.md5 === B.md5 : null),
+    mk("SHA-1", A.sha1, B.sha1, A.sha1 && B.sha1 ? A.sha1 === B.sha1 : null),
+    mk("SHA-256", A.sha256, B.sha256, A.sha256 && B.sha256 ? A.sha256 === B.sha256 : null)
+  );
+  if ((A.shaSkipped || B.shaSkipped) && !(A.sha1 && B.sha1)) {
+    const note = el("div", "st-note");
+    note.style.fontSize = "11px";
+    note.textContent = "文件超过 64MB，SHA-1 / SHA-256 已跳过（MD5 为流式计算不受影响）";
+    box.appendChild(note);
+  }
+}
+
+function loadImageEl(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => resolve({ el: img, url, w: img.naturalWidth, h: img.naturalHeight });
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("格式不受支持或文件损坏")); };
+    img.src = url;
+  });
+}
+
+function applyImgMode() {
+  const stg = $("imgStage");
+  stopBlink();
+  stg.innerHTML = "";
+  stg.className = "img-stage checker";
+  const mode = state.imgMode;
+  document.querySelectorAll("#imgModes button").forEach((b) => b.classList.toggle("active", b.dataset.m === state.imgMode));
+  buildImgCtl();
+
+  if (!state.img) return;
+  const { a, b } = state.img;
+
+  if (state.imgMode === "side") {
+    const pA = el("div", "img-pane");
+    const pB = el("div", "img-pane");
+    pA.append(el("span", "pane-tag", "A"));
+    pB.append(el("span", "pane-tag", "B"));
+    const iA = new Image(); iA.src = a.url;
+    const iB = new Image(); iB.src = b.url;
+    pA.appendChild(iA);
+    pB.appendChild(iB);
+    stg.append(pA, pB);
+    renderImgMeta();
+  } else if (state.imgMode === "stack") {
+    stg.className = "img-stage " + (state.stackBlend === "difference" ? "black" : "checker");
+    const wrap = el("div", "img-stack" + (state.stackBlend === "difference" ? " blend" : ""));
+    const iA = new Image(); iA.src = a.url;
+    const iB = new Image(); iB.src = b.url; iB.className = "top";
+    iB.style.opacity = String(state.stackOp / 100);
+    wrap.append(iA, iB);
+    stg.appendChild(wrap);
+    renderImgMeta();
+  } else if (state.imgMode === "blink") {
+    stg.className = "img-stage checker";
+    const wrap = el("div", "img-stack");
+    const iA = new Image(); iA.src = a.url;
+    const iB = new Image(); iB.src = b.url; iB.className = "top";
+    wrap.append(iA, iB);
+    stg.appendChild(wrap);
+    startBlink(iB);
+    renderImgMeta();
+  } else if (state.imgMode === "diff") {
+    renderPixelDiff();
+  }
+}
+
+function startBlink(imgB) {
+  state.blinkTimer = setInterval(() => {
+    imgB.style.visibility = imgB.style.visibility === "hidden" ? "visible" : "hidden";
+  }, 600);
+}
+
+function renderImgMeta(extra) {
+  if (!state.img) { $("imgMeta").textContent = ""; return; }
+  const { a, b } = state.img;
+  const dimSame = a.w === b.w && a.h === b.h;
+  let html = "A " + a.w + "×" + a.h + " · B " + b.w + "×" + b.h + " · " + formatSize(state.files.A.size) + " / " + formatSize(state.files.B.size);
+  if (!dimSame) html += '　<span class="img-warn">⚠ 两图尺寸不同，堆叠/差异按左上角对齐取重叠区域</span>';
+  if (extra) html += "　" + extra;
+  $("imgMeta").innerHTML = html;
+}
+
+function renderPixelDiff() {
+  const { a, b } = state.img;
+  const stg = $("imgStage");
+  stg.className = "img-stage checker";
+  stg.innerHTML = "";
+  const w = Math.min(a.w, b.w);
+  const h = Math.min(a.h, b.h);
+  const scale = Math.min(1, IMG_PIXEL_CAP / Math.max(w, h, 1));
+  const cw = Math.max(1, Math.round(w * scale));
+  const ch = Math.max(1, Math.round(h * scale));
+  const cA = document.createElement("canvas"); cA.width = cw; cA.height = ch;
+  const cB = document.createElement("canvas"); cB.width = cw; cB.height = ch;
+  const xA = cA.getContext("2d", { willReadFrequently: true });
+  const xB = cB.getContext("2d", { willReadFrequently: true });
+  xA.drawImage(a.el, 0, 0, cw, ch);
+  xB.drawImage(b.el, 0, 0, cw, ch);
+  const dA = xA.getImageData(0, 0, cw, ch).data;
+  const dB = xB.getImageData(0, 0, cw, ch).data;
+  const out = xA.createImageData(cw, ch);
+  const od = out.data;
+  const tol = state.diffTol;
+  let diffCount = 0;
+  for (let i = 0; i < dA.length; i += 4) {
+    const dr = Math.abs(dA[i] - dB[i]);
+    const dg = Math.abs(dA[i + 1] - dB[i + 1]);
+    const db = Math.abs(dA[i + 2] - dB[i + 2]);
+    const da = Math.abs(dA[i + 3] - dB[i + 3]);
+    const d = Math.max(dr, dg, db, da);
+    if (d > tol) {
+      diffCount++;
+      const k = i + 1;
+      od[i] = 255; od[k] = 45; od[k + 1] = 85;
+      od[k + 2] = 90 + Math.round(165 * (d / 255));
+    } else {
+      const g = 26;
+      od[i] = g; od[i + 1] = g + 3; od[i + 2] = g + 8; od[i + 3] = 255;
+    }
+  }
+  xA.putImageData(out, 0, 0);
+  const view = document.createElement("canvas");
+  view.width = cw; view.height = ch;
+  view.getContext("2d").drawImage(cA, 0, 0);
+  view.className = "img-diff";
+  stg.innerHTML = "";
+  stg.appendChild(view);
+  const total = cw * ch;
+  const pct = total ? ((diffCount / total) * 100).toFixed(2) : "0.00";
+  const stats = '差异像素 ' + diffCount.toLocaleString() + " / " + total.toLocaleString() + "（" + pct + "%）· 容差 " + tol;
+  renderImgMeta(stats + (scale < 1 ? " · 已缩放至 " + cw + "×" + ch : ""));
+}
+
+function buildImgCtl() {
+  const ctl = $("imgCtl");
+  ctl.textContent = "";
+  if (state.imgMode === "stack") {
+    const lbl = el("span", null, "顶层不透明度");
+    const range = el("input");
+    range.type = "range"; range.min = "0"; range.max = "100"; range.value = String(state.stackOp);
+    range.addEventListener("input", () => {
+      state.stackOp = Number(range.value);
+      const top = $("imgStage").querySelector("img.top");
+      if (top) top.style.opacity = String(state.stackOp / 100);
+    });
+    const blend = el("select");
+    for (const [v, t] of [["normal", "正常混合"], ["difference", "差值模式（相同处变黑）"]]) {
+      const o = el("option", null, t);
+      o.value = v;
+      if (v === state.stackBlend) o.selected = true;
+      blend.appendChild(o);
+    }
+    blend.addEventListener("change", () => { state.stackBlend = blend.value; applyImgMode(); });
+    ctl.append(lbl, range, blend);
+  } else if (state.imgMode === "blink") {
+    const btn = el("button", state.blinkTimer ? "pill on" : "pill");
+    btn.innerHTML = '<span class="pill-dot"></span><span>' + (state.blinkTimer ? "暂停" : "播放") + "</span>";
+    btn.addEventListener("click", () => {
+      if (state.blinkTimer) {
+        stopBlink();
+        const top = $("imgStage").querySelector("img.top");
+        if (top) top.style.visibility = "visible";
+      } else {
+        const top = $("imgStage").querySelector("img.top");
+        if (top) startBlink(top);
+      }
+      buildImgCtl();
+    });
+    const tip = el("span", null, "每 0.6s 在 A / B 间切换，肉眼捕捉差异区域");
+    ctl.append(btn, tip);
+  } else if (state.imgMode === "diff") {
+    const lbl = el("span", null, "容差");
+    const sel = el("select");
+    for (const v of [0, 5, 15, 30, 60]) {
+      const o = el("option", null, String(v));
+      o.value = String(v);
+      if (v === state.diffTol) o.selected = true;
+      sel.appendChild(o);
+    }
+    sel.addEventListener("change", () => { state.diffTol = Number(sel.value); renderPixelDiff(); });
+    const tip = el("span", null, "容差可过滤 JPEG 压缩噪声，仅保留真实差异");
+    ctl.append(lbl, sel, tip);
+  }
+}
+
+/* ---------- 事件 ---------- */
+function setViewPills() {
+  $("pillWs").classList.toggle("on", state.ignoreWs);
+  $("pillCase").classList.toggle("on", state.ignoreCase);
+}
+
+function setFileChip(side, name) {
+  state.fileNames[side] = name || "";
+  const chip = side === "left" ? $chipLeft : $chipRight;
+  if (name) {
+    chip.querySelector(".chip-name").textContent = name;
+    chip.title = name + "（点击清除标记）";
+    chip.hidden = false;
+  } else {
+    chip.hidden = true;
+  }
+}
+
+function readFileInto(side, file) {
+  if (!file) return;
+  if (file.size > MAX_TEXT_BYTES) { showToast("文件过大（超过 10MB），未载入", true); return; }
+  if (isImageFile(file)) { showToast("图片请切换到「文件 / 图片」标签对比", true); return; }
+  if (file.type && !file.type.startsWith("text/") && !isTextFile(file)) {
+    showToast("检测到二进制文件，请切换到「文件 / 图片」标签对比", true);
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    const ta = side === "left" ? $taLeft : $taRight;
+    ta.value = String(reader.result || "");
+    setFileChip(side, file.name);
+    recompute();
+    showToast("已导入 " + file.name + "（" + formatSize(file.size) + "）");
+  };
+  reader.onerror = () => showToast("文件读取失败", true);
+  reader.readAsText(file);
+}
+
+async function fillFromClipboard(side) {
+  const text = await readClipboardText();
+  if (text == null) { showToast("无法读取系统剪贴板", true); return; }
+  if (text === "") { showToast("剪贴板中无内容"); return; }
+  const ta = side === "left" ? $taLeft : $taRight;
+  ta.value = text;
+  setFileChip(side, "");
+  recompute();
+  showToast("已导入剪贴板至" + (side === "left" ? "左侧" : "右侧"));
+}
+
+function clearAll() {
+  $taLeft.value = "";
+  $taRight.value = "";
+  setFileChip("left", "");
+  setFileChip("right", "");
+  state.files = { A: null, B: null };
+  clearImages();
+  renderSlots();
+  recompute();
+  renderFileResult();
+  showToast("已清空所有内容");
+}
+
+async function swapSides() {
+  if (state.mode === "file") {
+    const t = state.files.A;
+    state.files.A = state.files.B;
+    state.files.B = t;
+    clearImages();
+    renderSlots();
+    renderFileResult();
+    showToast("已对调两个文件");
+    return;
+  }
+  const l = $taLeft.value;
+  $taLeft.value = $taRight.value;
+  $taRight.value = l;
+  const fn = state.fileNames.left;
+  setFileChip("left", state.fileNames.right);
+  setFileChip("right", fn);
+  recompute();
+  showToast("已对调两侧内容");
+}
+
+function loadUiState() {
+  let ui = null;
+  try { ui = JSON.parse(localStorage.getItem("spark_compare_ui") || "null"); } catch (_) {}
+  if (ui && typeof ui.split === "number" && ui.split >= 0.15 && ui.split <= 0.85) {
+    $("paneLeft").style.flex = "0 0 " + (ui.split * 100) + "%";
+  }
+}
+
+function saveUiState() {
+  try {
+    localStorage.setItem("spark_compare_ui", JSON.stringify({
+      split: $("paneLeft").offsetWidth / Math.max(1, $textZone.offsetWidth),
+    }));
+  } catch (_) {}
+}
+
+function setupGripV() {
+  $gripV.addEventListener("mousedown", (e) => {
+    const rect = $textZone.getBoundingClientRect();
+    document.body.classList.add("resizing-col");
+    const onMove = (ev) => {
+      let pct = (ev.clientX - rect.left) / rect.width;
+      pct = Math.min(0.85, Math.max(0.15, pct));
+      $("paneLeft").style.flex = "0 0 " + (pct * 100) + "%";
+    };
+    const onUp = () => {
+      document.body.classList.remove("resizing-col");
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      saveUiState();
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  });
+  $gripV.addEventListener("dblclick", () => {
+    $("paneLeft").style.flex = "";
+    saveUiState();
+  });
+}
+
+function wireEvents() {
+  let timer = 0;
+  const onEdit = () => {
+    // 全部清空时立即重算：高亮随删除同步消失，不留残影
+    if ($taLeft.value === "" && $taRight.value === "") { clearTimeout(timer); recompute(); return; }
+    // 节流+尾随：逐字慢速输入时每次按键都立即刷新（计算在 Worker，不占输入线程），
+    // 快速连打时每 ~120ms 用最新内容跟一次，停手后必有收尾，高亮贴手不迟滞
+    clearTimeout(timer);
+    const since = performance.now() - lastDiffAt;
+    if (since >= 120) recompute();
+    else timer = setTimeout(recompute, 130 - since);
+  };
+  $taLeft.addEventListener("input", onEdit);
+  $taRight.addEventListener("input", onEdit);
+
+  for (const ta of [$taLeft, $taRight]) {
+    ta.addEventListener("keydown", (e) => {
+      if (e.key === "Tab" && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        e.preventDefault();
+        const s = ta.selectionStart;
+        const epos = ta.selectionEnd;
+        ta.value = ta.value.slice(0, s) + "  " + ta.value.slice(epos);
+        ta.selectionStart = ta.selectionEnd = s + 2;
+        onEdit();
+      }
+    });
+  }
+  wireScrollPair();
+
+  $("modeText").addEventListener("click", () => setMode("text"));
+  $("modeFile").addEventListener("click", () => setMode("file"));
+
+  $("pillWs").addEventListener("click", () => { state.ignoreWs = !state.ignoreWs; setViewPills(); recompute(); });
+  $("pillCase").addEventListener("click", () => { state.ignoreCase = !state.ignoreCase; setViewPills(); recompute(); });
+
+  $("btnSwap").addEventListener("click", swapSides);
+  $("btnClear").addEventListener("click", clearAll);
+
+  $("btnCopyDiff").addEventListener("click", async () => {
+    const d = state.data;
+    if (!d || d.blocks.length === 0) { showToast("当前无差异文本可复制"); return; }
+    const ok = await copyText(d.unified);
+    showToast(ok ? "已复制差异补丁（" + d.unified.length + " 字符）" : "复制失败", !ok);
+  });
+
+  $("btnTheme").addEventListener("click", () => {
+    setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+  });
+
+  document.querySelectorAll(".mini-btn").forEach((btn) => {
+    btn.addEventListener("click", () => fillFromClipboard(btn.dataset.side));
+  });
+
+  $chipLeft.addEventListener("click", () => setFileChip("left", ""));
+  $chipRight.addEventListener("click", () => setFileChip("right", ""));
+
+  // 文件模式：槽位点击 / 拖拽
+  $slotInput.addEventListener("change", () => {
+    const f = $slotInput.files && $slotInput.files[0];
+    if (f && state.fileSlot) setSlotFile(state.fileSlot, f);
+    $slotInput.value = "";
+  });
+  for (const slot of ["A", "B"]) {
+    const card = $("slot" + slot);
+    card.addEventListener("click", (e) => {
+      if (e.target.closest(".sf-x")) return;
+      state.fileSlot = slot;
+      $slotInput.click();
+    });
+    $("sfX" + slot).addEventListener("click", (e) => {
+      e.stopPropagation();
+      clearSlot(slot);
+    });
+    card.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.dataTransfer.dropEffect = "copy";
+      card.classList.add("dropping");
+    });
+    card.addEventListener("dragleave", (e) => {
+      if (!card.contains(e.relatedTarget)) card.classList.remove("dropping");
+    });
+    card.addEventListener("drop", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      card.classList.remove("dropping");
+      const f = e.dataTransfer.files && e.dataTransfer.files[0];
+      if (f) setSlotFile(slot, f);
+    });
+  }
+  $("slots").addEventListener("drop", (e) => {
+    e.preventDefault();
+    const fs = e.dataTransfer.files;
+    if (!fs || !fs.length) return;
+    if (fs.length >= 2) { setSlotFile("A", fs[0]); setSlotFile("B", fs[1]); }
+    else {
+      const empty = !state.files.A ? "A" : (!state.files.B ? "B" : "A");
+      setSlotFile(empty, fs[0]);
+    }
+  });
+
+  $("imgModes").addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-m]");
+    if (!btn) return;
+    state.imgMode = btn.dataset.m;
+    applyImgMode();
+  });
+
+  $("btnOpenText").addEventListener("click", async () => {
+    const A = state.files.A, B = state.files.B;
+    if (!A || !B) return;
+    try {
+      const [ta, tb] = await Promise.all([blobText(A.file), blobText(B.file)]);
+      $taLeft.value = ta;
+      $taRight.value = tb;
+      setFileChip("left", A.name);
+      setFileChip("right", B.name);
+      setMode("text");
+      recompute();
+    } catch (_) {
+      showToast("文件读取失败", true);
+    }
+  });
+
+  // 文本编辑区拖拽
+  for (const pane of [$("paneLeft"), $("paneRight")]) {
+    pane.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "copy";
+      pane.classList.add("dropping");
+    });
+    pane.addEventListener("dragleave", (e) => {
+      if (!pane.contains(e.relatedTarget)) pane.classList.remove("dropping");
+    });
+    pane.addEventListener("drop", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      pane.classList.remove("dropping");
+      const f = e.dataTransfer.files && e.dataTransfer.files[0];
+      if (f) readFileInto(pane.dataset.side, f);
+    });
+  }
+
+  // 全局兜底：文本模式下直接拖 2 个文件 = 左右各一
+  document.addEventListener("dragover", (e) => e.preventDefault());
+  document.addEventListener("drop", (e) => {
+    e.preventDefault();
+    const fs = e.dataTransfer && e.dataTransfer.files;
+    if (!fs || !fs.length) return;
+    if (state.mode === "file") {
+      if (fs.length >= 2) { setSlotFile("A", fs[0]); setSlotFile("B", fs[1]); }
+      else {
+        const empty = !state.files.A ? "A" : (!state.files.B ? "B" : "A");
+        setSlotFile(empty, fs[0]);
+      }
+    } else {
+      if (fs.length >= 2) { readFileInto("left", fs[0]); readFileInto("right", fs[1]); }
+      else readFileInto($taLeft.value ? "right" : "left", fs[0]);
+    }
+  });
+
+  $("navPrev").addEventListener("click", () => navStep(-1));
+  $("navNext").addEventListener("click", () => navStep(1));
+  $diffCount.addEventListener("click", () => navStep(1));
+  document.addEventListener("keydown", (e) => {
+    if (e.altKey && e.key === "ArrowDown") { e.preventDefault(); navStep(1); }
+    else if (e.altKey && e.key === "ArrowUp") { e.preventDefault(); navStep(-1); }
+  });
+
+  setupGripV();
+}
+
+function wireScrollPair() {
+  wireScroll($taLeft, $taRight);
+  wireScroll($taRight, $taLeft);
+  applyScrollTransform($taLeft);
+  applyScrollTransform($taRight);
+}
+
+function blobText(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result || ""));
+    r.onerror = () => reject(r.error);
+    r.readAsText(file);
+  });
+}
+
+/* ---------- 启动 ---------- */
+(function init() {
+  wireEvents();
+  loadUiState();
+  const inputFromSpark = (window.spark && spark.input && spark.input.text) || "";
+  if (inputFromSpark) $taLeft.value = inputFromSpark;
+  setMode("text");
+  recompute();
+  renderSlots();
+  if (!$taLeft.value) $taLeft.focus();
+})();
+</script>
+</body>
+</html>

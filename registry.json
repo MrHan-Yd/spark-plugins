@@ -2,7 +2,7 @@
   "schema": 1,
   "name": "Spark 官方插件仓库",
   "zipball_url": "https://github.com/MrHan-Yd/spark-plugins/archive/refs/heads/master.zip",
-  "updated": "2026-08-27T00:00:00Z",
+  "updated": "2026-08-28T00:00:00Z",
   "plugins": [
     {
       "id": "com.spark.json-formatter",
@@ -30,6 +30,30 @@
             "algorithm": "ed25519",
             "signature": "74I4k14K1guiQQDcQAL5EUPkhVsjAY9D8Hi5TzLb38ZSYPDz2zwqMUphYcFRewSNvwsM4QScuvUC2/ra6hvADQ=="
           }
+        }
+      ]
+    },
+    {
+      "id": "com.spark.compare",
+      "name": "内容对比",
+      "description": "文本输入即对比、差异逐行逐词实时高亮；文件 MD5/SHA 哈希对比；图片并排/堆叠/闪烁/像素级差异",
+      "author": "Spark",
+      "homepage": "https://github.com/MrHan-Yd/spark-plugins/tree/master/compare",
+      "icon": "https://raw.githubusercontent.com/MrHan-Yd/spark-plugins/master/compare/0.1.0/icon.svg",
+      "runtime": "webview",
+      "latest": "0.1.0",
+      "permissions": [
+        "clipboard"
+      ],
+      "versions": [
+        {
+          "version": "0.1.0",
+          "path": "compare/0.1.0",
+          "url": null,
+          "sha256": null,
+          "size": null,
+          "released": "2026-08-28",
+          "signature": null
         }
       ]
     }
