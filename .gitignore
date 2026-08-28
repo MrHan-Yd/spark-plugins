@@ -87,3 +87,4 @@ $RECYCLE.BIN/
 application-local.conf
 application-local.properties
 .env
+.zcode
