@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "plugin_id": "com.spark.compare",
+  "version": "0.1.0",
+  "algorithm": "ed25519",
+  "key_id": "spark-official-v1",
+  "signed_at": "2026-08-28T09:27:08Z",
+  "files": [
+    {
+      "path": "icon.svg",
+      "sha256": "d686c65e98440e490fe264a47f295c5b71363cd79c3f276b17760e247641d798"
+    },
+    {
+      "path": "index.html",
+      "sha256": "df5693e20d185395fb4aa30c6fcc0a186ea3e60ed3631e57da244449f2186980"
+    },
+    {
+      "path": "plugin.json",
+      "sha256": "1940060976023845cd445c86d684c47036d1321b410b111ab10a7124a07a612a"
+    }
+  ],
+  "signature": "QOo4o0vBSTc1/liu8rhvR7d6LGN3fSxbgeJdXg9PVxHNPpiUVR6gApC8faYV1mfse686goEfZGN5oYGdOTg+Ag=="
+}
