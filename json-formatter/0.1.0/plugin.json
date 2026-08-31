@@ -17,6 +17,14 @@
       "subtitle": "粘贴 JSON,格式化成可展开收起的树",
       "mode": "page",
       "placeholder": "粘贴 JSON…"
+    },
+    {
+      "type": "keyword",
+      "keyword": "json格式化",
+      "title": "JSON 格式化",
+      "subtitle": "粘贴 JSON,格式化成可展开收起的树",
+      "mode": "page",
+      "placeholder": "粘贴 JSON…"
     }
   ],
   "window": {
