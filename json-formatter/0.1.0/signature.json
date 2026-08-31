@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "algorithm": "ed25519",
   "key_id": "spark-official-v1",
-  "signed_at": "2026-08-27T07:31:20Z",
+  "signed_at": "2026-08-31T06:41:51Z",
   "files": [
     {
       "path": "icon.svg",
@@ -16,8 +16,8 @@
     },
     {
       "path": "plugin.json",
-      "sha256": "545dfd292b9ab4bc5586d2bcec996119e8d84c53b5adf040385717c34c988ac8"
+      "sha256": "d31dea85927ece2d429f9387729fe3acfbe7fcfdbb1075217fe675355594d7ae"
     }
   ],
-  "signature": "74I4k14K1guiQQDcQAL5EUPkhVsjAY9D8Hi5TzLb38ZSYPDz2zwqMUphYcFRewSNvwsM4QScuvUC2/ra6hvADQ=="
+  "signature": "28AjBkHCj3BthlxQmI/WWZUsKX6U6mQ4ZlJK38Nd7ZmisU01aqATExUKl39q3JTMq/Qljelmp48XnyjHkDDYAA=="
 }

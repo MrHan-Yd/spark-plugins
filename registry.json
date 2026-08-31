@@ -2,7 +2,7 @@
   "schema": 1,
   "name": "Spark 官方插件仓库",
   "zipball_url": "https://github.com/MrHan-Yd/spark-plugins/archive/refs/heads/master.zip",
-  "updated": "2026-08-28T00:00:00Z",
+  "updated": "2026-08-31T00:00:00Z",
   "plugins": [
     {
       "id": "com.spark.json-formatter",
@@ -28,7 +28,7 @@
             "schema": 1,
             "key_id": "spark-official-v1",
             "algorithm": "ed25519",
-            "signature": "74I4k14K1guiQQDcQAL5EUPkhVsjAY9D8Hi5TzLb38ZSYPDz2zwqMUphYcFRewSNvwsM4QScuvUC2/ra6hvADQ=="
+            "signature": "28AjBkHCj3BthlxQmI/WWZUsKX6U6mQ4ZlJK38Nd7ZmisU01aqATExUKl39q3JTMq/Qljelmp48XnyjHkDDYAA=="
           }
         }
       ]
