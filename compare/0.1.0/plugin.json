@@ -20,7 +20,7 @@
     },
     {
       "type": "keyword",
-      "keyword": "对比",
+      "keyword": "内容对比",
       "title": "内容对比",
       "subtitle": "文本逐字精确高亮 · 文件哈希 · 图片像素级对比",
       "mode": "page",
