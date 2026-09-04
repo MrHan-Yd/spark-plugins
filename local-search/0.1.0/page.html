@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>本地搜索</title>
+<link rel="stylesheet" href="page.css">
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="10.5" cy="10.5" r="6.6" fill="none" stroke="var(--accent)" stroke-width="2.3"/>
+        <path d="M15.6 15.6L21 21" stroke="var(--accent)" stroke-width="2.6" stroke-linecap="round"/>
+        <path d="M7.4 10.5h6.2M10.5 7.4v6.2" stroke="var(--text)" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>
+      </svg>
+      <div class="bt"><b>本地搜索</b><span>全盘文件名实时搜索 · 内存索引</span></div>
+    </div>
+    <div class="tools">
+      <button id="btnRebuild" class="tb" title="重新扫描全部盘符,重建索引">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5A8 8 0 1 0 18.9 16"/><path d="M20 4v7h-7"/></svg>重建索引
+      </button>
+      <button id="btnSettings" class="tb" title="盘符 / 排除目录 / 结果上限">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.82-2.82l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.82-2.82l.06.06a1.7 1.7 0 0 0 1.87.34h.09a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.82 2.82l-.06.06a1.7 1.7 0 0 0-.34 1.87v.09a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg>设置
+      </button>
+      <span style="width:1px;height:16px;background:var(--line);margin:0 4px"></span>
+      <button id="btnTheme" class="tb icon" title="切换明暗主题">
+        <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M20 14.5A8.8 8.8 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
+        <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div id="buildbar" class="buildbar hidden">
+    <span id="buildtext">索引构建中…</span>
+    <div class="btrack"><div id="bfill" class="bfill" style="width:0%"></div></div>
+    <span id="bpct" class="bpct">0%</span>
+  </div>
+
+  <div class="searchwrap">
+    <div class="searchbox" id="searchbox">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg>
+      <input id="q" type="text" spellcheck="false" autocomplete="off"
+        placeholder="输入文件名,空格分词;ext:pdf 过滤扩展名,d: 限定盘符">
+      <button id="btnClear" class="clear" title="清空">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <main id="list" class="list"></main>
+
+  <footer class="status">
+    <span id="stL">就绪</span>
+    <span class="grow"></span>
+    <span id="stR"></span>
+  </footer>
+</div>
+
+<div id="mask" class="mask"></div>
+<aside id="drawer" class="drawer" aria-hidden="true">
+  <div class="dhead">
+    <b>搜索设置</b>
+    <button id="btnCloseDrawer" class="tb icon" title="关闭">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <div class="dbody">
+    <div>
+      <div class="dlabel"><span>索引的盘符</span><span id="drvCount"></span></div>
+      <div id="drives" class="drives"></div>
+    </div>
+    <div>
+      <div class="dlabel"><span>排除的目录名</span><span>每行一个,不分大小写</span></div>
+      <textarea id="excludes" class="dtext" spellcheck="false"></textarea>
+    </div>
+    <div>
+      <div class="dlabel"><span>单次结果上限</span></div>
+      <input id="maxResults" class="dnum" type="number" min="1" max="200" step="1">
+    </div>
+    <div class="dnote" id="cfgPath"></div>
+  </div>
+  <div class="dfoot">
+    <button id="btnSave" class="btn">保存并重建索引</button>
+    <button id="btnCancelDrawer" class="btn">取消</button>
+  </div>
+</aside>
+
+<div id="toast" class="toast" role="status"></div>
+
+<script src="page.js"></script>
+</body>
+</html>

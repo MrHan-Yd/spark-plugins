@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "plugin_id": "com.spark.local-search",
+  "version": "0.1.0",
+  "algorithm": "ed25519",
+  "key_id": "spark-official-v1",
+  "signed_at": "2026-09-04T09:26:11Z",
+  "files": [
+    {
+      "path": "icon.svg",
+      "sha256": "442462380fe25c00f6df9b7af403c6b824912b63a3d0d68751880852257fee57"
+    },
+    {
+      "path": "page.css",
+      "sha256": "8ec8bf279b1cdc189b199ca52bcbe00142874a3753df86b80377f2a37120faa2"
+    },
+    {
+      "path": "page.html",
+      "sha256": "00a9f1ef3449f6a2473aac0a415bc354822376cea826cac81a15eb96dce05022"
+    },
+    {
+      "path": "page.js",
+      "sha256": "de6c40cc5f27a09c70f4c3b49377d8a33865562d7d294f023aec86c94139130e"
+    },
+    {
+      "path": "plugin.json",
+      "sha256": "b4d17f36339d2dec526d10cc6cf1b61a1608750631dca55a770715c258295d8c"
+    },
+    {
+      "path": "spark-plugin-local-search.exe",
+      "sha256": "501512967c2ab707a2c1cd99f60b2b7b2f889f6dce1005b5adeb0e9bd262f62f"
+    }
+  ],
+  "signature": "f9pu56ywffcStIbE5HVPPRchu4o0nXU51+FKBEJVKweZdorCTB2ev7pBJuqRyf6BNkRmhYSa2AHzjz+9yGLHBA=="
+}

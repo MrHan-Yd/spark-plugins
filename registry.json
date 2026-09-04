@@ -90,6 +90,33 @@
           }
         }
       ]
+    },
+    {
+      "id": "com.spark.local-search",
+      "name": "本地搜索",
+      "description": "全盘文件名实时搜索:内存索引即建即搜,空格分词 AND、ext:pdf 扩展名过滤、d: 盘符限定,命中关键字高亮",
+      "author": "Spark",
+      "homepage": "https://github.com/MrHan-Yd/spark-plugins/tree/master/local-search",
+      "icon": "https://raw.githubusercontent.com/MrHan-Yd/spark-plugins/master/local-search/0.1.0/icon.svg",
+      "runtime": "native",
+      "latest": "0.1.0",
+      "permissions": [],
+      "versions": [
+        {
+          "version": "0.1.0",
+          "path": "local-search/0.1.0",
+          "url": null,
+          "sha256": null,
+          "size": null,
+          "released": "2026-09-04",
+          "signature": {
+            "schema": 1,
+            "key_id": "spark-official-v1",
+            "algorithm": "ed25519",
+            "signature": "f9pu56ywffcStIbE5HVPPRchu4o0nXU51+FKBEJVKweZdorCTB2ev7pBJuqRyf6BNkRmhYSa2AHzjz+9yGLHBA=="
+          }
+        }
+      ]
     }
   ]
 }

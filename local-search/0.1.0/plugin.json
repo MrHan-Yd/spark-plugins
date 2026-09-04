@@ -1,0 +1,38 @@
+{
+  "id": "com.spark.local-search",
+  "name": "本地搜索",
+  "version": "0.1.0",
+  "api_version": 2,
+  "runtime": "native",
+  "main": "spark-plugin-local-search.exe",
+  "page": "page.html",
+  "description": "全盘文件名实时搜索:内存索引即建即搜,空格分词 AND、ext:pdf 扩展名过滤、d: 盘符限定,命中关键字高亮",
+  "author": "Spark",
+  "homepage": "https://github.com/MrHan-Yd/spark-plugins/tree/master/local-search",
+  "features": [
+    {
+      "type": "keyword",
+      "keyword": "find",
+      "title": "本地搜索",
+      "subtitle": "全盘文件名秒搜 · 空格分词 · ext:/d: 过滤",
+      "mode": "page",
+      "placeholder": "输入文件名,空格分词…"
+    },
+    {
+      "type": "keyword",
+      "keyword": "本地搜索",
+      "title": "本地搜索",
+      "subtitle": "全盘文件名秒搜 · 空格分词 · ext:/d: 过滤",
+      "mode": "page",
+      "placeholder": "输入文件名,空格分词…"
+    }
+  ],
+  "window": {
+    "width": 960,
+    "height": 640,
+    "minWidth": 560,
+    "minHeight": 400,
+    "resizable": true
+  },
+  "permissions": []
+}
