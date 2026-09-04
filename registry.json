@@ -2,7 +2,7 @@
   "schema": 1,
   "name": "Spark 官方插件仓库",
   "zipball_url": "https://github.com/MrHan-Yd/spark-plugins/archive/refs/heads/master.zip",
-  "updated": "2026-08-31T00:00:00Z",
+  "updated": "2026-09-04T00:00:00Z",
   "plugins": [
     {
       "id": "com.spark.json-formatter",
@@ -58,6 +58,35 @@
             "key_id": "spark-official-v1",
             "algorithm": "ed25519",
             "signature": "bT9CT3EkWhLoM//73cqINgFFyX+m7O2JZKj5u+q4fQzLA8vVQZnXEEk9vh9hZ2ehuM3tLIAyZTh1RKzEGNf5BA=="
+          }
+        }
+      ]
+    },
+    {
+      "id": "com.spark.code-calc",
+      "name": "代码计算器",
+      "description": "像写代码一样计算：变量、循环、模板字符串，顶层表达式的值实时显示在行尾",
+      "author": "Spark",
+      "homepage": "https://github.com/MrHan-Yd/spark-plugins/tree/master/code-calc",
+      "icon": "https://raw.githubusercontent.com/MrHan-Yd/spark-plugins/master/code-calc/0.1.0/icon.svg",
+      "runtime": "webview",
+      "latest": "0.1.0",
+      "permissions": [
+        "clipboard"
+      ],
+      "versions": [
+        {
+          "version": "0.1.0",
+          "path": "code-calc/0.1.0",
+          "url": null,
+          "sha256": null,
+          "size": null,
+          "released": "2026-09-04",
+          "signature": {
+            "schema": 1,
+            "key_id": "spark-official-v1",
+            "algorithm": "ed25519",
+            "signature": "yBbv8v3qEuoqxWZoshLDwV/+SP0EiOGgnKu3GtW2dAze/bvlqrSTZ1A+tV25NOFuF67oGPStkZ7314O1ZyhRDA=="
           }
         }
       ]

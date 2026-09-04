@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "plugin_id": "com.spark.code-calc",
+  "version": "0.1.0",
+  "algorithm": "ed25519",
+  "key_id": "spark-official-v1",
+  "signed_at": "2026-09-04T02:46:28Z",
+  "files": [
+    {
+      "path": "app.js",
+      "sha256": "93d7deb622b6312fa352901b5f407d048eac2ac5fe4b674c6af9b2f52918c65c"
+    },
+    {
+      "path": "engine.js",
+      "sha256": "9219d6348da3bf34e7c1880b6efb4edc1f61d36485aa68cac5f0f86556c1a0ef"
+    },
+    {
+      "path": "icon.svg",
+      "sha256": "e3952ff34890c599262f2f37cfbc13626d48e4ea4a2e3180c8ca29c7346b256d"
+    },
+    {
+      "path": "index.html",
+      "sha256": "b0940cabc88ecf283a828486aa12b607dcbfc59112bd66fe997fc71817031fa4"
+    },
+    {
+      "path": "plugin.json",
+      "sha256": "9f242770611c352565639843ff46dab3bd1a64be47c5d674516dbffb51c98f1d"
+    },
+    {
+      "path": "style.css",
+      "sha256": "d4dd9244a5f47691e9178f55aa8661291536c6a65e5d45f86b6e36924699fdfb"
+    }
+  ],
+  "signature": "yBbv8v3qEuoqxWZoshLDwV/+SP0EiOGgnKu3GtW2dAze/bvlqrSTZ1A+tV25NOFuF67oGPStkZ7314O1ZyhRDA=="
+}

@@ -1,0 +1,37 @@
+{
+  "id": "com.spark.code-calc",
+  "name": "代码计算器",
+  "version": "0.1.0",
+  "api_version": 2,
+  "runtime": "webview",
+  "main": "index.html",
+  "icon": "icon.svg",
+  "author": "Spark",
+  "description": "像写代码一样计算：变量、函数、循环、模板字符串，顶层表达式的值实时显示在行尾",
+  "permissions": ["clipboard"],
+  "features": [
+    {
+      "type": "keyword",
+      "keyword": "calc",
+      "title": "代码计算器",
+      "subtitle": "变量 · 函数 · 循环 · 模板字符串",
+      "mode": "page",
+      "placeholder": "像写代码一样计算…"
+    },
+    {
+      "type": "keyword",
+      "keyword": "代码计算器",
+      "title": "代码计算器",
+      "subtitle": "变量 · 函数 · 循环 · 模板字符串",
+      "mode": "page",
+      "placeholder": "像写代码一样计算…"
+    }
+  ],
+  "window": {
+    "width": 1000,
+    "height": 680,
+    "minWidth": 560,
+    "minHeight": 400,
+    "resizable": true
+  }
+}
