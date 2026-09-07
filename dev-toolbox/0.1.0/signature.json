@@ -1,0 +1,139 @@
+{
+  "schema": 1,
+  "plugin_id": "com.spark.dev-toolbox",
+  "version": "0.1.0",
+  "algorithm": "ed25519",
+  "key_id": "spark-official-v1",
+  "signed_at": "2026-09-07T03:23:45Z",
+  "files": [
+    {
+      "path": "app.js",
+      "sha256": "3979301c18f6501509f738b7a2eb7c913297da04fe4ac84a8ff69213bd3ccde9"
+    },
+    {
+      "path": "icon.svg",
+      "sha256": "c05bb52838e7334841e247955d7718d1bb1340085a42b9a6db05f0836cfb91a1"
+    },
+    {
+      "path": "index.html",
+      "sha256": "c4663ecf4144191e6c4cf30426a41dec5890bcb739558b1e2fc267b2fd597b6b"
+    },
+    {
+      "path": "plugin.json",
+      "sha256": "0b5868c96b9e4dea816699c9bf4d9c6515330e6997dd3e767dd88d19bafc938c"
+    },
+    {
+      "path": "style.css",
+      "sha256": "fa7c5f4be153eea16a50d2e3214104ee85388acdb51b97c40372c297bdd6d28d"
+    },
+    {
+      "path": "ui.js",
+      "sha256": "369fcd0ff97366eab3050fc4ca715e33f10f39a87dbea6b7525ba6177a35c260"
+    },
+    {
+      "path": "tools/tools-code.js",
+      "sha256": "9b68157eb25a3bb7142865f2e397144da5ca0db70ef200cc8b23e84fe1e6d630"
+    },
+    {
+      "path": "tools/tools-codec.js",
+      "sha256": "41137b51134c1cae950c02b058a002ad6654468f75b93c5d0e5d62dec89ac3a0"
+    },
+    {
+      "path": "tools/tools-crypto.js",
+      "sha256": "37d10d24835baeafbb8659fd0f79ced4cd00c2c34548ab320f3d5fdd2ef6d214"
+    },
+    {
+      "path": "tools/tools-gen.js",
+      "sha256": "56f60e41f3f0f7ddb58303a6f6d16ac1f341f0c5e26ecb6fb1956c418114e6ed"
+    },
+    {
+      "path": "tools/tools-net.js",
+      "sha256": "85460184d494246fff554a640570600436a97a1227f909cf82e79e739313300e"
+    },
+    {
+      "path": "tools/tools-text.js",
+      "sha256": "8f4af8736ae211e5cedc5ab363ccbbf9e80752cc8b4f48dbca82bf1b3821e190"
+    },
+    {
+      "path": "tools/tools-time.js",
+      "sha256": "d3579cc08bfb0c88f9f03671a212fd6f330632f794cc25129802b1e87acfc6ad"
+    },
+    {
+      "path": "engine/cipher.js",
+      "sha256": "a46cea54d0afdec22e29ca87cbd07596b98ac2e446a87a10d5615b2882c494d6"
+    },
+    {
+      "path": "engine/codec.js",
+      "sha256": "314a5f97578c7cbdbd31499dd337b29562bfadfba2c104a5e8348ba542d87dee"
+    },
+    {
+      "path": "engine/crypto.js",
+      "sha256": "c638675e2573faa13141d49bbdb0b8a7acb92fc67906e7903d9953aeda1a25d9"
+    },
+    {
+      "path": "engine/datetime.js",
+      "sha256": "fb7f0c520ede48abbbbad60e90eda192fd287d376a9fdb867ff51c4117084f04"
+    },
+    {
+      "path": "engine/format.js",
+      "sha256": "33aff94ef3951f60b8058454481ed700282d93a73fba612086637777e27a1c8c"
+    },
+    {
+      "path": "engine/netcalc.js",
+      "sha256": "d786af76723f645e39a5e4890d70575f306971d41960de9fe488799d95932558"
+    },
+    {
+      "path": "engine/serial.js",
+      "sha256": "dd4eb15afb636cd6597766538951bc89fc3c3fc58ba451de849a7a19af5a6633"
+    },
+    {
+      "path": "engine/textkit.js",
+      "sha256": "a8505ef6da6256d1334eae924baf4be63cd248b319ac2a066143272e1e982a1f"
+    },
+    {
+      "path": "engine/units.js",
+      "sha256": "7dfbfee663e3fd0c8ce38b8369b3da837b900a97dbe5d52c6bbc95996370d339"
+    },
+    {
+      "path": "assets/vendor/bcrypt.js",
+      "sha256": "afd4bd299bcde6710dd6fa029156e3e1174c48bc006b8a9eba32f964e5923783"
+    },
+    {
+      "path": "assets/vendor/jsbarcode.js",
+      "sha256": "52e032534c3f98976ad95cb8c20baf80ed0cc83d42590602a8cf1db16e2e22ed"
+    },
+    {
+      "path": "assets/vendor/jsqr.js",
+      "sha256": "bc40c8a15196236b2314db0856f72ca0b49980cd5413b8c852a7349f5fee0859"
+    },
+    {
+      "path": "assets/vendor/jsyaml.js",
+      "sha256": "45dc3dd03dc07a06705a2c2989b8c7f709013f04bd5386e3279d4e447f07ebd7"
+    },
+    {
+      "path": "assets/vendor/pinyin-dict.js",
+      "sha256": "c6d7b8fdc50ecb4753cabafe81aebba1a4b900872c3f47bff5f56cc38c3a2f6f"
+    },
+    {
+      "path": "assets/vendor/qrcode.js",
+      "sha256": "2a8983e97e1c128d7f82dc6da94f4cd9b57fa60979d5f5ac6c7becfd05500b26"
+    },
+    {
+      "path": "assets/vendor/s2t.js",
+      "sha256": "dd2f6cb1f5976aa5bd3f5229a70c9a028e98cd00ab29741e2e42e3f401f8369c"
+    },
+    {
+      "path": "assets/vendor/sm-crypto.js",
+      "sha256": "455b27ef96b7d3dd3f8ad66cf9d2aed1e3c3d017cd030f3d0d6bb8859aa7758c"
+    },
+    {
+      "path": "assets/vendor/t2s.js",
+      "sha256": "d45a258bcc04ffe1b01b2a5e545e67e62f2f677147ec2b1e8ff13bceb95b7494"
+    },
+    {
+      "path": "assets/vendor/VENDORS.md",
+      "sha256": "79e22ba765fb35e05c66a177ba932f65bf3d2ede7edc7090f9a7405129cbdf0f"
+    }
+  ],
+  "signature": "jhpoU1PaO7GBaRied23+7Kwh6/m0FpFU/mh5Zu3rWiUZB4+mqHjtROOrUEcbnMLosUc34aOWz0eWKz1n+hOUAw=="
+}

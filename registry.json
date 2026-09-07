@@ -2,7 +2,7 @@
   "schema": 1,
   "name": "Spark 官方插件仓库",
   "zipball_url": "https://github.com/MrHan-Yd/spark-plugins/archive/refs/heads/master.zip",
-  "updated": "2026-09-04T00:00:00Z",
+  "updated": "2026-09-07T00:00:00Z",
   "plugins": [
     {
       "id": "com.spark.json-formatter",
@@ -114,6 +114,35 @@
             "key_id": "spark-official-v1",
             "algorithm": "ed25519",
             "signature": "f9pu56ywffcStIbE5HVPPRchu4o0nXU51+FKBEJVKweZdorCTB2ev7pBJuqRyf6BNkRmhYSa2AHzjz+9yGLHBA=="
+          }
+        }
+      ]
+    },
+    {
+      "id": "com.spark.dev-toolbox",
+      "name": "开发工具箱",
+      "description": "47 个离线开发工具：哈希/HMAC/AES/DES/SM2/SM4/Bcrypt、Base64/URL/Unicode/进制/JWT、文本统计替换拼音简繁、时间戳/Cron、JS/CSS/HTML/SQL/YAML/XML 格式化互转、IP 子网、UUID/ULID/二维码/条形码、单位换算",
+      "author": "Spark",
+      "homepage": "https://github.com/MrHan-Yd/spark-plugins/tree/master/dev-toolbox",
+      "icon": "https://raw.githubusercontent.com/MrHan-Yd/spark-plugins/master/dev-toolbox/0.1.0/icon.svg",
+      "runtime": "webview",
+      "latest": "0.1.0",
+      "permissions": [
+        "clipboard"
+      ],
+      "versions": [
+        {
+          "version": "0.1.0",
+          "path": "dev-toolbox/0.1.0",
+          "url": null,
+          "sha256": null,
+          "size": null,
+          "released": "2026-09-07",
+          "signature": {
+            "schema": 1,
+            "key_id": "spark-official-v1",
+            "algorithm": "ed25519",
+            "signature": "jhpoU1PaO7GBaRied23+7Kwh6/m0FpFU/mh5Zu3rWiUZB4+mqHjtROOrUEcbnMLosUc34aOWz0eWKz1n+hOUAw=="
           }
         }
       ]

@@ -1,0 +1,45 @@
+{
+  "id": "com.spark.dev-toolbox",
+  "name": "开发工具箱",
+  "version": "0.1.0",
+  "api_version": 2,
+  "runtime": "webview",
+  "main": "index.html",
+  "icon": "icon.svg",
+  "author": "Spark",
+  "description": "开发常用工具合集：哈希/加密解密/Base64/URL/Unicode/进制/时间戳/二维码/单位换算等 47 项，全部离线可用",
+  "permissions": ["clipboard"],
+  "features": [
+    {
+      "type": "keyword",
+      "keyword": "tool",
+      "title": "开发工具箱",
+      "subtitle": "哈希 · 加解密 · 编码转换 · 时间戳 · 二维码 · 单位换算",
+      "mode": "page",
+      "placeholder": "输入工具名直接定位，如 base64 / 时间戳"
+    },
+    {
+      "type": "keyword",
+      "keyword": "开发工具箱",
+      "title": "开发工具箱",
+      "subtitle": "哈希 · 加解密 · 编码转换 · 时间戳 · 二维码 · 单位换算",
+      "mode": "page",
+      "placeholder": "输入工具名直接定位，如 base64 / 时间戳"
+    },
+    {
+      "type": "keyword",
+      "keyword": "dev",
+      "title": "开发工具箱",
+      "subtitle": "开发常用工具合集",
+      "mode": "page",
+      "placeholder": "输入工具名直接定位，如 base64 / 时间戳"
+    }
+  ],
+  "window": {
+    "width": 1120,
+    "height": 720,
+    "minWidth": 760,
+    "minHeight": 480,
+    "resizable": true
+  }
+}

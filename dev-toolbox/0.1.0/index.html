@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>开发工具箱</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="3" y="3" width="18" height="18" rx="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/>
+        <path d="M7.6 9.4 5.2 12l2.4 2.6M16.4 9.4 18.8 12l-2.4 2.6M13.2 8.2l-2.4 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="brand-t"><b>开发工具箱</b><span>离线 · 常用工具集</span></div>
+    </div>
+    <div class="search">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="navsearch" class="navsearch" placeholder="搜索工具…" spellcheck="false" autocomplete="off">
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="side-foot">
+      <button id="btnDev" class="sbtn" title="打开 DevTools" style="display:none">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 8-4 4 4 4M16 8l4 4-4 4M13 5l-2 14"/></svg>DevTools
+      </button>
+      <button id="btnTheme" class="sbtn" title="切换明暗主题">
+        <svg class="i-moon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20 14.5A8.8 8.8 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
+        <svg class="i-sun" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="crumbbar"><span class="crumb-root">工具箱</span><span class="crumb-sep">/</span><span class="crumb" id="crumb"></span></header>
+    <div class="main-scroll" id="main"></div>
+  </main>
+</div>
+<div id="toast" class="toast" role="status"></div>
+
+<script src="assets/vendor/bcrypt.js"></script>
+<script src="assets/vendor/jsqr.js"></script>
+<script src="assets/vendor/sm-crypto.js"></script>
+<script src="assets/vendor/qrcode.js"></script>
+<script src="assets/vendor/jsbarcode.js"></script>
+<script src="assets/vendor/jsyaml.js"></script>
+<script src="assets/vendor/pinyin-dict.js"></script>
+<script src="assets/vendor/s2t.js"></script>
+<script src="assets/vendor/t2s.js"></script>
+<script src="engine/codec.js"></script>
+<script src="engine/crypto.js"></script>
+<script src="engine/cipher.js"></script>
+<script src="engine/textkit.js"></script>
+<script src="engine/format.js"></script>
+<script src="engine/serial.js"></script>
+<script src="engine/datetime.js"></script>
+<script src="engine/netcalc.js"></script>
+<script src="engine/units.js"></script>
+<script src="ui.js"></script>
+<script src="app.js"></script>
+<script src="tools/tools-codec.js"></script>
+<script src="tools/tools-crypto.js"></script>
+<script src="tools/tools-text.js"></script>
+<script src="tools/tools-time.js"></script>
+<script src="tools/tools-code.js"></script>
+<script src="tools/tools-net.js"></script>
+<script src="tools/tools-gen.js"></script>
+</body>
+</html>
