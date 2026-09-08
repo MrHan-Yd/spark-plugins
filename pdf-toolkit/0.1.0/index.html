@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDF 工具箱</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- ══════════ 侧栏 ══════════ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9.5 13h5M9.5 16.5h3.5"/></svg>
+      </div>
+      <div class="brand-text">
+        <div class="brand-name">PDF 工具箱</div>
+        <div class="brand-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.6-3 8.4-7 10-4-1.6-7-5.4-7-10V6z"/><path d="M9.2 12.2l2 2 3.6-4"/></svg>
+          100% 离线处理
+        </div>
+      </div>
+    </div>
+
+    <nav class="nav" id="nav">
+      <div class="nav-group">文档处理</div>
+      <button class="nav-item active" data-tool="compress" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v6M8 9l-3-3M8 9l3-3M16 21v-6M16 15l-3 3M16 15l3 3M3 12h18" transform="translate(0,0)"/><path d="M4 4l4 4M20 4l-4 4M4 20l4-4M20 20l-4-4"/></svg>
+        <span>PDF 压缩</span>
+      </button>
+      <button class="nav-item" data-tool="merge" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/><path d="M17 7h4M17 7l-2-2M17 7l-2 2" transform="translate(-4,0)"/><path d="M7 17v0"/><path d="M11 17h6M17 17l-2-2M17 17l-2 2" transform="translate(0,0)"/></svg>
+        <span>PDF 合并</span>
+      </button>
+      <button class="nav-item" data-tool="split" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h8M3 12h6M3 19h8"/><path d="M21 5h-6M21 12h-8M21 19h-6"/><path d="M12 3v18" stroke-dasharray="2 3"/></svg>
+        <span>PDF 拆分</span>
+      </button>
+      <button class="nav-item" data-tool="watermark" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5v.5l-9 4-9-4V8z"/><path d="M3 12.5l9 4 9-4"/><path d="M3 16.5l9 4 9-4"/></svg>
+        <span>PDF 水印</span>
+      </button>
+
+      <div class="nav-group">导出与提取</div>
+      <button class="nav-item" data-tool="extract" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="13" height="11" rx="1.5"/><path d="M3 13l3.5-3.5 3 3 3-3L16 12"/><circle cx="7.2" cy="8.4" r="1.3"/><path d="M19 9v9M19 18l-2.5-2.5M19 18l2.5-2.5"/></svg>
+        <span>提取图片</span>
+      </button>
+      <button class="nav-item" data-tool="to-image" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 14l4-4 4.5 4.5 3-3L20 15"/><circle cx="8.5" cy="8.5" r="1.4"/><path d="M8 21h8"/></svg>
+        <span>PDF 转图片</span>
+      </button>
+
+      <div class="nav-group">格式转换</div>
+      <button class="nav-item" data-tool="to-word" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M8.5 12h7M8.5 15.5h7M8.5 12l1.2 5h.8l1-3.4 1 3.4h.8l1.2-5"/></svg>
+        <span>转 Word</span>
+      </button>
+      <button class="nav-item" data-tool="to-ppt" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1.8"/><path d="M12 16v4M8.5 20h7M7.5 8h6M7.5 11h4"/></svg>
+        <span>转 PPT</span>
+      </button>
+      <button class="nav-item" data-tool="to-excel" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="1.8"/><path d="M3 9.5h18M3 14.5h18M9.5 4v16M15.5 9.5V20"/></svg>
+        <span>转 Excel</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="foot-line">所有文件仅在本机内存中处理</div>
+      <div class="foot-line dim">不联网 · 不上传 · 零痕迹</div>
+    </div>
+  </aside>
+
+  <!-- ══════════ 主区 ══════════ -->
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-text">
+        <h1 class="tool-title" id="tool-title">PDF 压缩</h1>
+        <p class="tool-desc" id="tool-desc">降低 PDF 文件体积，图片智能重压，质量与体积兼顾</p>
+      </div>
+    </header>
+
+    <!-- ── 压缩 ── -->
+    <section class="tool-page active" id="page-compress" data-title="PDF 压缩" data-desc="降低 PDF 文件体积，图片智能重压，质量与体积兼顾">
+      <div class="dropzone" id="dz-compress" tabindex="0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M12 4l-4 4M12 4l4 4"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+        <div class="dz-text">拖放 PDF 文件到此处，或 <em>点击选择</em></div>
+        <div class="dz-hint">支持多文件批量压缩</div>
+        <input type="file" id="file-compress" accept=".pdf,application/pdf" multiple hidden>
+      </div>
+      <div class="file-list" id="files-compress"></div>
+      <div class="opts">
+        <label class="opt-label">压缩强度</label>
+        <div class="seg" id="comp-level">
+          <button class="seg-btn" data-v="light" type="button">轻度</button>
+          <button class="seg-btn active" data-v="standard" type="button">标准</button>
+          <button class="seg-btn" data-v="strong" type="button">强力</button>
+        </div>
+        <label class="check"><input type="checkbox" id="comp-meta" checked><span>删除文档元数据（作者、生成工具、时间等）</span></label>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="run-compress" type="button">开始压缩</button>
+        <div class="progress" id="prog-compress" hidden><div class="bar"><i></i></div><span class="prog-text"></span></div>
+      </div>
+      <div class="result" id="result-compress" hidden></div>
+    </section>
+
+    <!-- ── 合并 ── -->
+    <section class="tool-page" id="page-merge" data-title="PDF 合并" data-desc="多个 PDF 与图片合并为一个文档，可视化调整顺序、旋转、复制、删除页面">
+      <div class="dropzone" id="dz-merge" tabindex="0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M12 4l-4 4M12 4l4 4"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+        <div class="dz-text">拖放 PDF / 图片（JPG、PNG）到此处，或 <em>点击选择</em></div>
+        <div class="dz-hint">图片将按原始比例自动转为 PDF 页面</div>
+        <input type="file" id="file-merge" accept=".pdf,application/pdf,image/jpeg,image/png" multiple hidden>
+      </div>
+      <div class="merge-toolbar" id="merge-toolbar" hidden>
+        <button class="btn ghost sm" id="merge-rot-all" type="button">全部右转</button>
+        <button class="btn ghost sm" id="merge-clear" type="button">清空</button>
+        <span class="merge-count" id="merge-count"></span>
+      </div>
+      <div class="merge-board" id="merge-board"></div>
+      <div class="actions">
+        <button class="btn primary" id="run-merge" type="button" disabled>合并为一个 PDF</button>
+        <div class="progress" id="prog-merge" hidden><div class="bar"><i></i></div><span class="prog-text"></span></div>
+      </div>
+      <div class="result" id="result-merge" hidden></div>
+    </section>
+
+    <!-- ── 拆分 ── -->
+    <section class="tool-page" id="page-split" data-title="PDF 拆分" data-desc="按页面把 PDF 拆成多个独立文档，支持自动等分与自定义范围">
+      <div class="dropzone" id="dz-split" tabindex="0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M12 4l-4 4M12 4l4 4"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+        <div class="dz-text">拖放 PDF 文件到此处，或 <em>点击选择</em></div>
+        <div class="dz-hint">支持多文件批量拆分</div>
+        <input type="file" id="file-split" accept=".pdf,application/pdf" multiple hidden>
+      </div>
+      <div class="file-list" id="files-split"></div>
+      <div class="opts">
+        <label class="opt-label">拆分方式</label>
+        <div class="seg" id="split-mode">
+          <button class="seg-btn active" data-v="each" type="button">每页一档</button>
+          <button class="seg-btn" data-v="every" type="button">每 N 页一档</button>
+          <button class="seg-btn" data-v="range" type="button">自定义范围</button>
+        </div>
+        <div class="opt-row" id="split-every-row" hidden>
+          <span class="opt-inline">每</span>
+          <input type="number" id="split-every" min="1" max="9999" value="2" class="input num">
+          <span class="opt-inline">页拆为一个文件</span>
+        </div>
+        <div class="opt-row" id="split-range-row" hidden>
+          <input type="text" id="split-range" class="input grow" placeholder="如 1-3, 5, 8-10（每组范围一个文件）">
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="run-split" type="button">开始拆分</button>
+        <div class="progress" id="prog-split" hidden><div class="bar"><i></i></div><span class="prog-text"></span></div>
+      </div>
+      <div class="result" id="result-split" hidden></div>
+    </section>
+
+    <!-- ── 水印 ── -->
+    <section class="tool-page" id="page-watermark" data-title="PDF 水印" data-desc="为 PDF 添加文字水印，可调位置、透明度与旋转角度，支持批量">
+      <div class="dropzone" id="dz-wm" tabindex="0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M12 4l-4 4M12 4l4 4"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+        <div class="dz-text">拖放 PDF 文件到此处，或 <em>点击选择</em></div>
+        <div class="dz-hint">支持多文件批量添加水印</div>
+        <input type="file" id="file-wm" accept=".pdf,application/pdf" multiple hidden>
+      </div>
+      <div class="file-list" id="files-wm"></div>
+      <div class="wm-layout">
+        <div class="opts wm-opts">
+          <div class="opt-field">
+            <label class="opt-label" for="wm-text">水印文字</label>
+            <input type="text" id="wm-text" class="input" value="内部资料" placeholder="输入水印文字">
+          </div>
+          <div class="opt-grid">
+            <div class="opt-field"><label class="opt-label" for="wm-size">字号 <b id="wm-size-v">48</b></label><input type="range" id="wm-size" min="12" max="160" value="48"></div>
+            <div class="opt-field"><label class="opt-label" for="wm-opacity">不透明度 <b id="wm-opacity-v">25%</b></label><input type="range" id="wm-opacity" min="5" max="100" value="25"></div>
+            <div class="opt-field"><label class="opt-label" for="wm-rot">旋转角度 <b id="wm-rot-v">-30°</b></label><input type="range" id="wm-rot" min="-90" max="90" value="-30"></div>
+            <div class="opt-field"><label class="opt-label" for="wm-color">颜色</label><input type="color" id="wm-color" value="#808080"></div>
+          </div>
+          <div class="opt-field">
+            <label class="opt-label">位置</label>
+            <div class="pos-grid" id="wm-pos">
+              <button class="pos" data-v="tl" type="button" title="左上"></button>
+              <button class="pos" data-v="tc" type="button" title="顶部居中"></button>
+              <button class="pos" data-v="tr" type="button" title="右上"></button>
+              <button class="pos" data-v="ml" type="button" title="左侧居中"></button>
+              <button class="pos active" data-v="c" type="button" title="居中"></button>
+              <button class="pos" data-v="mr" type="button" title="右侧居中"></button>
+              <button class="pos" data-v="bl" type="button" title="左下"></button>
+              <button class="pos" data-v="bc" type="button" title="底部居中"></button>
+              <button class="pos" data-v="br" type="button" title="右下"></button>
+            </div>
+          </div>
+          <label class="check"><input type="checkbox" id="wm-tile"><span>平铺整页（忽略位置与旋转，以斜排密铺）</span></label>
+        </div>
+        <div class="wm-preview-wrap">
+          <div class="opt-label">预览（第一页）</div>
+          <div class="wm-preview" id="wm-preview"><div class="preview-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 15l4-4 4 4 3-3 4 4"/><circle cx="9" cy="9" r="1.3"/></svg>
+            <span>添加文件后显示预览</span></div>
+            <img id="wm-preview-img" alt="" hidden>
+          </div>
+          <button class="btn ghost sm" id="wm-refresh" type="button" hidden>刷新预览</button>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="run-wm" type="button">添加水印</button>
+        <div class="progress" id="prog-wm" hidden><div class="bar"><i></i></div><span class="prog-text"></span></div>
+      </div>
+      <div class="result" id="result-wm" hidden></div>
+    </section>
+
+    <!-- ── 提取图片 ── -->
+    <section class="tool-page" id="page-extract" data-title="提取图片" data-desc="批量提取 PDF 内嵌图片，JPEG 原样保留原始质量，支持打包下载">
+      <div class="dropzone" id="dz-extract" tabindex="0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M12 4l-4 4M12 4l4 4"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+        <div class="dz-text">拖放 PDF 文件到此处，或 <em>点击选择</em></div>
+        <div class="dz-hint">JPEG 图片按原始数据提取，不重压缩</div>
+        <input type="file" id="file-extract" accept=".pdf,application/pdf" multiple hidden>
+      </div>
+      <div class="file-list" id="files-extract"></div>
+      <div class="actions">
+        <button class="btn primary" id="run-extract" type="button">提取图片</button>
+        <div class="progress" id="prog-extract" hidden><div class="bar"><i></i></div><span class="prog-text"></span></div>
+      </div>
+      <div class="result" id="result-extract" hidden></div>
+    </section>
+
+    <!-- ── 转图片 ── -->
+    <section class="tool-page" id="page-to-image" data-title="PDF 转图片" data-desc="将每一页渲染为高清图片，支持 PNG / JPEG 与多档分辨率，批量打包">
+      <div class="dropzone" id="dz-toimg" tabindex="0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M12 4l-4 4M12 4l4 4"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+        <div class="dz-text">拖放 PDF 文件到此处，或 <em>点击选择</em></div>
+        <div class="dz-hint">逐页渲染，多页自动打包 ZIP</div>
+        <input type="file" id="file-toimg" accept=".pdf,application/pdf" multiple hidden>
+      </div>
+      <div class="file-list" id="files-toimg"></div>
+      <div class="opts">
+        <div class="opt-grid">
+          <div class="opt-field">
+            <label class="opt-label">图片格式</label>
+            <div class="seg" id="toimg-fmt">
+              <button class="seg-btn active" data-v="png" type="button">PNG 无损</button>
+              <button class="seg-btn" data-v="jpeg" type="button">JPEG 高质量</button>
+            </div>
+          </div>
+          <div class="opt-field">
+            <label class="opt-label">分辨率</label>
+            <div class="seg" id="toimg-dpi">
+              <button class="seg-btn" data-v="1" type="button">96</button>
+              <button class="seg-btn active" data-v="1.5" type="button">144</button>
+              <button class="seg-btn" data-v="2" type="button">192</button>
+              <button class="seg-btn" data-v="3" type="button">288</button>
+            </div>
+          </div>
+          <div class="opt-field">
+            <label class="opt-label" for="toimg-pages">页码范围（留空 = 全部）</label>
+            <input type="text" id="toimg-pages" class="input" placeholder="如 1-5, 8, 11-">
+          </div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="run-toimg" type="button">转换为图片</button>
+        <div class="progress" id="prog-toimg" hidden><div class="bar"><i></i></div><span class="prog-text"></span></div>
+      </div>
+      <div class="result" id="result-toimg" hidden></div>
+    </section>
+
+    <!-- ── 转 Word ── -->
+    <section class="tool-page" id="page-to-word" data-title="PDF 转 Word" data-desc="提取文本与段落结构，生成可编辑的 docx 文档">
+      <div class="dropzone" id="dz-toword" tabindex="0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M12 4l-4 4M12 4l4 4"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+        <div class="dz-text">拖放 PDF 文件到此处，或 <em>点击选择</em></div>
+        <div class="dz-hint">适用于文本型 PDF；扫描件无文字层，请先用 OCR 工具</div>
+        <input type="file" id="file-toword" accept=".pdf,application/pdf" multiple hidden>
+      </div>
+      <div class="file-list" id="files-toword"></div>
+      <div class="actions">
+        <button class="btn primary" id="run-toword" type="button">转换为 Word</button>
+        <div class="progress" id="prog-toword" hidden><div class="bar"><i></i></div><span class="prog-text"></span></div>
+      </div>
+      <div class="result" id="result-toword" hidden></div>
+    </section>
+
+    <!-- ── 转 PPT ── -->
+    <section class="tool-page" id="page-to-ppt" data-title="PDF 转 PPT" data-desc="每页渲染为高清画面并生成演示文稿，完整保留页面布局">
+      <div class="dropzone" id="dz-toppt" tabindex="0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M12 4l-4 4M12 4l4 4"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+        <div class="dz-text">拖放 PDF 文件到此处，或 <em>点击选择</em></div>
+        <div class="dz-hint">每页一帧画面，版式 1:1 还原</div>
+        <input type="file" id="file-toppt" accept=".pdf,application/pdf" multiple hidden>
+      </div>
+      <div class="file-list" id="files-toppt"></div>
+      <div class="opts">
+        <div class="opt-grid">
+          <div class="opt-field">
+            <label class="opt-label">幻灯片比例</label>
+            <div class="seg" id="toppt-size">
+              <button class="seg-btn active" data-v="16x9" type="button">16:9</button>
+              <button class="seg-btn" data-v="4x3" type="button">4:3</button>
+            </div>
+          </div>
+          <div class="opt-field">
+            <label class="opt-label">渲染质量</label>
+            <div class="seg" id="toppt-quality">
+              <button class="seg-btn" data-v="1.5" type="button">标准</button>
+              <button class="seg-btn active" data-v="2" type="button">高清</button>
+              <button class="seg-btn" data-v="3" type="button">超清</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="run-toppt" type="button">转换为 PPT</button>
+        <div class="progress" id="prog-toppt" hidden><div class="bar"><i></i></div><span class="prog-text"></span></div>
+      </div>
+      <div class="result" id="result-toppt" hidden></div>
+    </section>
+
+    <!-- ── 转 Excel ── -->
+    <section class="tool-page" id="page-to-excel" data-title="PDF 转 Excel" data-desc="按坐标聚类还原行列结构，生成 xlsx 表格，每页可独立成表">
+      <div class="dropzone" id="dz-toxls" tabindex="0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M12 4l-4 4M12 4l4 4"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+        <div class="dz-text">拖放 PDF 文件到此处，或 <em>点击选择</em></div>
+        <div class="dz-hint">适用于文本型表格 PDF；复杂表格建议人工核对</div>
+        <input type="file" id="file-toxls" accept=".pdf,application/pdf" multiple hidden>
+      </div>
+      <div class="file-list" id="files-toxls"></div>
+      <div class="opts">
+        <label class="check"><input type="checkbox" id="toxls-persheet" checked><span>每页独立工作表（否则全部追加到同一表）</span></label>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="run-toxls" type="button">转换为 Excel</button>
+        <div class="progress" id="prog-toxls" hidden><div class="bar"><i></i></div><span class="prog-text"></span></div>
+      </div>
+      <div class="result" id="result-toxls" hidden></div>
+    </section>
+
+    <footer class="statusbar" id="statusbar" hidden><span id="statusbar-text"></span></footer>
+  </main>
+</div>
+
+<script src="assets/vendor/pdf.min.js"></script>
+<script src="assets/vendor/pdf-lib.min.js"></script>
+<script src="assets/vendor/jszip.min.js"></script>
+<script src="assets/vendor/xlsx.full.min.js"></script>
+<script src="assets/vendor/pptxgen.bundle.js"></script>
+<script src="assets/vendor/docx.umd.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/convert.js"></script>
+<script src="js/app.js"></script>
+<script src="js/tools.js"></script>
+<script src="js/merge.js"></script>
+</body>
+</html>

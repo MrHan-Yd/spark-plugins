@@ -146,6 +146,35 @@
           }
         }
       ]
+    },
+    {
+      "id": "com.spark.pdf-toolkit",
+      "name": "PDF工具箱",
+      "description": "离线 PDF 工具集：压缩、合并（可视化页面管理）、拆分、水印、提取图片、PDF 转图片，以及 PDF 转 Word/PPT/Excel，全程本地处理、文件不出电脑",
+      "author": "Spark",
+      "homepage": "https://github.com/MrHan-Yd/spark-plugins/tree/master/pdf-toolkit",
+      "icon": "https://raw.githubusercontent.com/MrHan-Yd/spark-plugins/master/pdf-toolkit/0.1.0/icon.svg",
+      "runtime": "webview",
+      "latest": "0.1.0",
+      "permissions": [
+        "notify"
+      ],
+      "versions": [
+        {
+          "version": "0.1.0",
+          "path": "pdf-toolkit/0.1.0",
+          "url": null,
+          "sha256": null,
+          "size": null,
+          "released": "2026-09-07",
+          "signature": {
+            "schema": 1,
+            "key_id": "spark-official-v1",
+            "algorithm": "ed25519",
+            "signature": "Xla496fLHuZU/0lS+XWf6nSCX0EAFgYY0QLBOcjs7Mzc12KtK2u6cjbw3WjRLN1tQK0TTzJ7mHljQqeB3/fFAw=="
+          }
+        }
+      ]
     }
   ]
 }

@@ -1,0 +1,45 @@
+{
+  "id": "com.spark.pdf-toolkit",
+  "name": "PDF工具箱",
+  "version": "0.1.0",
+  "api_version": 2,
+  "runtime": "webview",
+  "main": "index.html",
+  "icon": "icon.svg",
+  "author": "Spark",
+  "description": "离线 PDF 工具集：压缩、合并（可视化页面管理）、拆分、水印、提取图片、PDF 转图片，以及 PDF 转 Word/PPT/Excel，全程本地处理、文件不出电脑",
+  "permissions": ["notify"],
+  "features": [
+    {
+      "type": "keyword",
+      "keyword": "pdf",
+      "title": "PDF工具箱",
+      "subtitle": "压缩 · 合并 · 拆分 · 水印 · 提取图片 · 转图片 · 转 Word/PPT/Excel",
+      "mode": "page",
+      "placeholder": "拖入或选择 PDF 文件开始处理"
+    },
+    {
+      "type": "keyword",
+      "keyword": "PDF工具箱",
+      "title": "PDF工具箱",
+      "subtitle": "压缩 · 合并 · 拆分 · 水印 · 提取图片 · 转图片 · 转 Word/PPT/Excel",
+      "mode": "page",
+      "placeholder": "拖入或选择 PDF 文件开始处理"
+    },
+    {
+      "type": "keyword",
+      "keyword": "PDF处理",
+      "title": "PDF工具箱",
+      "subtitle": "离线 PDF 压缩合并拆分水印与格式转换",
+      "mode": "page",
+      "placeholder": "拖入或选择 PDF 文件开始处理"
+    }
+  ],
+  "window": {
+    "width": 1120,
+    "height": 720,
+    "minWidth": 860,
+    "minHeight": 560,
+    "resizable": true
+  }
+}

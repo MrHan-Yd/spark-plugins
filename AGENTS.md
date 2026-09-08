@@ -34,7 +34,8 @@
    <link rel="stylesheet" href="style.css">
    <script src="app.js"></script>
    ```
-3. 文件命名与上表一致,不发明新名字;不放进子目录。
+3. 文件命名与上表一致,不发明新名字;不放进子目录(例外:`pdf-toolkit` 的 JS 已由 owner
+   归档到 `js/` 子目录,见下方正例)。
 4. 迁移后自检:JS 过 `node --check <file>.js`;CSS/JS 行数用 `wc -l` 复核。
 5. JS 超过 ~600 行且职责可分时继续按职责拆分(先例:code-calc 的 `app.js` + `engine.js`)。
 
@@ -42,6 +43,9 @@
 
 - ✅ `code-calc/0.1.0/`:index.html 87 行 + style.css 196 行 + app.js 666 行 + engine.js 1210 行
 - ✅ `local-search/0.1.0/`:page.html 93 行 + page.css 156 行 + page.js 311 行
+- ✅ `pdf-toolkit/0.1.0/`:index.html 359 行 + style.css 403 行 + js/(app.js 575 + tools.js 591
+  + merge.js 410 + engine.js 938 + convert.js 554;JS 已归档 `js/` 子目录——owner 2026-09-08 决定,
+  本插件例外于"不放进子目录",页面引用 `js/*.js`)(外壳/工具/合并编辑器/引擎/转换五层拆分)
 - ❌ `compare/0.1.0/index.html`(2801 行)、`json-formatter/0.1.0/index.html`(1163 行):
   历史单文件巨石,**不要求立刻重写**;但 agent 一旦要改它们,先按阈值判断是否顺手提取。
 
