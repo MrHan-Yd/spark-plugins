@@ -19,6 +19,8 @@ var DTime = (function () {
     if (m) {
       var d = new Date(+m[1], +m[2] - 1, +m[3], +(m[5] || 0), +(m[6] || 0), Math.floor(+(m[7] || 0)), m[7] ? Math.round((parseFloat(m[7]) % 1) * 1000) : 0);
       if (isNaN(d.getTime())) return null;
+      // 越界月/日（如 2 月 30 日）会被 Date 静默进位到下月——回读比对，不一致视为无法解析
+      if (d.getFullYear() !== +m[1] || d.getMonth() !== +m[2] - 1 || d.getDate() !== +m[3]) return null;
       return d;
     }
     var d2 = new Date(s);
@@ -104,7 +106,7 @@ var DTime = (function () {
   var DOW_NAMES = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
   function parseCron(expr) {
     var fields = String(expr == null ? '' : expr).trim().split(/\s+/);
-    if (fields.length < 5 || fields.length > 7) {
+    if (fields.length < 5 || fields.length > 6) {
       return { ok: false, error: '字段数应为 5 个（分 时 日 月 周）或 6 个（秒 分 时 日 月 周），当前 ' + fields.length + ' 个' };
     }
     var sec = null;
@@ -144,7 +146,7 @@ var DTime = (function () {
     if (!f || !f.length) throw new Error('字段为空');
     var parts = f.split(',');
     var set = new Set();
-    var wildcard = false;
+    var wildcard = true; // 仅当整个字段都是裸 */? 时为真；*/n 与显式值都算实际约束
     for (var p of parts) {
       var step = 1, range = p;
       if (p.includes('/')) {
@@ -156,6 +158,7 @@ var DTime = (function () {
       }
       var lo = min, hi = max;
       if (range !== '*' && range !== '?') {
+        wildcard = false;
         if (p.includes('/')) {
           lo = normField(range, names);
           if (lo === null || isNaN(lo)) throw new Error('起点「' + range + '」无法识别');
@@ -174,16 +177,16 @@ var DTime = (function () {
           if (lo === null || isNaN(lo) || hi === null || isNaN(hi)) throw new Error('区间「' + range + '」无法识别');
           if (lo < min || hi > max || lo > hi) throw new Error('区间 ' + lo + '-' + hi + ' 不合法（范围 [' + min + ', ' + max + ']）');
         }
-      } else wildcard = true;
+      } else if (p.includes('/')) wildcard = false;
       for (var v = lo; v <= hi; v += step) set.add(v);
       if (range === '*' && !p.includes('/')) for (var w = min; w <= max; w++) set.add(w);
     }
     if (!set.size) throw new Error('没有匹配到任何值');
-    return { values: set, wildcard: wildcard && !p.includes('/') };
+    return { values: set, wildcard: wildcard };
   }
   function parseCronDow(f, label) {
     try {
-      var r = parseCronFieldCore(f, 0, 6, DOW_NAMES);
+      var r = parseCronFieldCore(f, 0, 7, DOW_NAMES); // vixie cron 允许 7≡0
       var vals = new Set();
       for (var v of r.values) vals.add(v % 7);
       r.values = vals;
@@ -200,11 +203,14 @@ var DTime = (function () {
     t.setSeconds(p.hasSeconds ? 0 : 0, 0);
     if (!p.hasSeconds) t.setMinutes(t.getMinutes() + 1, 0);
     else t.setSeconds(t.getSeconds() + 1);
-    var limit = 366 * 24 * 3600; // 最多回溯一年
+    var y0 = t.getFullYear();
+    var limit = 366 * 24 * 3600; // 最多步进一年
     var steps = 0;
     while (out.length < count && steps < limit) {
       steps++;
-      if (t.getFullYear() < new Date().getFullYear() - 1) break;
+      // 只向前搜索；5 年仍无匹配即可判定表达式永不满足（如 2 月 30 日、4 月 31 日），
+      // 避免不可满足表达式跑满步数上限把页面卡死
+      if (t.getFullYear() > y0 + 5) return { error: '未来 5 年内没有匹配的执行时间（表达式可能永不满足，如 2 月 30 日）', list: [] };
       if (!p.mon.values.has(t.getMonth() + 1)) { advanceMonth(t, p.mon.values); continue; }
       var domOk = p.dom.values.has(t.getDate());
       var dowOk = p.dow.values.has(t.getDay());

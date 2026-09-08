@@ -66,6 +66,12 @@ var Fmt = (function () {
       }
       if (/[0-9]/.test(ch)) {
         var k6 = i; while (k6 < n && /[0-9a-fA-FxXoObB._]/.test(src[k6])) k6++;
+        var numTok = src.slice(i, k6);
+        // 科学计数法（1.5e-3；0x 前缀不适用）与 BigInt 后缀（10n）
+        if (!/^0[xXoObB]/.test(numTok) && /[eE]$/.test(numTok) && (src[k6] === '+' || src[k6] === '-')) {
+          k6++; while (k6 < n && /[0-9]/.test(src[k6])) k6++;
+        }
+        if (src[k6] === 'n' && /[0-9]/.test(numTok.slice(-1))) k6++;
         T.push({ t: 'num', v: src.slice(i, k6) }); i = k6; prevSig = { t: 'v' }; continue;
       }
       var three = src.substr(i, 3), two = src.substr(i, 2);
@@ -74,7 +80,8 @@ var Fmt = (function () {
       else if (BINOPS.indexOf(two) >= 0) opLen = 2;
       var op = src.substr(i, opLen);
       T.push({ t: 'p', v: op }); i += opLen;
-      prevSig = { t: (op === '(' || op === '[' || op === '{' || op === ',' || op === ';' || op === ':') ? op : 'op', v: op };
+      // ) ] 是"值结束"，其后跟 / 应按除法而非正则起点处理
+      prevSig = { t: (op === '(' || op === '[' || op === '{' || op === ',' || op === ';' || op === ':') ? op : (op === ')' || op === ']') ? 'v' : 'op', v: op };
     }
     return T;
   }
@@ -112,6 +119,7 @@ var Fmt = (function () {
       return false;
     }
     function spaceBetween(p, c) {
+      if (!p) return ''; // 首个有效 token（行首）不需要前置空格
       if (lastUnary) return '';
       if (c.t === 'w') {
         if (p.t === 'w' || p.t === 'str' || p.t === 'num') return ' ';
@@ -434,6 +442,7 @@ var Fmt = (function () {
   /* ================= JSON / JSON5 ================= */
   function parseJsonLoose(src) {
     var s = String(src == null ? '' : src).trim();
+    try { return JSON.parse(s); } catch (eStrict) { } // 合法 JSON 直接走严格解析，避免宽松路径误伤字符串内容
     var out = '', inStr = null;
     for (var i = 0; i < s.length; i++) {
       var ch = s[i];
@@ -478,8 +487,16 @@ var Fmt = (function () {
   var SQL_MAJOR2 = ['INSERT INTO', 'GROUP BY', 'ORDER BY', 'DELETE FROM', 'UNION ALL', 'LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN', 'FULL JOIN', 'CROSS JOIN', 'CREATE TABLE', 'ALTER TABLE', 'DROP TABLE'];
   var SQL_MAJOR1 = ['SELECT', 'FROM', 'WHERE', 'HAVING', 'LIMIT', 'OFFSET', 'VALUES', 'UPDATE', 'SET', 'UNION', 'JOIN', 'ON', 'WITH'];
   var SQL_UP = /^(SELECT|FROM|WHERE|AND|OR|NOT|NULL|IN|LIKE|BETWEEN|IS|AS|DISTINCT|CASE|WHEN|THEN|ELSE|END|ASC|DESC|LIMIT|OFFSET|INSERT|INTO|VALUES|UPDATE|SET|DELETE|JOIN|ON|GROUP|ORDER|BY|HAVING|UNION|LEFT|RIGHT|INNER|OUTER|CROSS|CREATE|TABLE|ALTER|DROP|WITH|COUNT|SUM|AVG|MIN|MAX)$/i;
+  /* 把字符串字面量暂时替换为占位符，空白收敛/替换只作用于代码部分（占位符 1 起编） */
+  function maskStrings(s, re) {
+    var store = [];
+    var masked = s.replace(re, function (m2) { store.push(m2); return '\x00' + store.length + '\x00'; });
+    return { masked: masked, unmask: function (t) { return t.replace(/\x00\d+\x00/g, function (ph) { var v = store[+ph.slice(1, -1) - 1]; return v === undefined ? '' : v; }); } };
+  }
+  var SQL_STR_RE = /'(?:[^']|'')*'|"(?:[^"]|"")*"/g;
   function formatSql(src, indentSize, upper) {
-    var s = String(src == null ? '' : src).replace(/\r\n/g, '\n').replace(/\s+/g, ' ').replace(/,/g, ' , ').trim();
+    var m1 = maskStrings(String(src == null ? '' : src).replace(/\r\n/g, '\n'), SQL_STR_RE);
+    var s = m1.masked.replace(/\s+/g, ' ').replace(/,/g, ' , ').trim();
     if (!s) return '\n';
     var tokens = s.split(' ');
     var lines2 = [], cur = '', depth = 0;
@@ -507,7 +524,7 @@ var Fmt = (function () {
       }
     }
     if (cur.trim()) lines2.push(cur);
-    return lines2.join('\n').replace(/\n{2,}/g, '\n').trimEnd() + '\n';
+    return m1.unmask(lines2.join('\n').replace(/\n{2,}/g, '\n').trimEnd()) + '\n';
   }
 
   /* ================= Markdown（保守整理） ================= */
@@ -547,20 +564,23 @@ var Fmt = (function () {
       }
       if (t.t === 'lc' || t.t === 'bc') continue;
       var v = t.v;
-      if (t.t === 'w' && (v === 'else' || v === 'do') && out.endsWith('}')) { out += ' ' + v; prev = t; continue; }
+      if (v === '}' && /;$/.test(out)) out = out.slice(0, -1);
+      if (t.t === 'w' && (v === 'else' || v === 'do') && out.endsWith('}')) { out += v; prev = t; continue; }
       if (out && /[\w$)\]'"]$/.test(out) && /[\w$'"(]/.test(v.charAt(0)) === false) { out += v; prev = t; continue; }
       if (out && /[\w$)]$/.test(out) && (/^[\w$]/.test(v) || v.charAt(0) === '"' || v.charAt(0) === "'" || v.charAt(0) === '`' || v === '(')) out += ' ';
-      else if (out && prev && (prev.t === 'w' || prev.t === 'num') && (t.t === 'w' || t.t === 'num' || t.t === 'str')) out += ' ';
-      else if (out && prev && prev.t === 'str' && (t.t === 'w')) out += ' ';
+      else if (out && !/;$/.test(out) && prev && (prev.t === 'w' || prev.t === 'num') && (t.t === 'w' || t.t === 'num' || t.t === 'str')) out += ' ';
+      else if (out && !/;$/.test(out) && prev && prev.t === 'str' && (t.t === 'w')) out += ' ';
       out += v;
       prev = t;
     }
-    return out.replace(/\s*([{};,])\s*/g, '$1').replace(/;\}/g, '}').trim();
+    // 压缩在 token 层完成；不得对结果串做全局替换——字符串字面量内容不容改写
+    return out.trim();
   }
   function minifyCss(src) {
-    var s = String(src == null ? '' : src).replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ');
+    var m1 = maskStrings(String(src == null ? '' : src), /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g);
+    var s = m1.masked.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ');
     s = s.replace(/\s*([{}:;,>~])\s*/g, '$1').replace(/;}/g, '}');
-    return s.trim();
+    return m1.unmask(s).trim();
   }
   function minifyMarkup(src) {
     var nodes = parseTags(String(src == null ? '' : src).replace(/\r\n/g, '\n'));
@@ -584,8 +604,8 @@ var Fmt = (function () {
     catch (e) { return JSON.stringify(parseJsonLoose(s)); }
   }
   function minifySql(src) {
-    return String(src == null ? '' : src)
-      .replace(/--[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ').trim();
+    var m1 = maskStrings(String(src == null ? '' : src), SQL_STR_RE);
+    return m1.unmask(m1.masked.replace(/--[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ').trim());
   }
   function minifyYaml(src) {
     return String(src == null ? '' : src).split('\n')

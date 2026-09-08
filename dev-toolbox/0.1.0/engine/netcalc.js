@@ -44,7 +44,10 @@ var NetCalc = (function () {
       if (m2) { ip = m2[1]; prefix = prefixFromMask(ipToInt(m2[2])); }
       else {
         var m3 = s.match(/^([\d.]+)$/);
-        if (m3) { ip = m3[1]; prefix = 32; }
+        if (m3) {
+          ip = m3[1]; prefix = 32;
+          try { prefix = prefixFromMask(ipToInt(ip)); } catch (e2) { /* 不是连续掩码，按主机 IP /32 处理 */ }
+        }
         else throw new Error('请输入 IP/CIDR（如 192.168.1.10/24 或 192.168.1.10 255.255.255.0）');
       }
     }
@@ -52,12 +55,13 @@ var NetCalc = (function () {
   }
 
   function classify(ipInt) {
+    if (ipInt < 0x01000000) return '保留 (0.0.0.0/8)';
     if (ipInt >= 0x0a000000 && ipInt <= 0x0affffff) return 'A 类私有 (10.0.0.0/8)';
     if (ipInt >= 0xac100000 && ipInt <= 0xac1fffff) return 'B 类私有 (172.16.0.0/12)';
     if (ipInt >= 0xc0a80000 && ipInt <= 0xc0a8ffff) return 'C 类私有 (192.168.0.0/16)';
     if (ipInt >= 0x7f000000 && ipInt <= 0x7fffffff) return '环回 (127.0.0.0/8)';
     if (ipInt >= 0xa9fe0000 && ipInt <= 0xa9feffff) return '链路本地 (169.254.0.0/16)';
-    if (ipInt >= 0xc0000000 && ipInt <= 0xc0000007) return '保留 (0.0.0.0/8 或 224+ 多播边界外)';
+    if (ipInt >= 0xc0000000 && ipInt <= 0xc0000007) return '保留 (192.0.0.0/29)';
     if (ipInt >= 0xe0000000) return '多播/保留 (224.0.0.0/4+)';
     var first = ipInt >>> 24;
     if (first < 128) return 'A 类公网';

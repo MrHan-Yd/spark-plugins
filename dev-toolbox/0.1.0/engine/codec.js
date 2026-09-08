@@ -61,7 +61,7 @@ var Codec = (function () {
   }
   function urlDecode(s, mode) {
     var str = String(s == null ? '' : s).trim();
-    if (mode === 'form' || /\+/.test(str)) str = str.replace(/\+/g, '%20');
+    if (mode === 'form') str = str.replace(/\+/g, '%20'); // 仅表单模式把 + 视为空格；uri/component 模式保留字面加号
     try { return decodeURIComponent(str); }
     catch (e) { throw new Error('解码失败：百分比编码不完整或非法（' + e.message + '）'); }
   }
@@ -184,7 +184,7 @@ var Codec = (function () {
         return c >= 0x20 && c <= 0x10ffff ? String.fromCodePoint(c) : m;
       })
       .replace(/&([a-zA-Z][a-zA-Z0-9]{1,31});/g, function (m, name) {
-        var rev = htmlDecode._rev;
+        var rev = ENT_REV;
         return rev[name] !== undefined ? String.fromCodePoint(rev[name]) : m;
       });
   }
@@ -323,7 +323,7 @@ var Codec = (function () {
       signatureB64: seg[2] || null,
       signatureHex: seg[2] ? bytesToHex(b64ToBytes(seg[2] + repeatPad(seg[2]))) : null,
       timeClaims: claims,
-      expired: typeof payload.exp === 'number' && payload.exp * 1000 < Date.now()
+      expired: typeof payload.exp === 'number' && (payload.exp > 1e12 ? payload.exp : payload.exp * 1000) < Date.now()
     };
   }
   function repeatPad(s) { var p = ''; while ((s.length + p.length) % 4) p += '='; return p; }

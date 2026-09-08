@@ -58,7 +58,8 @@ var Serial = (function () {
         }
         if (s.startsWith('<![CDATA[', i)) {
           var ce = s.indexOf(']]>', i + 9);
-          textParts.push(s.slice(i + 9, ce < 0 ? s.length : ce));
+          if (ce < 0) { textParts.push(s.slice(i + 9)); i = s.length; break; }
+          textParts.push(s.slice(i + 9, ce));
           i = ce + 3; continue;
         }
         var gt = s.indexOf('>', i);
@@ -73,7 +74,7 @@ var Serial = (function () {
         var self = /\/\s*$/.test(tag);
         var attrs = {};
         var am, re = /([^\s=]+)\s*=\s*("([^"]*)"|'([^']*)')/g;
-        while ((am = re.exec(tag))) attrs[am[1]] = decodeEnt(am[2] !== undefined ? am[2] : am[3]);
+        while ((am = re.exec(tag))) attrs[am[1]] = decodeEnt(am[3] !== undefined ? am[3] : am[4]);
         i = gt + 1;
         var child = { '#': null };
         if (!self) {
@@ -117,7 +118,7 @@ var Serial = (function () {
     var opts = { indent: 2, lineWidth: 120, noRefs: true };
     return yaml().dump(v, opts);
   }
-  function yamlToJson(s) { return JSON.stringify(yaml().load(String(s)), null, 2); }
+  function yamlToJson(s) { var docs = yaml().loadAll(String(s)); return JSON.stringify(docs.length ? docs[0] : null, null, 2); } // 多文档取首段，与工具提示一致
 
   /* ---------- PHP 数组 ---------- */
   function jsonToPhp(v, opt) {
@@ -256,6 +257,7 @@ var Serial = (function () {
     }
     function readDigits() {
       var start = i;
+      if (src[i] === 0x2d) i++; // 负号
       while (i < src.length && src[i] >= 48 && src[i] <= 57) i++;
       return Codec.bytesToUtf8(src.subarray(start, i));
     }
@@ -315,7 +317,8 @@ var Serial = (function () {
     function toPropStr(v2) {
       if (v2 === null || v2 === undefined) return '';
       if (typeof v2 === 'boolean') return v2 ? 'true' : 'false';
-      return String(v2);
+      // .properties 以 \ 为转义符：值里的反斜杠/换行/制表必须转义，否则结构被破坏
+      return String(v2).replace(/\\/g, '\\\\').replace(/[\r\n]+/g, '\\n').replace(/\t/g, '\\t');
     }
     walk(v, '');
     return out.join('\n') + '\n';

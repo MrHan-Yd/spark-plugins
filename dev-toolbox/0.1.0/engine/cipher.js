@@ -239,7 +239,7 @@ var Cipher = (function () {
   }
   function rabbitCreate(key16, iv8) {
     if (key16.length !== 16) throw new Error('Rabbit 密钥必须为 16 字节');
-    if (iv8 && iv8.length !== 8) throw new Error('Rabbit IV 必须为 8 字节');
+    if (iv8 && iv8.length && iv8.length !== 8) throw new Error('Rabbit IV 必须为 8 字节');
     function be32(b, o) { return ((b[o] << 24) | (b[o + 1] << 16) | (b[o + 2] << 8) | b[o + 3]) >>> 0; }
     var K = [be32(key16, 0), be32(key16, 4), be32(key16, 8), be32(key16, 12)].map(function (w) { return bswap32(w); });
     var st = { x: [], c: [], carry: 0, oldC: [0, 0, 0, 0, 0, 0, 0, 0], g: [0, 0, 0, 0, 0, 0, 0, 0] };
@@ -255,7 +255,7 @@ var Cipher = (function () {
     st.carry = 0;
     for (i = 0; i < 4; i++) rabbitNextState(st);
     for (i = 0; i < 8; i++) c[i] = (c[i] ^ x[(i + 4) % 8]) >>> 0;
-    if (iv8) {
+    if (iv8 && iv8.length) {
       var iv0 = be32(iv8, 0), iv1 = be32(iv8, 4);
       var w0 = bswap32(iv0), w2 = bswap32(iv1);
       var w1 = ((w0 >>> 16) | (w2 & 0xffff0000)) >>> 0;
@@ -401,33 +401,39 @@ var Cipher = (function () {
     var iv = opt.iv;
     if (mode !== 'ECB' && (!iv || iv.length !== bs)) throw new Error(mode + ' 模式需要 ' + bs + ' 字节 IV');
     var P = PADDING[opt.padding || 'pkcs7'];
+    if (!P) throw new Error('不支持的填充：' + opt.padding);
+    var STREAM = mode === 'CTR' || mode === 'CFB' || mode === 'OFB'; // 流模式：密文长度=明文长度，填充不适用
     var i, off;
 
     if (opt.decrypt) {
-      if (!data.length || data.length % bs) throw new Error('密文长度必须是 ' + bs + ' 字节的整数倍');
+      if (!STREAM && (!data.length || data.length % bs)) throw new Error('密文长度必须是 ' + bs + ' 字节的整数倍');
       var out = new Uint8Array(data.length);
       var prev = mode === 'ECB' ? null : new Uint8Array(iv);
       for (off = 0; off < data.length; off += bs) {
         var cur = data.subarray(off, off + bs);
-        var d = bf.decrypt(cur);
-        if (mode === 'ECB') out.set(d, off);
-        else if (mode === 'CBC') {
-          for (i = 0; i < bs; i++) out[off + i] = d[i] ^ prev[i];
-          prev = new Uint8Array(cur);
+        if (mode === 'ECB' || mode === 'CBC') {
+          var d = bf.decrypt(cur);
+          if (mode === 'ECB') out.set(d, off);
+          else {
+            for (i = 0; i < bs; i++) out[off + i] = d[i] ^ prev[i];
+            prev = new Uint8Array(cur);
+          }
         } else if (mode === 'CFB') {
           var ks = bf.encrypt(prev);
-          for (i = 0; i < bs; i++) out[off + i] = cur[i] ^ ks[i];
-          prev = new Uint8Array(cur);
+          var cLen = Math.min(bs, data.length - off); // 流模式允许末块不满
+          for (i = 0; i < cLen; i++) out[off + i] = cur[i] ^ ks[i];
+          if (cLen === bs) prev = new Uint8Array(cur);
         } else { // OFB / CTR 解密与加密相同
-          var kk = bf.encrypt(mode === 'CTR' ? prev : prev);
-          for (i = 0; i < bs; i++) out[off + i] = cur[i] ^ kk[i];
+          var kk = bf.encrypt(prev);
+          var cLen2 = Math.min(bs, data.length - off);
+          for (i = 0; i < cLen2; i++) out[off + i] = cur[i] ^ kk[i];
           prev = mode === 'CTR' ? incrBlock(prev) : kk;
         }
       }
-      return P.unpad(out, bs);
+      return STREAM ? out : P.unpad(out, bs);
     }
 
-    var padArr = P.pad(data.length, bs);
+    var padArr = STREAM ? [] : P.pad(data.length, bs);
     var msg = new Uint8Array(data.length + padArr.length);
     msg.set(data);
     for (i = 0; i < padArr.length; i++) msg[data.length + i] = padArr[i] & 0xff;
@@ -446,11 +452,13 @@ var Cipher = (function () {
       } else if (mode === 'CFB') {
         var ks2 = bf.encrypt(prev2);
         var cb = new Uint8Array(bs);
-        for (i = 0; i < bs; i++) { out2[off + i] = blk[i] ^ ks2[i]; cb[i] = out2[off + i]; }
-        prev2 = cb;
+        var blkLen = Math.min(bs, msg.length - off); // 流模式允许末块不满
+        for (i = 0; i < blkLen; i++) { out2[off + i] = blk[i] ^ ks2[i]; cb[i] = out2[off + i]; }
+        if (blkLen === bs) prev2 = cb;
       } else {
         var kk2 = bf.encrypt(prev2);
-        for (i = 0; i < bs; i++) out2[off + i] = blk[i] ^ kk2[i];
+        var blkLen2 = Math.min(bs, msg.length - off);
+        for (i = 0; i < blkLen2; i++) out2[off + i] = blk[i] ^ kk2[i];
         prev2 = mode === 'CTR' ? incrBlock(prev2) : kk2;
       }
     }

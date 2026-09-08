@@ -30,7 +30,7 @@
           out.set(list.join('\n'));
         }
       });
-      host.appendChild(UI.hint('UUID v4 由密码学安全随机源生成； nil 全零 UUID 场景请使用 Codec 常量。'));
+      host.appendChild(UI.hint('UUID v4 由密码学安全随机源生成，可批量、控制大小写/连字符/花括号。'));
     }
   });
 

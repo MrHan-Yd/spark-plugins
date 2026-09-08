@@ -16,7 +16,6 @@
       var t = UI.ioTool(host, {
         placeholder: '输入时间戳（1700000000 或 1700000000000）或日期（2024-03-15 08:30:00）…',
         rows: 3,
-        swap: true,
         live: function (text, v, out) {
           if (!text.trim()) { out.setNode(UI.el('div', {})); return; }
           var d = DTime.parseInput(text);
@@ -47,7 +46,7 @@
         t.input.dispatchEvent(new Event('input'));
       }));
       host.appendChild(foot);
-      host.appendChild(UI.hint('纯数字 ≤10 位按秒、≥13 位按毫秒解析；「交换」可把右侧文本区域内容复制回输入继续处理。'));
+      host.appendChild(UI.hint('纯数字 ≤10 位按秒、≥13 位按毫秒解析。输出为只读信息卡，点击数值可复制。'));
     }
   });
 

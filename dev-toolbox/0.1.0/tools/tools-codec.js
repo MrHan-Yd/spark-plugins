@@ -100,7 +100,7 @@
         ],
         live: function (text, v, out) {
           if (!text) { out.set(''); return; }
-          var hasEsc = /\\u[0-9a-fA-F]{4}|\\u\{|&#x?[0-9a-fA-F]+;|&#\d+;|\\[0-9a-fA-F]{1,6}/.test(text);
+          var hasEsc = /\\u[0-9a-fA-F]{4}|\\u\{|&#x?[0-9a-fA-F]+;|&#\d+;|&[a-zA-Z][a-zA-Z0-9]{1,31};|\\[0-9a-fA-F]{1,6}/.test(text);
           if (hasEsc) { out.set(Codec.fromUnicode(text)); return; }
           var opt = { all: v.uall, upper: v.uupper };
           if (v.umode === 'brace') opt.braces = true;
@@ -136,11 +136,18 @@
             kind: 'select', id: 'asep', label: '分隔符', value: ' ', options: [
               { v: ' ', t: '空格' }, { v: ',', t: '逗号' }, { v: '', t: '无' }
             ]
+          },
+          {
+            kind: 'select', id: 'adir', label: '方向', value: 'auto', options: [
+              { v: 'auto', t: '自动判向' }, { v: 'enc', t: '文本→码点' }, { v: 'dec', t: '码点→文本' }
+            ]
           }
         ],
         live: function (text, v, out) {
           if (!text) { out.set(''); return; }
           var radix = +v.ardx, sep = v.asep === '' ? '' : v.asep;
+          if (v.adir === 'dec') { out.set(Codec.fromRadixList(text, radix)); return; }
+          if (v.adir === 'enc') { out.set(Codec.toRadixList(text, radix, sep)); return; }
           if (/^[\s\d,;a-fA-Fx]+$/.test(text) && text.trim().match(/^[\d,;\s]+$/) || (radix === 16 && /^[0-9a-fA-F\s,]+$/.test(text))) {
             try { out.set(Codec.fromRadixList(text, radix)); return; } catch (e) { }
           }
@@ -162,15 +169,27 @@
         swap: true,
         options: [
           { kind: 'check', id: 'hxsSpace', label: 'hex 加空格', value: false },
-          { kind: 'check', id: 'hxsUpper', label: 'hex 大写', value: false }
+          { kind: 'check', id: 'hxsUpper', label: 'hex 大写', value: false },
+          {
+            kind: 'select', id: 'hxsDir', label: '方向', value: 'auto', options: [
+              { v: 'auto', t: '自动判向' }, { v: 'enc', t: '强制编码' }, { v: 'dec', t: '强制解码' }
+            ]
+          }
         ],
         live: function (text, v, out) {
           if (!text) { out.set(''); return; }
-          if (/^[0-9a-fA-F\s,:xX]+$/.test(text) && /[0-9a-fA-F]/.test(text)) {
-            try { out.set(Codec.bytesToUtf8(Codec.hexToBytes(text))); return; } catch (e) { }
+          function enc() {
+            var h = Codec.bytesToHex(Codec.utf8ToBytes(text), v.hxsSpace ? ' ' : '');
+            return v.hxsUpper ? h.toUpperCase() : h;
           }
-          var h = Codec.bytesToHex(Codec.utf8ToBytes(text), v.hxsSpace ? ' ' : '');
-          out.set(v.hxsUpper ? h.toUpperCase() : h);
+          function dec() { return Codec.bytesToUtf8(Codec.hexToBytes(text)); }
+          if (v.hxsDir === 'dec') { out.set(dec()); return; }
+          if (v.hxsDir === 'enc') { out.set(enc()); return; }
+          // 自动：形如 hex 才尝试解码；beef/face 这类纯 a-f 单词可强制编码绕开歧义
+          if (/^[0-9a-fA-F\s,:xX]+$/.test(text) && /[0-9a-fA-F]/.test(text)) {
+            try { out.set(dec()); return; } catch (e) { }
+          }
+          out.set(enc());
         }
       });
     }
@@ -186,13 +205,24 @@
         placeholder: '粘贴 hex 得 Base64；粘贴 Base64 得 hex',
         rows: 8,
         swap: true,
+        options: [
+          {
+            kind: 'select', id: 'hxbDir', label: '方向', value: 'auto', options: [
+              { v: 'auto', t: '自动判向' }, { v: 'enc', t: '按 Hex 编码' }, { v: 'dec', t: '按 Base64 解码' }
+            ]
+          }
+        ],
         live: function (text, v, out) {
           if (!text.trim()) { out.set(''); return; }
           var t = text.trim();
+          function enc() { return Codec.bytesToB64(Codec.hexToBytes(t)); }
+          function dec() { return Codec.bytesToHex(Codec.b64ToBytes(t)); }
+          if (v.hxbDir === 'dec') { out.set(dec()); return; }
+          if (v.hxbDir === 'enc') { out.set(enc()); return; }
           if (/^[0-9a-fA-F\s,:xX]+$/.test(t) && /[0-9a-fA-F]/.test(t) && !/[^0-9a-fA-F\s,:xX]/.test(t)) {
-            try { out.set(Codec.bytesToB64(Codec.hexToBytes(t))); return; } catch (e) { }
+            try { out.set(enc()); return; } catch (e) { }
           }
-          try { out.set(Codec.bytesToHex(Codec.b64ToBytes(t))); }
+          try { out.set(dec()); }
           catch (e) { throw new Error('无法识别输入：既不是合法 hex 也不是 Base64'); }
         }
       });

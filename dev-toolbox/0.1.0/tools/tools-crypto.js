@@ -38,12 +38,7 @@
         live: function (text, v, out) {
           if (!text.trim()) { out.set(''); return; }
           function digestOf(bytes) {
-            if (v.halg === 'sm3') {
-              var hex = (window.SM && SM.sm3) ? SM.sm3(Codec.bytesToUtf8(bytes)) : null;
-              if (hex === null) throw new Error('sm-crypto 未加载');
-              return hex;
-            }
-            return Crypto.hash(v.halg, bytes);
+            return Crypto.hash(v.halg, bytes); // sm3 引擎按字节实现，文本与文件同一口径
           }
           var lines = text.split(/\r\n|\r|\n/).filter(function (l) { return l !== ''; });
           if (v.hbatch && lines.length > 1) {
@@ -59,13 +54,11 @@
       });
       var row = UI.el('div', { class: 'btnrow' });
       row.appendChild(UI.btn('计算文件哈希', function () {
-        UI.filePick('', false, function (name, bytes) {
-          try {
-            var d;
-            var alg = document.getElementById('halg').value;
-            if (alg === 'sm3') d = (window.SM && SM.sm3) ? SM.sm3(Codec.bytesToUtf8(bytes)) : null;
-            else d = Crypto.hash(alg, bytes);
-            var up = document.getElementById('hupper').checked;
+          UI.filePick('', false, function (name, bytes) {
+            try {
+              var alg = document.getElementById('halg').value;
+              var d = Crypto.hash(alg, bytes); // 全算法按原始字节计算（含 SM3），二进制文件不再失真
+              var up = document.getElementById('hupper').checked;
             t.out.set((up ? d.toUpperCase() : d) + '  (' + name + ', ' + bytes.length + ' 字节)');
             UI.toast('已计算 ' + name);
           } catch (e) { UI.toast(e.message, true); }
@@ -112,7 +105,7 @@
           live: function (text, v, out) {
             if (!text.trim()) { out.set(''); return; }
             var key = keyBytes(inKey.value || '', selKeyEnc.value);
-            var iv = def.iv ? keyBytes(inIv.value || '', selIvEnc.value) : null;
+            var iv = def.iv && inIv.value.trim() ? keyBytes(inIv.value, selIvEnc.value) : null;
             var opt = { mode: selMode ? selMode.value : 'ECB', iv: iv, padding: selPadVal(), decrypt: selDir.value === 'dec' };
             var result;
             if (def.kind === 'block') {
@@ -183,7 +176,6 @@
   });
   cipherTool({
     id: 'rabbit', name: 'Rabbit', kind: 'rabbit', iv: true, modes: null,
-    pads: [['pkcs7', 'PKCS7'], ['zero', 'Zero'], ['iso7816', 'ISO7816'], ['none', '无']],
     alias: 'rabbit 加密', icon: 'M4 17c2-6 5-9 8-9s6 3 8 9M8 8V5M16 8V5',
     desc: 'Rabbit 流加密（16 字节密钥 + 可选 8 字节 IV）',
     ph: '明文（加密）或 Base64/Hex 密文（解密）…',

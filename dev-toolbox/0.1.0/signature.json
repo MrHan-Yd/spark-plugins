@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "algorithm": "ed25519",
   "key_id": "spark-official-v1",
-  "signed_at": "2026-09-07T03:23:45Z",
+  "signed_at": "2026-09-08T01:23:03Z",
   "files": [
     {
       "path": "app.js",
@@ -28,7 +28,7 @@
     },
     {
       "path": "ui.js",
-      "sha256": "369fcd0ff97366eab3050fc4ca715e33f10f39a87dbea6b7525ba6177a35c260"
+      "sha256": "a8bd39713a8f2755afafc4a4c2c859f0373e46db8b62a823e4f20d43c02520de"
     },
     {
       "path": "tools/tools-code.js",
@@ -36,15 +36,15 @@
     },
     {
       "path": "tools/tools-codec.js",
-      "sha256": "41137b51134c1cae950c02b058a002ad6654468f75b93c5d0e5d62dec89ac3a0"
+      "sha256": "77447095618ccf0e0246ed9bb2a4794478c9bcbef037585397851605ef54553f"
     },
     {
       "path": "tools/tools-crypto.js",
-      "sha256": "37d10d24835baeafbb8659fd0f79ced4cd00c2c34548ab320f3d5fdd2ef6d214"
+      "sha256": "f8fd5df7995270e5b3ee521d6602f7150cf60794fe6cbf6552dc3e8327ce8b2a"
     },
     {
       "path": "tools/tools-gen.js",
-      "sha256": "56f60e41f3f0f7ddb58303a6f6d16ac1f341f0c5e26ecb6fb1956c418114e6ed"
+      "sha256": "dc5ac5227172f4aa142a8fc499c7577439a4c135ad0debf9430d0fd0d78a383c"
     },
     {
       "path": "tools/tools-net.js",
@@ -56,39 +56,39 @@
     },
     {
       "path": "tools/tools-time.js",
-      "sha256": "d3579cc08bfb0c88f9f03671a212fd6f330632f794cc25129802b1e87acfc6ad"
+      "sha256": "a954d6ed5e4fc172b10969862f9460c067add2779f680eef9d8fe348d932269c"
     },
     {
       "path": "engine/cipher.js",
-      "sha256": "a46cea54d0afdec22e29ca87cbd07596b98ac2e446a87a10d5615b2882c494d6"
+      "sha256": "666e3de6794ea13fa50f7984b54f3e40afc581a9247d2e9876850937485ace44"
     },
     {
       "path": "engine/codec.js",
-      "sha256": "314a5f97578c7cbdbd31499dd337b29562bfadfba2c104a5e8348ba542d87dee"
+      "sha256": "0d1be1b743d91bf213e69223f839983e572449102b2081c4bdda8c5bb0d99874"
     },
     {
       "path": "engine/crypto.js",
-      "sha256": "c638675e2573faa13141d49bbdb0b8a7acb92fc67906e7903d9953aeda1a25d9"
+      "sha256": "756bd562dbb8a37612a8c447db91035992700d793337b91cc9ffb590c2735535"
     },
     {
       "path": "engine/datetime.js",
-      "sha256": "fb7f0c520ede48abbbbad60e90eda192fd287d376a9fdb867ff51c4117084f04"
+      "sha256": "ca0d29a8b1b630b839d478253378d9567bdbba8a0543a4fa76c59a58ed397c8e"
     },
     {
       "path": "engine/format.js",
-      "sha256": "33aff94ef3951f60b8058454481ed700282d93a73fba612086637777e27a1c8c"
+      "sha256": "e7a490dfa61c767a656b1a57b1e12723d5a00507379371f5675874a0d286e93c"
     },
     {
       "path": "engine/netcalc.js",
-      "sha256": "d786af76723f645e39a5e4890d70575f306971d41960de9fe488799d95932558"
+      "sha256": "52221992671d365b4f2a4f0849113ae39d3511bbef11107fe98ed2ab449be836"
     },
     {
       "path": "engine/serial.js",
-      "sha256": "dd4eb15afb636cd6597766538951bc89fc3c3fc58ba451de849a7a19af5a6633"
+      "sha256": "13d4e8defcd93854ac0bcadf6b44842b59e3578bea34084837e180670989a808"
     },
     {
       "path": "engine/textkit.js",
-      "sha256": "a8505ef6da6256d1334eae924baf4be63cd248b319ac2a066143272e1e982a1f"
+      "sha256": "dd42294732a62d054b61dc02d130edaeb9c665221c567b69f67cf20a8c2a59c2"
     },
     {
       "path": "engine/units.js",
@@ -135,5 +135,5 @@
       "sha256": "79e22ba765fb35e05c66a177ba932f65bf3d2ede7edc7090f9a7405129cbdf0f"
     }
   ],
-  "signature": "jhpoU1PaO7GBaRied23+7Kwh6/m0FpFU/mh5Zu3rWiUZB4+mqHjtROOrUEcbnMLosUc34aOWz0eWKz1n+hOUAw=="
+  "signature": "BXH5WdDoOlJYJdpQPEXm+nUGuRT7CDbxNBRlj5HuP6c7wE18vgamkd0sJ/aOCpCHBKLOlH1poNqMbKLIScEgBQ=="
 }

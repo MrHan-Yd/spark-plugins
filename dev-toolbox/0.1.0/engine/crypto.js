@@ -211,7 +211,8 @@ var Crypto = (function () {
         var lenLen = algName === 'sha512' ? 16 : 8;
         var pad = new Uint8Array(bufLen <= A.blockSize - 1 - lenLen ? A.blockSize - bufLen : A.blockSize * 2 - bufLen);
         pad[0] = 0x80;
-        // 长度字段：md5 小端 8 字节，其余大端（sha512 为 16 字节，高位 8 字节恒 0 已含在 pad 内）
+        // 长度字段：md5 小端 8 字节，其余大端（sha512 为 16 字节，用 BigInt 全量写入）
+        var bitsHi = Math.floor(bits / 0x100000000); // ≥512MiB 输入时高位非 0
         if (algName === 'sha512') {
           var lenBytes = new Uint8Array(16);
           var v = BigInt(bits);
@@ -220,7 +221,11 @@ var Crypto = (function () {
         } else if (algName === 'md5') {
           pad[pad.length - 8] = bits & 0xff; pad[pad.length - 7] = (bits >>> 8) & 0xff;
           pad[pad.length - 6] = (bits >>> 16) & 0xff; pad[pad.length - 5] = (bits >>> 24) & 0xff;
+          pad[pad.length - 4] = bitsHi & 0xff; pad[pad.length - 3] = (bitsHi >>> 8) & 0xff;
+          pad[pad.length - 2] = (bitsHi >>> 16) & 0xff; pad[pad.length - 1] = (bitsHi >>> 24) & 0xff;
         } else {
+          pad[pad.length - 8] = (bitsHi >>> 24) & 0xff; pad[pad.length - 7] = (bitsHi >>> 16) & 0xff;
+          pad[pad.length - 6] = (bitsHi >>> 8) & 0xff; pad[pad.length - 5] = bitsHi & 0xff;
           pad[pad.length - 4] = (bits >>> 24) & 0xff; pad[pad.length - 3] = (bits >>> 16) & 0xff;
           pad[pad.length - 2] = (bits >>> 8) & 0xff; pad[pad.length - 1] = bits & 0xff;
         }
@@ -237,7 +242,57 @@ var Crypto = (function () {
     return s;
   }
 
+  /* ---------- SM3（GB/T 32907-2016，按原始字节输入；vendor sm-crypto 的 sm3 只收字符串） ---------- */
+  var SM3_IV = [0x7380166f, 0x4914b2b9, 0x172442d7, 0xda8a0600, 0xa96f30bc, 0x163138aa, 0xe38dee4d, 0xb0fb0e4e];
+  function sm3Rotl(x, n) { return ((x << n) | (x >>> (32 - n))) >>> 0; }
+  function sm3Bytes(data) {
+    var len = data.length, bitLen = len * 8;
+    var zeros = (64 - ((len + 9) % 64)) % 64;
+    var msg = new Uint8Array(len + 1 + zeros + 8);
+    msg.set(data);
+    msg[len] = 0x80;
+    for (var j = 0; j < 4; j++) {
+      msg[msg.length - 8 + j] = (Math.floor(bitLen / 0x100000000) >>> (24 - 8 * j)) & 0xff;
+      msg[msg.length - 4 + j] = (bitLen >>> (24 - 8 * j)) & 0xff;
+    }
+    var V = SM3_IV.slice();
+    var W = new Array(68);
+    for (var off = 0; off < msg.length; off += 64) {
+      var i;
+      for (i = 0; i < 16; i++) W[i] = ((msg[off + i * 4] << 24) | (msg[off + i * 4 + 1] << 16) | (msg[off + i * 4 + 2] << 8) | msg[off + i * 4 + 3]) >>> 0;
+      for (i = 16; i < 68; i++) {
+        var t = W[i - 16] ^ W[i - 9] ^ sm3Rotl(W[i - 3], 15);
+        W[i] = ((t ^ sm3Rotl(t, 15) ^ sm3Rotl(t, 23)) ^ sm3Rotl(W[i - 13], 7) ^ W[i - 6]) >>> 0;
+      }
+      var A = V[0], B = V[1], C = V[2], D = V[3], E = V[4], F = V[5], G = V[6], H = V[7];
+      for (i = 0; i < 64; i++) {
+        var T = i < 16 ? 0x79cc4519 : 0x7a879d8a; // 与标准测试向量一致的轮常量（GB/T 32907 实现通用值）
+        var SS1 = sm3Rotl((sm3Rotl(A, 12) + E + sm3Rotl(T, i % 32)) >>> 0, 7);
+        var SS2 = (SS1 ^ sm3Rotl(A, 12)) >>> 0;
+        // GB/T 32907：TT1 用 SS2 + W'，TT2 用 SS1 + W
+        var TT1 = ((i < 16 ? (A ^ B ^ C) : ((A & B) | (A & C) | (B & C))) + D + SS2 + (W[i] ^ W[i + 4])) >>> 0;
+        var TT2 = ((i < 16 ? (E ^ F ^ G) : ((E & F) | (~E & G))) + H + SS1 + W[i]) >>> 0;
+        D = C;
+        C = sm3Rotl(B, 9);
+        B = A;
+        A = TT1;
+        H = G;
+        G = sm3Rotl(F, 19);
+        F = E;
+        E = (TT2 ^ sm3Rotl(TT2, 9) ^ sm3Rotl(TT2, 17)) >>> 0;
+      }
+      V[0] = (V[0] ^ A) >>> 0; V[1] = (V[1] ^ B) >>> 0; V[2] = (V[2] ^ C) >>> 0; V[3] = (V[3] ^ D) >>> 0;
+      V[4] = (V[4] ^ E) >>> 0; V[5] = (V[5] ^ F) >>> 0; V[6] = (V[6] ^ G) >>> 0; V[7] = (V[7] ^ H) >>> 0;
+    }
+    var out = new Uint8Array(32);
+    for (i = 0; i < 8; i++) {
+      out[i * 4] = (V[i] >>> 24) & 0xff; out[i * 4 + 1] = (V[i] >>> 16) & 0xff;
+      out[i * 4 + 2] = (V[i] >>> 8) & 0xff; out[i * 4 + 3] = V[i] & 0xff;
+    }
+    return out;
+  }
   function hash(algName, data) {
+    if (algName === 'sm3') return toHex(sm3Bytes(data instanceof Uint8Array ? data : new Uint8Array(data)));
     var h = create(algName);
     h.update(data instanceof Uint8Array ? data : new Uint8Array(data));
     return h.digestHex();

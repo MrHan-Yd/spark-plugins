@@ -99,20 +99,25 @@ var UI = (function () {
     });
     return b;
   }
-  function clearBtn(target, small) {
+  function clearBtn(target, small, onClear) {
     var b = el('button', { class: 'pbt' + (small ? ' small' : ''), title: '清空' });
     b.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V5h6v2M6.5 7l.8 12h9.4l.8-12"/></svg>清空';
     b.addEventListener('click', function () {
+      if (onClear) { onClear(); return; }
       if (target.value !== undefined) { target.value = ''; target.dispatchEvent(new Event('input')); }
       else target.textContent = '';
     });
     return b;
   }
-  function swapBtn(a, b) {
+  function swapBtn(a, b, readB) {
     var btnEl = el('button', { class: 'pbt', title: '交换输入输出' });
     btnEl.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v13M7 17l-3-3M7 17l3-3M17 20V7M17 7l-3 3M17 7l3 3"/></svg>交换';
     btnEl.addEventListener('click', function () {
-      var t = a.value; a.value = b.value; b.value = t;
+      // readB：输出走节点渲染时取当前可见内容，避免把空串换进输入侧丢数据
+      var bv = readB ? readB() : b.value;
+      var t = a.value;
+      a.value = bv === undefined || bv === null ? '' : String(bv);
+      b.value = t;
       a.dispatchEvent(new Event('input'));
     });
     return btnEl;
@@ -227,7 +232,9 @@ var UI = (function () {
     var outTa = ta(uid + 'out', '');
     outTa.readOnly = true;
     var inBarBtns = [copyBtn(function () { return inTa.value; }), clearBtn(inTa)];
-    if (def.swap) inBarBtns.push(swapBtn(inTa, outTa));
+    if (def.swap) inBarBtns.push(swapBtn(inTa, outTa, function () {
+      return outTa.style.display === 'none' ? outNodeHost.textContent : outTa.value;
+    }));
     var inBar = paneHeader(inBarBtns);
     var inCol = el('div', { class: 'pane' });
     inCol.appendChild(inBar);
@@ -282,7 +289,7 @@ var UI = (function () {
 
     var grid = el('div', { class: 'iogrid' });
     var outCol = el('div', { class: 'col' });
-    outCol.appendChild(paneHeader([copyBtn(function () { return outTa.style.display === 'none' ? outNodeHost.textContent : outTa.value; }), clearBtn(outTa)]));
+    outCol.appendChild(paneHeader([copyBtn(function () { return outTa.style.display === 'none' ? outNodeHost.textContent : outTa.value; }), clearBtn(outTa, false, function () { outSet.set(''); })]));
     outCol.appendChild(outTa);
     outCol.appendChild(outNodeHost);
     outCol.appendChild(errBoxEl);

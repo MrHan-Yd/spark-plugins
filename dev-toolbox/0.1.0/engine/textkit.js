@@ -31,7 +31,11 @@ var TextKit = (function () {
     return s.replace(/——/g, '-').replace(/…/g, '...').replace(/[，。；：？！“”‘’【】《》、～·]/g, function (c) { return CN2EN[c] || c; }).replace(/　/g, ' ');
   }
   function en2cnPunct(s) {
-    return s.replace(/\.\.\./g, '…').replace(/[,:;?!()<>~]/g, function (c) { return EN2CN[c] || c; });
+    // . [ ] 也在转换表里；小数点（前后都是数字）不转
+    return s.replace(/\.\.\./g, '…').replace(/[.,:;?!()\[\]<>~]/g, function (c, off, str) {
+      if (c === '.' && ((str[off - 1] || '').match(/\d/) || (str[off + 1] || '').match(/\d/))) return c;
+      return EN2CN[c] || c;
+    });
   }
 
   /* ---------- 简繁转换（数据来自 assets/vendor/s2t.js、t2s.js） ---------- */
@@ -177,16 +181,18 @@ var TextKit = (function () {
   }
   var TONE_MARK = { a: ['ā', 'á', 'ǎ', 'à'], e: ['ē', 'é', 'ě', 'è'], i: ['ī', 'í', 'ǐ', 'ì'], o: ['ō', 'ó', 'ǒ', 'ò'], u: ['ū', 'ú', 'ǔ', 'ù'], v: ['ǖ', 'ǘ', 'ǚ', 'ǜ'] };
   function numToMark(py) {
-    var m = py.match(/^([a-zü]+)([1-4])$/);
+    var m = py.match(/^([a-zü]+)([0-4])$/);
     if (!m) return py;
-    var base = m[1], tone = +m[2] - 1;
+    var base = m[1], tone = +m[2];
+    if (!tone) return base; // 轻声（0）：去数字、不标调
+    tone -= 1;
     var idx = -1, kind = null;
     for (var k of ['a', 'e', 'o']) { var p = base.indexOf(k); if (p >= 0 && idx < 0) { idx = p; kind = k; } }
     if (idx < 0) {
-      // 标在最后一个元音（iu 并列标后）
+      // 标在最后一个元音（iu/ü 并列标后；字典里 ü 也可能写作 v）
       for (var i = base.length - 1; i >= 0; i--) {
         var c = base[i];
-        if (c === 'i' || c === 'u' || c === 'v') { idx = i; kind = c === 'ü' ? 'v' : c; break; }
+        if (c === 'i' || c === 'u' || c === 'v' || c === 'ü') { idx = i; kind = (c === 'v' || c === 'ü') ? 'v' : c; break; }
       }
     }
     if (idx < 0) return py;
