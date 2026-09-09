@@ -88,3 +88,7 @@ application-local.conf
 application-local.properties
 .env
 .zcode
+
+# ----- 插件运行时产物(勿随发布物提交) -----
+# hosts-switcher 开发态把插件目录当安装目录,export_base 的运行时备份会落进 0.1.0/backups/
+hosts-switcher/0.1.0/backups/

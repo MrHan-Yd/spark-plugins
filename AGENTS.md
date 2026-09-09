@@ -54,6 +54,15 @@
 - 新插件页面一律带「页面加固」段(禁默认右键菜单 + capture keydown 拦 F12/F5/Ctrl+P/Ctrl+Shift+I|J|C,
   Ctrl+R 非编辑焦点才拦;input/textarea 豁免右键拦截):代码模板见 `docs/插件开发/WebView插件开发.md` §12
   与 `Native插件开发.md` §12,参考实现 `hosts-switcher/0.1.0/page.js`「页面加固」段。
+- **发布物完整性:提交前后必须机械核对,exe/二进制资源是重灾区**(local-search 的 exe、pdf-toolkit 的
+  179 个 cmaps、hosts-switcher 的 exe 都实际漏过/差点漏):
+  1. `git add <插件>/0.1.0/` **整目录添加,禁止挑文件**——exe、bcmap、字体、vendor 等二进制一律随目录进;
+  2. add 后 `git status --short` 该目录**必须干净**(无 `??` 残留);exe 是最常漏的单件,另跑
+     `git ls-files <插件>/0.1.0/*.exe` 确认非空(native 插件);
+  3. 提交后核对数量:`git ls-files <插件>/0.1.0` 条数 **减 1**(signature.json 自身)= 包内
+     `signature.json` 清单条数,不一致必须补提交——市场走 master zipball,缺文件会在 zipball 双向
+     校验时拒装;
+  4. 运行时产物(如 `0.1.0/backups/`)不进 git,规则在 .gitignore 维护。
 - 发布物直接在 `<插件>/<版本>/` 目录内迭代;开发阶段**不新建版本目录、不改版本号**。
 - 涉及 exe 的改动:`cargo build --release` 后把产物复制进版本目录,文件名与 `plugin.json` 的 `main` 一致。
 - 改完页面文件后跑 `node --check` 校验 JS;改完协议/Rust 跑 `cargo run --example smoke` 冒烟。
