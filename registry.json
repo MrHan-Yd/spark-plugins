@@ -194,7 +194,12 @@
           "sha256": null,
           "size": null,
           "released": "2026-09-09",
-          "signature": null
+          "signature": {
+            "schema": 1,
+            "key_id": "spark-official-v1",
+            "algorithm": "ed25519",
+            "signature": "wEO0asVbxNlgixtYyQCOe5dNUDEVw0L1xnC7dhp13RHEoym/ilY3dHXSYpnoSaQcyyqyPaYD7FkCG1hJ6yKQAA=="
+          }
         }
       ]
     }

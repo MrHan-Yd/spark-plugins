@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "plugin_id": "com.spark.hosts-switcher",
+  "version": "0.1.0",
+  "algorithm": "ed25519",
+  "key_id": "spark-official-v1",
+  "signed_at": "2026-09-09T09:55:03Z",
+  "files": [
+    {
+      "path": "editor.js",
+      "sha256": "eafaae755e3382865e4bbd94de4a933e39df28d4ab4c12cc772f7a770169acac"
+    },
+    {
+      "path": "icon.svg",
+      "sha256": "6aefc156c8eff908a9ce04b46a6701518ec3e6e1b7ee6d0da73685785dec9ca8"
+    },
+    {
+      "path": "page.css",
+      "sha256": "4da59a0754fbcaaa32b1b008bff62d5c77e9df51367ff365cb1d1fe9f5a16b97"
+    },
+    {
+      "path": "page.html",
+      "sha256": "39141e6a4b46bf3d2de09cff16b999f52f719456682e1da51e5190a94315452b"
+    },
+    {
+      "path": "page.js",
+      "sha256": "e8eb36b88fe90d8c72504cb3d6335e5cba597948a76e7550c51747a8f4707291"
+    },
+    {
+      "path": "plugin.json",
+      "sha256": "a3882fd707bf580b07162a5ecbc159ae93c9c1f29b4943bb953e5ab6bb4ce8b5"
+    },
+    {
+      "path": "spark-plugin-hosts-switcher.exe",
+      "sha256": "b5d08028cb3ac6960db2db6f8455bcff8cc699978f17dfb85f480c18a73a45c7"
+    },
+    {
+      "path": "vim.js",
+      "sha256": "51fb0cceeb65e54527a89a0cb6cd432ee8e078adbc2c264f37f9deb54dfffab1"
+    }
+  ],
+  "signature": "wEO0asVbxNlgixtYyQCOe5dNUDEVw0L1xnC7dhp13RHEoym/ilY3dHXSYpnoSaQcyyqyPaYD7FkCG1hJ6yKQAA=="
+}
