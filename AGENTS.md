@@ -41,16 +41,19 @@
 
 ### 仓库内正反例
 
-- ✅ `code-calc/0.1.0/`:index.html 87 行 + style.css 196 行 + app.js 666 行 + engine.js 1210 行
-- ✅ `local-search/0.1.0/`:page.html 93 行 + page.css 156 行 + page.js 311 行
-- ✅ `pdf-toolkit/0.1.0/`:index.html 359 行 + style.css 403 行 + js/(app.js 575 + tools.js 591
+- ✅ `code-calc/0.1.0/`:index.html 87 行 + style.css 196 行 + app.js 688 行 + engine.js 1210 行
+- ✅ `local-search/0.1.0/`:page.html 93 行 + page.css 156 行 + page.js 390 行
+- ✅ `pdf-toolkit/0.1.0/`:index.html 359 行 + style.css 403 行 + js/(app.js 597 + tools.js 591
   + merge.js 410 + engine.js 938 + convert.js 554;JS 已归档 `js/` 子目录——owner 2026-09-08 决定,
   本插件例外于"不放进子目录",页面引用 `js/*.js`)(外壳/工具/合并编辑器/引擎/转换五层拆分)
-- ❌ `compare/0.1.0/index.html`(2801 行)、`json-formatter/0.1.0/index.html`(1163 行):
+- ❌ `compare/0.1.0/index.html`(2823 行)、`json-formatter/0.1.0/index.html`(1185 行):
   历史单文件巨石,**不要求立刻重写**;但 agent 一旦要改它们,先按阈值判断是否顺手提取。
 
 ## 2. 其它硬性约束
 
+- 新插件页面一律带「页面加固」段(禁默认右键菜单 + capture keydown 拦 F12/F5/Ctrl+P/Ctrl+Shift+I|J|C,
+  Ctrl+R 非编辑焦点才拦;input/textarea 豁免右键拦截):代码模板见 `docs/插件开发/WebView插件开发.md` §12
+  与 `Native插件开发.md` §12,参考实现 `hosts-switcher/0.1.0/page.js`「页面加固」段。
 - 发布物直接在 `<插件>/<版本>/` 目录内迭代;开发阶段**不新建版本目录、不改版本号**。
 - 涉及 exe 的改动:`cargo build --release` 后把产物复制进版本目录,文件名与 `plugin.json` 的 `main` 一致。
 - 改完页面文件后跑 `node --check` 校验 JS;改完协议/Rust 跑 `cargo run --example smoke` 冒烟。

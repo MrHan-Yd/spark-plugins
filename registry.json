@@ -2,7 +2,7 @@
   "schema": 1,
   "name": "Spark 官方插件仓库",
   "zipball_url": "https://github.com/MrHan-Yd/spark-plugins/archive/refs/heads/master.zip",
-  "updated": "2026-09-08T00:00:00Z",
+  "updated": "2026-09-09T00:00:00Z",
   "plugins": [
     {
       "id": "com.spark.json-formatter",
@@ -28,7 +28,7 @@
             "schema": 1,
             "key_id": "spark-official-v1",
             "algorithm": "ed25519",
-            "signature": "28AjBkHCj3BthlxQmI/WWZUsKX6U6mQ4ZlJK38Nd7ZmisU01aqATExUKl39q3JTMq/Qljelmp48XnyjHkDDYAA=="
+            "signature": "Jm2D6h4m0xZzsjnn7/Veo9xjuTFCIHohqXqLe94yScIUwWSpqxWkexkptHHD3v65pkZNZFXcUJ0oq+fVSE1kDg=="
           }
         }
       ]
@@ -57,7 +57,7 @@
             "schema": 1,
             "key_id": "spark-official-v1",
             "algorithm": "ed25519",
-            "signature": "bT9CT3EkWhLoM//73cqINgFFyX+m7O2JZKj5u+q4fQzLA8vVQZnXEEk9vh9hZ2ehuM3tLIAyZTh1RKzEGNf5BA=="
+            "signature": "fTityxY/jZogMlmWPmRaYEUa1o29/VWCMLYnDZkqPQq5+EwCQYFFGjAmuuf/hvdOS1wYSzbMsX4j/GQX58wxAg=="
           }
         }
       ]
@@ -86,7 +86,7 @@
             "schema": 1,
             "key_id": "spark-official-v1",
             "algorithm": "ed25519",
-            "signature": "yBbv8v3qEuoqxWZoshLDwV/+SP0EiOGgnKu3GtW2dAze/bvlqrSTZ1A+tV25NOFuF67oGPStkZ7314O1ZyhRDA=="
+            "signature": "tlFWkgMK9HwQJUmIGNLePpmTBIOcstXD8PtPHAQl1pc4JAKtuDgywf5y7xQEO+uJTHRGPbzxtWKXnTPFvLCiAw=="
           }
         }
       ]
@@ -113,7 +113,7 @@
             "schema": 1,
             "key_id": "spark-official-v1",
             "algorithm": "ed25519",
-            "signature": "f9pu56ywffcStIbE5HVPPRchu4o0nXU51+FKBEJVKweZdorCTB2ev7pBJuqRyf6BNkRmhYSa2AHzjz+9yGLHBA=="
+            "signature": "841FO8BmyUSPu+4AlYDv4J5D6UH1UIfwW6OH63r1tCAomI+hgjBva+xtP3W9xgSD7xgRRgkS4d34sFeTEKj+CQ=="
           }
         }
       ]
@@ -142,7 +142,7 @@
             "schema": 1,
             "key_id": "spark-official-v1",
             "algorithm": "ed25519",
-            "signature": "BXH5WdDoOlJYJdpQPEXm+nUGuRT7CDbxNBRlj5HuP6c7wE18vgamkd0sJ/aOCpCHBKLOlH1poNqMbKLIScEgBQ=="
+            "signature": "oAdzC9wLl1Na4hxCOj9uHJK73FVAmfYprsLOzzHKyew4c3rNQ9rS/RLa2Pir8wfVR/uknxTu7SyZD4zrM8qOAA=="
           }
         }
       ]
@@ -171,8 +171,30 @@
             "schema": 1,
             "key_id": "spark-official-v1",
             "algorithm": "ed25519",
-            "signature": "Xla496fLHuZU/0lS+XWf6nSCX0EAFgYY0QLBOcjs7Mzc12KtK2u6cjbw3WjRLN1tQK0TTzJ7mHljQqeB3/fFAw=="
+            "signature": "U25S30tbZIetPB5gi042WBG/xgcfgsJp+MYRcQfaEBVS0/LOiv8lTCkvYUkJei0yUyk1IYszLH3m1giV0v/lDQ=="
           }
+        }
+      ]
+    },
+    {
+      "id": "com.spark.hosts-switcher",
+      "name": "Hosts切换",
+      "description": "多套 hosts 方案自由组合:首次读取系统 hosts 为公共配置,勾选一个或多个方案合并写入,双击即切;明暗主题、vim 编辑、写入前自动备份、自动刷新 DNS 缓存",
+      "author": "Spark",
+      "homepage": "https://github.com/MrHan-Yd/spark-plugins/tree/master/hosts-switcher",
+      "icon": "https://raw.githubusercontent.com/MrHan-Yd/spark-plugins/master/hosts-switcher/0.1.0/icon.svg",
+      "runtime": "native",
+      "latest": "0.1.0",
+      "permissions": [],
+      "versions": [
+        {
+          "version": "0.1.0",
+          "path": "hosts-switcher/0.1.0",
+          "url": null,
+          "sha256": null,
+          "size": null,
+          "released": "2026-09-09",
+          "signature": null
         }
       ]
     }

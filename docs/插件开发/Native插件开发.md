@@ -332,4 +332,42 @@ host 懒启动 exe + plugin.initialize 握手（最坏 ~5s，其后常驻）
 
 ---
 
+## 12. 页面加固：屏蔽右键与浏览器快捷键（默认必做）
+
+native 页面（`page.html` 及其 JS）与 webview 页面同规：**默认带一段「页面加固」**，屏蔽 WebView2 的默认右键菜单与浏览器快捷键，避免用户在插件窗口里调出浏览器级的右键菜单 / DevTools / 刷新 / 打印（webview 侧同款要求见 [WebView插件开发.md](./WebView插件开发.md) §12）：
+
+```js
+/* ── 页面加固：屏蔽默认右键菜单与浏览器快捷键 ── */
+document.addEventListener('contextmenu', e => {
+  // 输入框/文本域保留系统菜单（剪切/复制/粘贴）
+  if (e.target && e.target.closest && e.target.closest('input, textarea')) return;
+  e.preventDefault();
+});
+document.addEventListener('keydown', e => {
+  const k = (e.key || '').toLowerCase();
+  const editing = e.target && e.target.closest && e.target.closest('input, textarea');
+  // DevTools / 打印 / 刷新：任何焦点都拦（F12、F5、Ctrl+Shift+I/J/C、Ctrl+P）
+  if (k === 'f12' || k === 'f5' ||
+      (e.shiftKey && (e.ctrlKey || e.metaKey) && (k === 'i' || k === 'j' || k === 'c')) ||
+      ((e.ctrlKey || e.metaKey) && !e.shiftKey && k === 'p')) {
+    e.preventDefault();
+    return;
+  }
+  // Ctrl+R：输入框/文本域内放行（页内可能作它用，如编辑器 redo）；其余位置（会整页刷新）拦截
+  if (!editing && (e.ctrlKey || e.metaKey) && !e.shiftKey && k === 'r') {
+    e.preventDefault();
+  }
+}, true);
+```
+
+要点：
+
+- **右键**：document 级全局拦；`input`/`textarea` 内豁免（保留剪切/复制/粘贴系统菜单）；页面自建的自定义右键菜单（若有）不受影响。
+- **快捷键**：capture 阶段（第三参 `true`）注册，先于页面其它 keydown 处理器生效；F12 / F5 / Ctrl+P / Ctrl+Shift+I|J|C 任何焦点都拦；Ctrl+R 只在非编辑焦点时拦（注意：若页面自身在编辑器里把 Ctrl+R 用作别的功能，编辑焦点内自动放行，无需额外处理）。
+- **放行范围**：只拦上述键，其余（Tab、Enter、Ctrl+C/V/S 等）一律不碰，页面自身快捷键不受影响。
+- **已知边界**：若宿主 WebView2 在页面之前就把浏览器加速键消费掉，F12/Ctrl+Shift+I 可能仍会打开 DevTools——页面 JS 管不到；兜底是 host 侧正式安装版默认关闭 DevTools，开发调试走插件卡片的「调试」入口。
+- 参考实现：本仓库 native 插件页面均含此段（如 `hosts-switcher/0.1.0/page.js`「页面加固」段，2026-09-09 起全部插件统一）。
+
+---
+
 > 本指南面向原生插件开发者。完整字段 schema、IPC 方法表、版本兼容策略见 [插件开发规范.md](./插件开发规范.md)。

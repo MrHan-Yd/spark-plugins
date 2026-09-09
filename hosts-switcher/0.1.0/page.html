@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>Hosts切换</title>
+<link rel="stylesheet" href="page.css">
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M7 3.5h7L18.5 8v11a1.8 1.8 0 0 1-1.8 1.8H7A1.8 1.8 0 0 1 5.2 19V5.3A1.8 1.8 0 0 1 7 3.5z" fill="none" stroke="var(--accent)" stroke-width="1.9" stroke-linejoin="round"/>
+        <path d="M9.2 8.4h5.6M9.2 11.6h3.4" stroke="var(--accent)" stroke-width="1.7" stroke-linecap="round" opacity=".6"/>
+        <path d="M8.8 15.4h6m0 0-2.4-2.4m2.4 2.4-2.4 2.4" stroke="var(--text)" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/>
+      </svg>
+      <div class="bt"><b>Hosts切换</b><span>多套方案合并写入系统 hosts</span></div>
+    </div>
+    <div class="tools">
+      <button id="btnBase" class="tb" title="查看/编辑公共配置(合并的基础内容)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 4.5A1.5 1.5 0 0 1 8 3h8.5A1.5 1.5 0 0 1 18 4.5v15a1.5 1.5 0 0 1-1.5 1.5H8a1.5 1.5 0 0 1-1.5-1.5z"/><path d="M9.5 8h5.5M9.5 11.5h5.5M9.5 15h3"/></svg>公共配置
+      </button>
+      <button id="btnPreview" class="tb" title="预览公共配置 + 勾选方案的合并结果">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg>预览合并
+      </button>
+      <button id="btnHelp" class="tb" title="hosts 不可写 / DNS 缓存清理 / 文件位置">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.6"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.6 2.9c-.8.5-1.2 1-1.2 2"/><path d="M12 17.3h.01"/></svg>帮助
+      </button>
+      <span class="vsep"></span>
+      <button id="btnTheme" class="tb icon" title="切换明暗主题">
+        <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M20 14.5A8.8 8.8 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
+        <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <button id="btnNew" class="tb">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>新建方案
+    </button>
+    <span id="toolHint" class="toolhint">双击方案 = 立即写入 hosts · 右键方案管理</span>
+    <span class="grow"></span>
+    <button id="btnApply" class="btn primary">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l4.7 4.7L19.5 6.9"/></svg><span id="applyText">应用到 hosts</span>
+    </button>
+  </div>
+
+  <main id="list" class="list"></main>
+
+  <footer class="status">
+    <span id="stDot" class="dot"></span>
+    <span id="stText">连接插件中…</span>
+    <span class="grow"></span>
+    <span id="stPath" class="stpath" title="在资源管理器中定位 hosts 文件"></span>
+  </footer>
+</div>
+
+<!-- 右键菜单 -->
+<div id="ctx" class="ctx" role="menu">
+  <button data-act="apply" class="ctxi primary">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l4.7 4.7L19.5 6.9"/></svg>应用并写入 hosts
+  </button>
+  <button data-act="edit" class="ctxi">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4.2L19.5 8.7a2.1 2.1 0 0 0 0-3L18.3 4.5a2.1 2.1 0 0 0-3 0L4 15.8z"/><path d="M13.6 6.2l4.2 4.2"/></svg>编辑
+  </button>
+  <button data-act="rename" class="ctxi">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V5.5A1.5 1.5 0 0 1 5.5 4H7M4 17v1.5A1.5 1.5 0 0 0 5.5 20H7M17 4h1.5A1.5 1.5 0 0 1 20 5.5V7M17 20h1.5a1.5 1.5 0 0 0 1.5-1.5V17"/><path d="M9 12h6"/></svg>重命名
+  </button>
+  <button data-act="dup" class="ctxi">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8.5" y="8.5" width="11" height="11" rx="1.6"/><path d="M15.5 5.5h-10a1 1 0 0 0-1 1v10"/></svg>复制副本
+  </button>
+  <span class="ctxsep"></span>
+  <button data-act="del" class="ctxi danger">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 6.5h15M9.5 6.5V5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v1.5M6.5 6.5l1 13h9l1-13"/><path d="M10 10.5v5.5M14 10.5v5.5"/></svg>删除
+  </button>
+</div>
+
+<div id="mask" class="mask"></div>
+
+<!-- 编辑抽屉(方案 / 公共配置共用) -->
+<aside id="edDrawer" class="drawer wide" aria-hidden="true">
+  <div class="dhead">
+    <b id="edTitle">编辑方案</b>
+    <button id="btnEdClose" class="tb icon" title="关闭">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <div class="dbody edbody">
+    <div id="edNameRow">
+      <div class="dlabel"><span>方案名</span></div>
+      <input id="edName" type="text" spellcheck="false" autocomplete="off" placeholder="例如:开发环境 / 测试环境 / 内网调试">
+    </div>
+    <div class="dlabel edhint"><span id="edHint" class="mono-hint">每行一条,格式:IP 域名;以 # 开头的行为注释</span></div>
+    <div id="edImportRow" class="hidden">
+      <button id="btnImportCur" class="tb" title="把当前系统 hosts 的内容覆盖到公共配置">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v10.5M12 14.5l-4-4M12 14.5l4-4"/><path d="M4.5 17.5V19a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5v-1.5"/></svg>从当前系统 hosts 导入内容
+      </button>
+      <button id="btnBackupBase" class="tb" title="备份到插件安装目录 backups/ 下,列表中自动显示备份条目">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14.5V4M12 14.5l-4-4M12 14.5l4-4"/><path d="M4.5 17.5V19a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5v-1.5"/></svg>备份公共配置
+      </button>
+    </div>
+    <div class="editor">
+      <div id="edGutter" class="gutter" aria-hidden="true">1</div>
+      <textarea id="edText" class="edtext" spellcheck="false" wrap="off"></textarea>
+    </div>
+  </div>
+  <div class="edfoot">
+    <label class="vimswitch" id="vimWrap" title="vim 键位编辑(hjkl 移动 / dd 删除行 / :w 保存)">
+      <input type="checkbox" id="vimToggle"><i></i><span>vim 模式</span>
+    </label>
+    <span id="vimMode" class="vimmode hidden">NORMAL</span>
+    <span id="vimCmdWrap" class="vimcmd hidden">:<input id="vimCmd" type="text" spellcheck="false" autocomplete="off"></span>
+    <span id="vimPos" class="vimpos"></span>
+    <span class="grow"></span>
+    <button id="btnBkRestore" class="btn hidden">恢复为公共配置</button>
+    <button id="btnBkToScheme" class="btn hidden">转为方案</button>
+    <button id="btnEdCancel" class="btn">取消</button>
+    <button id="btnEdSave" class="btn primary">保存</button>
+  </div>
+</aside>
+
+<!-- 预览抽屉 -->
+<aside id="pvDrawer" class="drawer" aria-hidden="true">
+  <div class="dhead">
+    <b>预览合并结果</b>
+    <button id="btnPvClose" class="tb icon" title="关闭">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <div class="dbody">
+    <div class="dlabel"><span id="pvMeta"></span><span>写入前的完整内容</span></div>
+    <pre id="pvText" class="pvtext"></pre>
+  </div>
+  <div class="dfoot">
+    <button id="btnPvCopy" class="btn">复制</button>
+    <button id="btnPvApply" class="btn primary">应用并写入 hosts</button>
+  </div>
+</aside>
+
+<!-- 帮助抽屉 -->
+<aside id="hpDrawer" class="drawer" aria-hidden="true">
+  <div class="dhead">
+    <b>帮助</b>
+    <button id="btnHpClose" class="tb icon" title="关闭">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <div class="dbody hpbody">
+    <section>
+      <h4>提示 hosts 文件不可写?</h4>
+      <p>查看 <code>C:\Windows\System32\drivers\etc\hosts</code> 文件属性,取消文件只读属性。</p>
+      <p>如果不想每次都弹出授权窗口,或 360 拦截窗口,可以在 hosts 文件属性中切换到「安全」标签,点击「编辑」,选择你当前的登录用户名,在权限列表中勾选「写入」,保存退出。</p>
+    </section>
+    <section>
+      <h4>如何清理浏览器缓存</h4>
+      <p>本插件在每次写入 hosts 后会自动刷新系统 DNS 缓存(ipconfig /flushdns),但浏览器可能还有自己的内部缓存。如果切换后解析不正确,可以新开一个无痕浏览标签,或参考以下方法清空 DNS 缓存。</p>
+      <p><b>Chrome 浏览器</b></p>
+      <p>1. 地址栏中输入 <code>chrome://net-internals/#dns</code><br>2. 右上角下拉菜单中选择:<code>Clear cache</code> 和 <code>Flush sockets</code></p>
+      <p><b>Firefox 浏览器</b></p>
+      <p>1. 地址栏中输入 <code>about:config</code><br>2. 搜索 <code>network.dnsCacheExpirationGracePeriod</code>,编辑此项值为 0</p>
+      <button id="btnFlush" class="btn">立即刷新系统 DNS 缓存</button>
+    </section>
+    <section>
+      <h4>系统 hosts 文件位置</h4>
+      <p class="mono">C:\Windows\System32\drivers\etc\hosts</p>
+      <button id="btnReveal" class="btn">在资源管理器中定位 hosts</button>
+      <p class="note">每次写入前,插件都会把当前内容自动备份到同目录 <code>hosts.spark-backup</code>。</p>
+    </section>
+  </div>
+</aside>
+
+<!-- 确认/输入弹窗 -->
+<div id="modal" class="modal">
+  <div class="mcard">
+    <b id="mdTitle">确认</b>
+    <p id="mdBody"></p>
+    <input id="mdInput" type="text" spellcheck="false" autocomplete="off" class="hidden">
+    <div class="mfoot">
+      <button id="btnMdCancel" class="btn">取消</button>
+      <button id="btnMdOk" class="btn primary">确定</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status"></div>
+
+<script src="vim.js"></script>
+<script src="page.js"></script>
+<script src="editor.js"></script>
+</body>
+</html>

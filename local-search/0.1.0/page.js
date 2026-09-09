@@ -366,3 +366,25 @@ $('#btnSave').addEventListener('click', saveSettings);
 /* ── 启动 ──────────────────────────────────────────────── */
 elQ.focus();
 runSearch();
+
+/* ── 页面加固：屏蔽默认右键菜单与浏览器快捷键 ── */
+document.addEventListener('contextmenu', e => {
+  /* 输入框/文本域保留系统菜单（剪切/复制/粘贴） */
+  if (e.target && e.target.closest && e.target.closest('input, textarea')) return;
+  e.preventDefault();
+});
+document.addEventListener('keydown', e => {
+  const k = (e.key || '').toLowerCase();
+  const editing = e.target && e.target.closest && e.target.closest('input, textarea');
+  /* DevTools / 打印 / 刷新：任何焦点都拦（F12、F5、Ctrl+Shift+I/J/C、Ctrl+P） */
+  if (k === 'f12' || k === 'f5' ||
+      (e.shiftKey && (e.ctrlKey || e.metaKey) && (k === 'i' || k === 'j' || k === 'c')) ||
+      ((e.ctrlKey || e.metaKey) && !e.shiftKey && k === 'p')) {
+    e.preventDefault();
+    return;
+  }
+  /* Ctrl+R：输入框/文本域内放行；其余位置（会整页刷新）拦截 */
+  if (!editing && (e.ctrlKey || e.metaKey) && !e.shiftKey && k === 'r') {
+    e.preventDefault();
+  }
+}, true);

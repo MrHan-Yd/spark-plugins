@@ -1,0 +1,39 @@
+{
+  "id": "com.spark.hosts-switcher",
+  "name": "Hosts切换",
+  "version": "0.1.0",
+  "api_version": 2,
+  "runtime": "native",
+  "main": "spark-plugin-hosts-switcher.exe",
+  "page": "page.html",
+  "icon": "icon.svg",
+  "author": "Spark",
+  "description": "多套 hosts 方案自由组合:首次读取系统 hosts 为公共配置,勾选一个或多个方案合并写入,双击即切;明暗主题、vim 编辑、写入前自动备份、自动刷新 DNS 缓存",
+  "homepage": "https://github.com/MrHan-Yd/spark-plugins/tree/master/hosts-switcher",
+  "features": [
+    {
+      "type": "keyword",
+      "keyword": "hosts",
+      "title": "Hosts切换",
+      "subtitle": "多方案合并切换 · 双击即写 · vim 编辑",
+      "mode": "page",
+      "placeholder": "回车打开 Hosts切换…"
+    },
+    {
+      "type": "keyword",
+      "keyword": "Hosts切换",
+      "title": "Hosts切换",
+      "subtitle": "多方案合并切换 · 双击即写 · vim 编辑",
+      "mode": "page",
+      "placeholder": "回车打开 Hosts切换…"
+    }
+  ],
+  "window": {
+    "width": 1000,
+    "height": 680,
+    "minWidth": 640,
+    "minHeight": 460,
+    "resizable": true
+  },
+  "permissions": []
+}
