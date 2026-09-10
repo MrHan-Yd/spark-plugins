@@ -1,0 +1,37 @@
+{
+  "id": "com.spark.regex-lab",
+  "name": "正则编辑器",
+  "version": "0.1.0",
+  "api_version": 2,
+  "runtime": "webview",
+  "main": "index.html",
+  "icon": "icon.svg",
+  "author": "Spark",
+  "description": "从示例文本自动推断正则，大文本分块扫描高频模式（邮箱/IP/URL/日期等），Worker 隔离测试防灾难性回溯，大内容不卡界面不崩溃",
+  "permissions": ["clipboard"],
+  "features": [
+    {
+      "type": "keyword",
+      "keyword": "regex",
+      "title": "正则编辑器",
+      "subtitle": "示例生成 · 内容分析 · 安全测试",
+      "mode": "page",
+      "placeholder": "粘贴文本作为测试内容…"
+    },
+    {
+      "type": "keyword",
+      "keyword": "正则",
+      "title": "正则编辑器",
+      "subtitle": "示例生成 · 内容分析 · 安全测试",
+      "mode": "page",
+      "placeholder": "粘贴文本作为测试内容…"
+    }
+  ],
+  "window": {
+    "width": 1100,
+    "height": 720,
+    "minWidth": 680,
+    "minHeight": 440,
+    "resizable": true
+  }
+}

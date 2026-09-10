@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>正则编辑器</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
+        <circle cx="20" cy="40" r="6.5" fill="var(--accent2)"/>
+        <g stroke="var(--accent)" stroke-width="5" stroke-linecap="round" fill="none">
+          <path d="M41 15v26"/>
+          <path d="M28.5 22.5l25 11"/>
+          <path d="M53.5 22.5l-25 11"/>
+        </g>
+      </svg>
+      <div class="bt"><b>正则编辑器</b><span>示例生成 · 大文本分析 · 安全测试</span></div>
+    </div>
+    <div class="tools">
+      <button id="btnExplain" class="tb" data-tip="逐段解读当前正则的含义">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 19.5V6a2 2 0 0 1 2-2H20v14H6.5a2.5 2.5 0 0 0 0 5H20"/><path d="M9 8h7M9 12h5"/></svg>解读
+      </button>
+      <button id="btnCopyPat" class="tb" data-tip="复制上方正则">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>复制正则
+      </button>
+      <span class="tsep"></span>
+      <button id="btnTheme" class="tb icon" data-tip="切换明暗主题">
+        <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M20 14.5A8.8 8.8 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
+        <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="patternbar">
+    <span class="pblabel">正则</span>
+    <input id="pattern" class="mono" placeholder="输入正则，如 \d{4}-\d{2}-\d{2}，或从右侧「生成 / 分析」得到" spellcheck="false" autocomplete="off">
+    <div class="flagchips" id="flagchips">
+      <button data-flag="g" class="chip on" data-tip="g 全局：找遍全部命中，不加只找第一处。匹配计数/高亮/列表都依赖它，一般保持开启">g</button>
+      <button data-flag="i" class="chip" data-tip="i 忽略大小写：abc 也能命中 ABC、AbC">i</button>
+      <button data-flag="m" class="chip" data-tip="m 多行：^ 和 $ 按每一行的行首/行尾算。整行锚定的生成结果去测试时插件会自动加上">m</button>
+      <button data-flag="s" class="chip" data-tip="s 点号通配：让 . 也能匹配换行符（默认 . 不跨行）">s</button>
+      <button data-flag="u" class="chip" data-tip="u Unicode：按码点解析模式，支持 \p{...} 属性与 emoji">u</button>
+    </div>
+    <button id="btnRun" class="tb primary">测试</button>
+    <span id="matchStat" class="pbstat"></span>
+  </div>
+  <div class="explainbar mono" id="explainBar" hidden></div>
+
+  <main class="stage">
+    <section class="editor">
+      <div class="editorbar">
+        <span class="et">测试内容</span>
+        <span id="contentStat" class="hint"></span>
+        <span class="grow"></span>
+        <label class="chk" data-tip="内容 ≤512KB 时在原文上高亮命中位置；超限自动停用（不影响匹配统计）"><input type="checkbox" id="chkHl" checked>高亮预览</label>
+        <button id="btnSample" class="tb small">示例数据</button>
+        <button id="btnClear" class="tb small danger">清空</button>
+      </div>
+      <div class="codebox" id="codebox">
+        <div class="hl mono" id="hl" aria-hidden="true"></div>
+        <textarea id="content" class="code mono" spellcheck="false" wrap="off" autocomplete="off"
+          autocorrect="off" autocapitalize="off" aria-label="测试内容输入区"
+          placeholder="粘贴任意大小的文本：日志、JSON、CSV、代码…&#10;右侧「生成」页可从示例行推断正则；「分析」页扫描高频模式；「常用」页有现成模板。"></textarea>
+      </div>
+      <div class="matches">
+        <div class="replrow">
+          <label for="repl">替换预览</label>
+          <input id="repl" class="mono" placeholder="填替换文本（$1 引用分组），留空则不预览" spellcheck="false" autocomplete="off">
+          <span id="replStat" class="hint"></span>
+        </div>
+        <div id="replPreview" class="replprev mono" hidden></div>
+        <div class="mhead"><span>匹配列表 <span id="matchHint" class="hint"></span></span><span class="hint">点击定位到原文</span></div>
+        <div class="mlist mono" id="mlist"></div>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="ptabs">
+        <button class="ptab active" data-tab="gen">生成</button>
+        <button class="ptab" data-tab="scan">分析</button>
+        <button class="ptab" data-tab="lib">常用</button>
+      </div>
+      <div class="pbody">
+        <div class="tabpane" id="pane-gen">
+          <label class="pt" for="examples">示例（每行一条，越相似越准确）</label>
+          <textarea id="examples" class="mono" rows="6" spellcheck="false" placeholder="如：&#10;2026-09-09&#10;2026-1-2&#10;2025-12-31"></textarea>
+          <div class="optrow">
+            <label data-tip="整行匹配：生成 ^…$ 锚定，要求整行完全匹配；只想匹配行内片段请取消此项"><input type="checkbox" id="optAnchor" checked>整行匹配 ^…$</label>
+            <label data-tip="紧凑写法：用 \d \w 简写代替 [0-9] 等字符类，更短更好读"><input type="checkbox" id="optCompact" checked>紧凑写法 \d \w</label>
+            <label data-tip="合并大小写：把 [a-z] 与 [A-Z] 归并为 [A-Za-z]"><input type="checkbox" id="optFold">合并大小写</label>
+          </div>
+          <div class="btnrow">
+            <button id="btnFromContent" class="tb" data-tip="用左侧内容的选区或前 200 行作为示例；行内片段会自动按片段模式生成">取自内容</button>
+            <span class="grow"></span>
+            <button id="btnGenerate" class="tb primary">生成正则</button>
+          </div>
+          <div id="genResult" class="genresult" hidden>
+            <div class="pt">生成的正则</div>
+            <div class="patbox mono" id="genPattern"></div>
+            <div class="pt">解读</div>
+            <ul class="expl" id="genExplain"></ul>
+            <div class="btnrow">
+              <button id="btnGenCopy" class="tb small">复制</button>
+              <button id="btnDeAnchor" class="tb small" hidden data-tip="取消 ^…$ 锚定并按片段模式重新生成，可命中行内任意位置">改为片段匹配</button>
+              <span class="grow"></span>
+              <button id="btnGenTest" class="tb small primary">去测试 →</button>
+            </div>
+            <div id="genNotes" class="notes"></div>
+          </div>
+        </div>
+
+        <div class="tabpane hidden" id="pane-scan">
+          <div class="btnrow">
+            <button id="btnScan" class="tb primary">扫描内容</button>
+            <span class="grow"></span>
+            <button id="btnScanCancel" class="tb small" hidden>取消</button>
+          </div>
+          <div class="progwrap" id="progwrap"><div id="scanBar"></div></div>
+          <div id="scanStats" class="scanstats hint"></div>
+          <div id="scanList" class="scanlist"></div>
+        </div>
+
+        <div class="tabpane hidden" id="pane-lib">
+          <div class="libgrid" id="libGrid"></div>
+          <p class="hint libhint">点击模板填入上方正则并立即测试。</p>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="dock">
+    <span id="stL">就绪</span>
+    <span class="grow"></span>
+    <span id="stR" class="hint"></span>
+  </footer>
+</div>
+
+<div id="toast" class="toast" role="status"></div>
+<div id="tip" class="tip" role="tooltip"></div>
+
+<script src="generator.js"></script>
+<script src="scanner.js"></script>
+<script src="matcher.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

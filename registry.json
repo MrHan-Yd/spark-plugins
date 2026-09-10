@@ -202,6 +202,35 @@
           }
         }
       ]
+    },
+    {
+      "id": "com.spark.regex-lab",
+      "name": "正则编辑器",
+      "description": "从示例自动推断正则，大文本分块扫描高频模式（邮箱/IP/URL/日期等），Worker 隔离测试防灾难性回溯，大内容不卡界面不崩溃",
+      "author": "Spark",
+      "homepage": "https://github.com/MrHan-Yd/spark-plugins/tree/master/regex-lab",
+      "icon": "https://raw.githubusercontent.com/MrHan-Yd/spark-plugins/master/regex-lab/0.1.0/icon.svg",
+      "runtime": "webview",
+      "latest": "0.1.0",
+      "permissions": [
+        "clipboard"
+      ],
+      "versions": [
+        {
+          "version": "0.1.0",
+          "path": "regex-lab/0.1.0",
+          "url": null,
+          "sha256": null,
+          "size": null,
+          "released": "2026-09-10",
+          "signature": {
+            "schema": 1,
+            "key_id": "spark-official-v1",
+            "algorithm": "ed25519",
+            "signature": "rFWjTfyh2F5ZKp9w6FrZetAMCfGpVEuAsToPfKP4vsNXn7fqixWiVDJDj/wS847qnQKX66F/vTHu3utxD2AbAw=="
+          }
+        }
+      ]
     }
   ]
 }
