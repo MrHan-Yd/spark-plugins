@@ -49,6 +49,9 @@ body {
   user-select: none;
 }
 
+/* body 的 user-select:none 会被输入框继承,显式恢复 */
+input, textarea { user-select: text; }
+
 /* ── 顶栏 ── */
 
 .topbar {

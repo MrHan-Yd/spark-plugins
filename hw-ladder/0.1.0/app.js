@@ -101,25 +101,26 @@ document.addEventListener('keydown', function (e) {
     return new Date(t).toISOString().slice(0, 10);
   }
 
-  function viaLabel(via, partial) {
-    if (via === 'network') return partial ? '在线 · 部分' : '在线';
-    if (via === 'cache') return '缓存';
-    if (via === 'builtin') return '出厂快照';
-    return '无数据';
+  function failText(f) {
+    var label = f.label || window.HWL_SOURCES.SOURCE_LABEL[f.source] || f.source || '联网';
+    return label + ':' + f.error;
   }
 
   function render() {
     var rec = state.snaps[state.cat];
     var snap = rec && rec.snapshot;
     var cat = state.cat;
-    els.headMetric.textContent = snap ? (snap.metric || '分数') : '分数';
+    els.headMetric.textContent = snap && snap.metric ? snap.metric : '分数';
+    buildSourceSelect(rec);
 
-    if (!snap) {
+    if (!snap || !Array.isArray(snap.items)) {
       els.rows.textContent = '';
+      var busy = !!state.busy[cat];
+      els.empty.textContent = busy ? '抓取中…' : '暂无数据,所有数据源均不可用';
       els.empty.hidden = false;
       els.more.hidden = true;
       els.srcBadge.textContent = '—';
-      els.statusText.textContent = '所有数据源不可用';
+      els.statusText.textContent = busy ? '抓取中…' : '暂无数据,所有数据源均不可用';
       return;
     }
 
@@ -174,6 +175,7 @@ document.addEventListener('keydown', function (e) {
     }
     els.rows.textContent = '';
     els.rows.appendChild(frag);
+    els.empty.textContent = '没有匹配的型号';
     els.empty.hidden = shown.length > 0;
     els.more.hidden = shown.length >= items.length;
     if (shown.length < items.length) {
@@ -183,19 +185,7 @@ document.addEventListener('keydown', function (e) {
     renderStatus(rec);
   }
 
-  function renderStatus(rec) {
-    var snap = rec.snapshot;
-    var label = window.HWL_SOURCES.SOURCE_LABEL[snap.source] || snap.source;
-    els.srcBadge.textContent = label;
-    var bits = [snap.metric || ''];
-    bits.push('共 ' + snap.count.toLocaleString('en-US') + ' 条');
-    bits.push('抓取于 ' + fmtTime(snap.fetched_at));
-    var via = { network: '在线', cache: '缓存', builtin: '出厂快照' }[rec.via] || rec.via;
-    if (rec.via === 'network' && snap.partial) via += ' · 部分';
-    bits.push(via);
-    els.statusText.textContent = bits.filter(Boolean).join(' · ');
-
-    // 源下拉
+  function buildSourceSelect(rec) {
     var chain = window.HWL_SOURCES.CHAIN[state.cat] || [];
     var sel = els.sourceSelect;
     sel.textContent = '';
@@ -209,14 +199,28 @@ document.addEventListener('keydown', function (e) {
       opt.textContent = window.HWL_SOURCES.SOURCE_LABEL[chain[i]] || chain[i];
       sel.appendChild(opt);
     }
-    sel.value = snap.source && rec.via !== 'builtin' ? snap.source : '';
+    sel.disabled = !!state.busy[state.cat];
+    sel.value = rec && rec.snapshot && rec.snapshot.source && rec.via !== 'builtin' ? rec.snapshot.source : '';
+  }
+
+  function renderStatus(rec) {
+    var snap = rec.snapshot;
+    var label = window.HWL_SOURCES.SOURCE_LABEL[snap.source] || snap.source;
+    els.srcBadge.textContent = label;
+    var bits = [snap.metric || ''];
+    bits.push('共 ' + snap.count.toLocaleString('en-US') + ' 条');
+    bits.push('抓取于 ' + fmtTime(snap.fetched_at));
+    var via = { network: '在线', cache: '缓存', builtin: '出厂快照' }[rec.via] || rec.via;
+    if (snap.partial) via += ' · 部分';
+    bits.push(via);
+    els.statusText.textContent = bits.filter(Boolean).join(' · ');
   }
 
   function showNotice(rec) {
     var msgs = [];
     if (rec && rec.failures && rec.failures.length) {
       for (var i = 0; i < rec.failures.length; i++) {
-        msgs.push(window.HWL_SOURCES.SOURCE_LABEL[rec.failures[i].source] + ':' + rec.failures[i].error);
+        msgs.push(failText(rec.failures[i]));
       }
     }
     if (rec && rec.via === 'cache') msgs.unshift('当前展示的是离线缓存,可点「刷新」重试联网');
@@ -238,56 +242,77 @@ document.addEventListener('keydown', function (e) {
     if (cat !== state.cat) return;
     els.refresh.classList.toggle('busy', busy);
     els.refresh.textContent = busy ? '⟳ 刷新中…' : REFRESH_HINT;
+    els.sourceSelect.disabled = busy;
     if (text) els.statusText.textContent = text;
   }
 
   async function loadCat(cat, opts) {
     opts = opts || {};
     if (state.busy[cat] && !opts.force) return;
+    setBusy(cat, true);
 
-    // 1) 快速渲染:缓存 / 出厂快照(不联网)
-    var fast = await window.HWL_SOURCES.getSnapshot(cat, { store: store, allowNetwork: false, preferredSource: opts.preferred });
-    if (fast.snapshot) state.snaps[cat] = fast;
-    if (cat === state.cat) { state.shown = PAGE; render(); }
-
-    // 2) 决定是否联网
-    var need = opts.force || !fast.snapshot || fast.via === 'builtin' ||
-      (fast.snapshot && isStale(fast.snapshot));
-    var now = Date.now();
-    if (!opts.force && netTriedAt[cat] && (now - netTriedAt[cat]) < RETRY_GUARD_MS) need = false;
-    if (need && !hasNet()) {
-      netTriedAt[cat] = now;
-      var offlineRec = state.snaps[cat];
-      if (offlineRec) {
-        showNotice({ via: offlineRec.via, failures: [{ source: 'net', error: '宿主无联网能力' }].concat(offlineRec.failures || []) });
-      }
-      return;
-    }
-    if (!need) return;
-
-    netTriedAt[cat] = now;
-    setBusy(cat, true, cat === 'disk' ? '硬盘榜抓取中…' : '抓取中…');
     try {
+      // 1) 快速渲染:缓存 / 出厂快照(不联网)
+      var fast = null;
+      try {
+        fast = await window.HWL_SOURCES.getSnapshot(cat, { store: store, allowNetwork: false, preferredSource: opts.preferred });
+      } catch (e) {
+        fast = { snapshot: null, via: 'none', failures: [{ label: '缓存', error: '读取失败:' + ((e && e.message) || e) }] };
+      }
+      if (fast.snapshot) state.snaps[cat] = fast;
+      if (cat === state.cat) { state.shown = PAGE; render(); }
+
+      // 2) 决定是否联网
+      var need = opts.force || !fast.snapshot || fast.via === 'builtin' ||
+        (fast.snapshot && isStale(fast.snapshot));
+      var now = Date.now();
+      if (!opts.force && netTriedAt[cat] && (now - netTriedAt[cat]) < RETRY_GUARD_MS) need = false;
+      if (need && !hasNet()) {
+        netTriedAt[cat] = now;
+        if (cat === state.cat) {
+          var offlineRec = state.snaps[cat] || { via: 'none', failures: [] };
+          var viaName = { network: '在线', cache: '缓存', builtin: '出厂快照' }[offlineRec.via] || '兜底';
+          showNotice({
+            via: offlineRec.via,
+            failures: (offlineRec.failures || []).concat([
+              { label: '离线提示', error: '宿主无联网通道(net.fetch 不可用),当前展示' + viaName + '数据' }
+            ])
+          });
+        }
+        return;
+      }
+      if (!need) return;
+
+      netTriedAt[cat] = now;
+      if (cat === state.cat) {
+        els.statusText.textContent = cat === 'disk' ? '硬盘榜抓取中…' : '抓取中…';
+      }
       var r = await window.HWL_SOURCES.getSnapshot(cat, {
         store: store,
         allowNetwork: true,
         preferredSource: opts.preferred || null,
         onProgress: function (p) {
-          if (p && p.total > 1) setBusy(cat, true, '抓取中:第 ' + p.page + '/' + p.total + ' 页…');
+          if (p && p.total > 1 && cat === state.cat) {
+            els.statusText.textContent = '抓取中:第 ' + p.page + '/' + p.total + ' 页…';
+          }
         }
       });
-      if (r.snapshot) {
-        state.snaps[cat] = r;
-      } else {
-        r.via = (state.snaps[cat] || {}).via || 'none';
-      }
-      if (cat === state.cat) { state.shown = PAGE; render(); }
-      if (r.failures && r.failures.length) showNotice(r);
-      else els.notice.hidden = true;
-    } catch (e) {
+      if (r.snapshot) state.snaps[cat] = r;
+      else r.via = (state.snaps[cat] || {}).via || 'none';
       if (cat === state.cat) {
-        els.statusText.textContent = '刷新失败:' + ((e && e.message) || e);
-        showNotice(state.snaps[cat]);
+        state.shown = PAGE;
+        render();
+        if (r.failures && r.failures.length) showNotice(r);
+        else els.notice.hidden = true;
+      }
+    } catch (e) {
+      var msg = (e && e.message) || String(e);
+      if (cat === state.cat) {
+        els.statusText.textContent = '刷新失败:' + msg;
+        showNotice({
+          via: 'none',
+          failures: [{ label: '联网', error: '刷新失败:' + msg }].concat((state.snaps[cat] || {}).failures || [])
+        });
       }
     } finally {
       setBusy(cat, false);
@@ -301,7 +326,7 @@ document.addEventListener('keydown', function (e) {
     var btn = e.target.closest('.tab');
     if (!btn) return;
     var cat = btn.getAttribute('data-cat');
-    if (cat === state.cat || state.busy[cat]) return;
+    if (cat === state.cat) return;
     state.cat = cat;
     state.shown = PAGE;
     var tabs = els.tabs.querySelectorAll('.tab');
@@ -310,8 +335,9 @@ document.addEventListener('keydown', function (e) {
     }
     els.search.value = '';
     state.query = '';
-    if (state.snaps[cat]) render();
-    else loadCat(cat);
+    setBusy(cat, !!state.busy[cat]);   // 同步忙碌视觉(切回正在抓取的分类)
+    render();
+    if (!state.snaps[cat]) loadCat(cat);
   });
 
   var searchTimer = null;

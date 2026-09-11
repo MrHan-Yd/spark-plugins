@@ -86,6 +86,13 @@
 
   function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 
+  // 缓存快照形状校验:schema 演进/脏数据不满足时按无缓存处理,落到出厂快照
+  function validSnapshot(s) {
+    return !!s && s.schema === 1 && Array.isArray(s.items) &&
+      typeof s.count === 'number' &&
+      typeof s.fetched_at === 'string' && !isNaN(Date.parse(s.fetched_at));
+  }
+
   function makeSnapshot(cat, source, items, partial) {
     items = items.filter(function (it) { return it && it.n && typeof it.s === 'number'; });
     items.sort(function (a, b) { return b.s - a.s; });
@@ -152,9 +159,20 @@
     return parsePassmarkTable(html, { score: 2, rank: 3, extra: 1 });
   }
 
-  // 从页面链接发现最大页号(/hdd-list/pageN)
+  // 从页面发现最大页号:依次取 (of N) 文本、分页 select 的最大 option、pageN 链接,取最大值
   function discoverMaxPage(html) {
-    var max = 1, m, re = /hdd-list\/page(\d+)/g;
+    var max = 1, m;
+    var of = html.match(/\(of\s+(\d+)\)/i);
+    if (of) max = Math.max(max, +of[1]);
+    var sel = html.match(/<select[^>]*id=["']pageno["'][^>]*>([\s\S]*?)<\/select>/i);
+    if (sel) {
+      var opts = sel[1].match(/value=["'](\d+)["']/gi) || [];
+      for (var i = 0; i < opts.length; i++) {
+        m = opts[i].match(/(\d+)/);
+        if (m && +m[1] > max) max = +m[1];
+      }
+    }
+    var re = /hdd-list\/page(\d+)/g;
     while ((m = re.exec(html))) if (+m[1] > max) max = +m[1];
     return max;
   }
@@ -308,7 +326,10 @@
           return p.then(function (snaps) {
             if (snaps) return snaps;
             return trySource(srcName).then(function (got) {
-              return store.set('snap:' + cat + ':' + srcName, got[0]).then(function () { return got; });
+              // 缓存写失败只降级为"本次不缓存",不影响已抓到的数据交付
+              var persist = (store && store.set)
+                ? store.set('snap:' + cat + ':' + srcName, got[0]) : null;
+              return Promise.resolve(persist).catch(function () {}).then(function () { return got; });
             }, function (err) {
               failures.push({ source: srcName, error: (err && err.message) || String(err) });
               return null;
@@ -323,11 +344,11 @@
       return Promise.all(lookups).then(function (snaps) {
         var best = null;
         for (var k = 0; k < snaps.length; k++) {
-          if (snaps[k] && (!best || snaps[k].fetched_at > best.fetched_at)) best = snaps[k];
+          if (validSnapshot(snaps[k]) && (!best || snaps[k].fetched_at > best.fetched_at)) best = snaps[k];
         }
         if (best) return { snapshot: best, via: 'cache', failures: failures };
         var builtin = global.HWL_BUILTIN && global.HWL_BUILTIN[cat];
-        if (builtin) return { snapshot: builtin, via: 'builtin', failures: failures };
+        if (validSnapshot(builtin)) return { snapshot: builtin, via: 'builtin', failures: failures };
         return { snapshot: null, via: 'none', failures: failures };
       });
     });
