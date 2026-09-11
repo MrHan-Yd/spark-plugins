@@ -17,6 +17,7 @@
       <button class="tab active" data-cat="cpu">CPU</button>
       <button class="tab" data-cat="gpu">GPU</button>
       <button class="tab" data-cat="disk">硬盘</button>
+      <button class="tab" data-cat="compare">对比</button>
     </nav>
     <div class="tools">
       <input id="search" type="text" placeholder="搜索型号,如 9950X / RTX 4090…" spellcheck="false" autocomplete="off">
@@ -29,7 +30,7 @@
     <button id="notice-close" class="ghost-btn" title="关闭">✕</button>
   </div>
 
-  <main class="ladder-wrap">
+  <main id="view-ladder" class="ladder-wrap">
     <div class="ladder-head">
       <div class="col-rank">#</div>
       <div class="col-main">型号</div>
@@ -41,10 +42,24 @@
     <div class="more-wrap"><button id="more" class="more-btn" hidden>显示更多</button></div>
   </main>
 
+  <main id="view-compare" class="cmp-wrap" hidden>
+    <div class="cmp-bar">
+      <div id="cmp-cats" class="cmp-cats"></div>
+      <span id="cmp-metric" class="cmp-metric">—</span>
+      <div class="cmp-search-wrap">
+        <input id="cmp-search" type="text" placeholder="搜索型号加入对比(回车添加第一个)…" spellcheck="false" autocomplete="off">
+        <div id="cmp-suggest" class="cmp-suggest" hidden></div>
+      </div>
+    </div>
+    <div id="cmp-selchips" class="cmp-selchips"></div>
+    <div id="cmp-table" class="cmp-table"></div>
+    <div id="cmp-empty" class="empty">添加至少 2 个型号开始对比</div>
+  </main>
+
   <div id="cmp-tray" class="cmp-tray" hidden>
     <span class="cmp-label">对比栏</span>
     <div id="cmp-chips" class="cmp-chips"></div>
-    <button id="cmp-open" class="cmp-btn" disabled>对比</button>
+    <button id="cmp-open" class="cmp-btn" disabled>去对比</button>
     <button id="cmp-clear" class="ghost-btn" title="清空对比栏">清空</button>
   </div>
 
@@ -57,21 +72,11 @@
     <button id="refresh" class="refresh-btn" title="强制刷新(重新联网抓取)">⟳ 刷新</button>
   </footer>
 
-  <div id="cmp-overlay" class="cmp-overlay" hidden>
-    <div class="cmp-panel" role="dialog" aria-label="硬件对比">
-      <div class="cmp-head">
-        <span id="cmp-title">对比</span>
-        <button id="cmp-close" class="ghost-btn" title="关闭(Esc)">✕</button>
-      </div>
-      <div id="cmp-body" class="cmp-body"></div>
-      <div class="cmp-tip">同一分类内对比;分数口径以当前数据源为准</div>
-    </div>
-  </div>
-
   <script src="data/builtin-cpu.js"></script>
   <script src="data/builtin-gpu.js"></script>
   <script src="data/builtin-disk.js"></script>
   <script src="sources.js"></script>
+  <script src="compare.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

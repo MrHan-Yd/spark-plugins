@@ -33,6 +33,13 @@
 
   var SOURCE_LABEL = { geekbench: 'Geekbench', passmark: 'PassMark' };
 
+  // 设备图标类名 → 厂商显示名(Geekbench device-icon)
+  var VENDOR = {
+    qualcomm: 'Qualcomm', amd: 'AMD', nvidia: 'NVIDIA', intel: 'Intel',
+    apple: 'Apple', mediatek: 'MediaTek', samsung: 'Samsung', unisoc: 'UNISOC',
+    hisilicon: 'HiSilicon', google: 'Google', arm: 'Arm'
+  };
+
   // 每类的源优先级(主源在前)
   var CHAIN = {
     cpu: ['geekbench', 'passmark'],
@@ -106,6 +113,7 @@
   /* ── 解析器 ───────────────────────────────────────────── */
 
   // Geekbench 图表页:pane 内行 = td.name(a + 可选 .description) + td.score
+  // 条目带结构化属性 a(厂商/核心/频率),供对比页逐行展示
   function parseGeekbenchPane(html, paneId) {
     var pane = slicePane(html, paneId);
     if (!pane) return [];
@@ -113,23 +121,34 @@
     var rows = pane.match(/<tr\b[^>]*>([\s\S]*?)<\/tr>/gi) || [];
     for (var i = 0; i < rows.length; i++) {
       if (/stacked-heading/i.test(rows[i])) continue;
-      var name = null, desc = '', score = null;
+      var name = null, desc = '', score = null, vendor = null;
       var a = rows[i].match(/<a\s[^>]*href=['"][^'"]*['"][^>]*>([\s\S]*?)<\/a>/i);
       if (a) name = stripTags(a[1]);
+      var vd = rows[i].match(/class=['"]device-icon\s+([\w-]+)['"]/i);
+      if (vd) vendor = VENDOR[vd[1].toLowerCase()] || vd[1];
       var d = rows[i].match(/class=['"]description['"][^>]*>([\s\S]*?)<\/div>/i);
       if (d) desc = stripTags(d[1]);
       var sc = rows[i].match(/class=['"]score['"][^>]*>([\s\S]*?)<\/td>/i);
       if (sc) score = parseNum(sc[1]);
       if (name && score != null) {
         var item = { n: name, s: score };
-        if (desc) item.m = desc;
+        var attrs = {};
+        if (vendor) attrs['厂商'] = vendor;
+        if (desc) {
+          item.m = desc;
+          var ghz = desc.match(/([\d.]+)\s*GHz/i);
+          if (ghz) attrs['频率'] = ghz[1] + ' GHz';
+          var cores = desc.match(/\((\d+)\s*cores?\)/i);
+          if (cores) attrs['核心'] = +cores[1];
+        }
+        if (Object.keys(attrs).length) item.a = attrs;
         items.push(item);
       }
     }
     return items;
   }
 
-  // PassMark 列表页:cputable 行 = 各列 td;colIdx 指定 name/score/rank/extra 列序
+  // PassMark 列表页:cputable 行 = 各列 td;colIdx 指定 score/rank/extra/value/price 列序
   function parsePassmarkTable(html, colIdx) {
     var table = sliceTable(html, 'cputable');
     if (!table) return [];
@@ -145,10 +164,27 @@
       var score = parseNum(cells[colIdx.score]);
       if (!name || score == null) continue;
       var meta = [];
-      if (colIdx.extra != null && cells[colIdx.extra]) meta.push(cells[colIdx.extra]);
+      var attrs = {};
+      if (colIdx.extra != null && cells[colIdx.extra]) {
+        meta.push(cells[colIdx.extra]);
+        attrs[colIdx.extraKey || '容量'] = cells[colIdx.extra];
+      }
       if (cells[colIdx.rank]) meta.push('#' + cells[colIdx.rank]);
+      if (colIdx.rank != null) {
+        var rk = parseNum(cells[colIdx.rank]);
+        if (rk != null) attrs['排名'] = rk;
+      }
+      if (colIdx.value != null) {
+        var vv = parseNum(cells[colIdx.value]);
+        if (vv != null) attrs['性价比'] = vv;
+      }
+      if (colIdx.price != null) {
+        var pv = parseNum(cells[colIdx.price]);
+        if (pv != null) attrs['价格'] = pv;
+      }
       var item = { n: name, s: score };
       if (meta.length) item.m = meta.join(' · ');
+      if (Object.keys(attrs).length) item.a = attrs;
       out.push(item);
     }
     return out;
@@ -156,7 +192,7 @@
 
   function parseHddPage(html) {
     // 硬盘列序:name, size, rating, rank, value, price
-    return parsePassmarkTable(html, { score: 2, rank: 3, extra: 1 });
+    return parsePassmarkTable(html, { score: 2, rank: 3, extra: 1, value: 4, price: 5 });
   }
 
   // 从页面发现最大页号:依次取 (of N) 文本、分页 select 的最大 option、pageN 链接,取最大值
@@ -235,7 +271,7 @@
         fetchAll: function (ctx) {
           var url = this.url;
           return ctx.fetchText(url).then(function (html) {
-            var items = parsePassmarkTable(html, { score: 1, rank: 2 });
+            var items = parsePassmarkTable(html, { score: 1, rank: 2, value: 3, price: 4 });
             if (items.length < MIN_ITEMS['passmark:cpu']) {
               throw new Error('解析失败(仅 ' + items.length + ' 条)');
             }
@@ -248,7 +284,7 @@
         fetchAll: function (ctx) {
           var url = this.url;
           return ctx.fetchText(url).then(function (html) {
-            var items = parsePassmarkTable(html, { score: 1, rank: 2 });
+            var items = parsePassmarkTable(html, { score: 1, rank: 2, value: 3, price: 4 });
             if (items.length < MIN_ITEMS['passmark:gpu']) {
               throw new Error('解析失败(仅 ' + items.length + ' 条)');
             }

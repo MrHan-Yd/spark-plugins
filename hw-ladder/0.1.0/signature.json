@@ -4,23 +4,27 @@
   "version": "0.1.0",
   "algorithm": "ed25519",
   "key_id": "spark-official-v1",
-  "signed_at": "2026-09-11T06:49:16Z",
+  "signed_at": "2026-09-11T07:06:55Z",
   "files": [
     {
       "path": "app.js",
-      "sha256": "7a4ab655d714e792c9f701778063774ed27f748359c2fa6085cdb353f0e24b9d"
+      "sha256": "8dce981322d41616ec9fb8db1d651350357f5e74e79a2d862b942d59b52e55b1"
+    },
+    {
+      "path": "compare.js",
+      "sha256": "836d341070e35cedcfc0a17717b238ee55dc53276e82a36bdc432ee7d31fca32"
     },
     {
       "path": "data/builtin-cpu.js",
-      "sha256": "8393e62a472db8879660a1b3079f0f0b79daf1abbea00507671f32d2357b1b6e"
+      "sha256": "516fabba15f256c203ce0afc98f8680b230ca9b0fbf845177081051f17aef140"
     },
     {
       "path": "data/builtin-disk.js",
-      "sha256": "66bc84201a2d0824c2277d521c7f526b3248e97c7e2771e03ae26982b5be2bb9"
+      "sha256": "1f285e60965092764561a7a1b078f383d13b2778c5d4b2faa946bab6afc00991"
     },
     {
       "path": "data/builtin-gpu.js",
-      "sha256": "e8d9cfc919c215a5516363b8d30041f945a0f69eb5cad57c699612f31ecd77a4"
+      "sha256": "c1830500f16905cd6085bb82e855dac99981a7630c0156973b5a46353b746e0e"
     },
     {
       "path": "icon.svg",
@@ -28,7 +32,7 @@
     },
     {
       "path": "index.html",
-      "sha256": "180d261f3754e1fa12e3c9712d60ac22af177d53136bc13ec96df551f26c2281"
+      "sha256": "fd2e4f09a32c2cc931d3e3c61a21daf5368352ad780914130c4b183470ac5402"
     },
     {
       "path": "plugin.json",
@@ -36,12 +40,12 @@
     },
     {
       "path": "sources.js",
-      "sha256": "a83d213ad11899302e0286fcbd7b37938eefa3798af34df9d90d2b61be9ed9b1"
+      "sha256": "ea50a3485fb9b3b53d6868ad5c73a10b616e888d7a66d08e9123cd4bf7b62362"
     },
     {
       "path": "style.css",
-      "sha256": "4ec14a8c75b04a609a7b9859301b60018de69080155b183f2e53a8fac566b484"
+      "sha256": "392e85b68cacbce3ad7f6938e4db6a61c1e203b9ac62b1df9adc2b38e3d960d7"
     }
   ],
-  "signature": "GTaxHQoCvHDFvXtvWRA2KJ4Br8BvOAemC6Go6lgUW2t9Ag96jtAyyM6fdPCwgS6CWVluiKV6brisc76Mjy/SAQ=="
+  "signature": "UASHQ8eD/KrH6tl0nLGQ5ah4eh91WN+MYdm5LSPKEiidXcIbTiujO6+AwoC39VnZNmn1ghR1HFZjay+80YwqBw=="
 }
