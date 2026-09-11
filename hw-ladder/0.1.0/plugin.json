@@ -1,0 +1,17 @@
+{
+  "id": "com.spark.hw-ladder",
+  "name": "硬件天梯",
+  "version": "0.1.0",
+  "api_version": 2,
+  "runtime": "webview",
+  "main": "index.html",
+  "icon": "icon.svg",
+  "author": "Spark",
+  "description": "CPU/GPU/硬盘跑分天梯:Geekbench 与 PassMark 双数据源互为兜底,spark.db 缓存与出厂快照三级降级,型号搜索过滤,明暗主题",
+  "permissions": ["net"],
+  "features": [
+    { "type": "keyword", "keyword": "cpu", "title": "硬件天梯", "subtitle": "CPU/GPU/硬盘跑分 · 双源互备 · 离线兜底", "mode": "page", "placeholder": "搜索型号,如 9950X / RTX 4090…" },
+    { "type": "keyword", "keyword": "天梯", "title": "硬件天梯", "subtitle": "CPU/GPU/硬盘跑分 · 双源互备 · 离线兜底", "mode": "page" }
+  ],
+  "window": { "width": 1100, "height": 720, "minWidth": 680, "minHeight": 440, "resizable": true }
+}

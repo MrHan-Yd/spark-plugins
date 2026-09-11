@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-Hans" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>硬件天梯</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4v-6H4v6Zm6 0h4V8h-4v12Zm6 0h4v-9h-4v9Z"/></svg>
+      <span>硬件天梯</span>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-cat="cpu">CPU</button>
+      <button class="tab" data-cat="gpu">GPU</button>
+      <button class="tab" data-cat="disk">硬盘</button>
+    </nav>
+    <div class="tools">
+      <input id="search" type="text" placeholder="搜索型号,如 9950X / RTX 4090…" spellcheck="false" autocomplete="off">
+      <button id="theme-btn" class="ghost-btn" title="切换明暗主题">🌙</button>
+    </div>
+  </header>
+
+  <div id="notice" class="notice" hidden>
+    <span id="notice-text"></span>
+    <button id="notice-close" class="ghost-btn" title="关闭">✕</button>
+  </div>
+
+  <main class="ladder-wrap">
+    <div class="ladder-head">
+      <div class="col-rank">#</div>
+      <div class="col-main">型号</div>
+      <div class="col-score" id="head-metric">分数</div>
+    </div>
+    <div id="rows" class="rows"></div>
+    <div id="empty" class="empty" hidden>没有匹配的型号</div>
+    <div class="more-wrap"><button id="more" class="more-btn" hidden>显示更多</button></div>
+  </main>
+
+  <footer class="statusbar">
+    <span id="src-badge" class="src-badge">—</span>
+    <span id="status-text" class="status-text">初始化…</span>
+    <span class="spacer"></span>
+    <label class="src-picker" for="source-select">数据源</label>
+    <select id="source-select" title="切换数据源"></select>
+    <button id="refresh" class="refresh-btn" title="强制刷新(重新联网抓取)">⟳ 刷新</button>
+  </footer>
+
+  <script src="data/builtin-cpu.js"></script>
+  <script src="data/builtin-gpu.js"></script>
+  <script src="data/builtin-disk.js"></script>
+  <script src="sources.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

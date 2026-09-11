@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "plugin_id": "com.spark.hw-ladder",
+  "version": "0.1.0",
+  "algorithm": "ed25519",
+  "key_id": "spark-official-v1",
+  "signed_at": "2026-09-11T06:19:43Z",
+  "files": [
+    {
+      "path": "app.js",
+      "sha256": "f1188e8708fdb32e6b335c9500fa04fc69879675f64c3f524992fdfbdad21e4e"
+    },
+    {
+      "path": "data/builtin-cpu.js",
+      "sha256": "8393e62a472db8879660a1b3079f0f0b79daf1abbea00507671f32d2357b1b6e"
+    },
+    {
+      "path": "data/builtin-disk.js",
+      "sha256": "66bc84201a2d0824c2277d521c7f526b3248e97c7e2771e03ae26982b5be2bb9"
+    },
+    {
+      "path": "data/builtin-gpu.js",
+      "sha256": "e8d9cfc919c215a5516363b8d30041f945a0f69eb5cad57c699612f31ecd77a4"
+    },
+    {
+      "path": "icon.svg",
+      "sha256": "c5cb9c82be56a4d5ae3034513bb70f3b46d5f3675902768c3961a06b15fed85c"
+    },
+    {
+      "path": "index.html",
+      "sha256": "1e4b2905a83af566cce570a766c2e0f060d043d627d3d88b19fad87544927f55"
+    },
+    {
+      "path": "plugin.json",
+      "sha256": "a4e451f11a39cd9b6dd4a21c836d93a50671207b3d128d8b8ff9af6dd4ed5bb6"
+    },
+    {
+      "path": "sources.js",
+      "sha256": "1127268b0f54b736893bcdc4be37f2dd5d61dca6d8ae5ec15c34adc1320f70cb"
+    },
+    {
+      "path": "style.css",
+      "sha256": "a77378326006f947facacf845662dea312310cf89db47e78dc38bda31c846843"
+    }
+  ],
+  "signature": "uFflRsVoszbir6vVhGy21YgoHGQSox3QOGjYML4exsDZbyhOi/yBy2IBM7W/W3qfIRSLRhVrr/dCucAx65Y3AQ=="
+}

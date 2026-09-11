@@ -231,6 +231,35 @@
           }
         }
       ]
+    },
+    {
+      "id": "com.spark.hw-ladder",
+      "name": "硬件天梯",
+      "description": "CPU/GPU/硬盘跑分天梯:Geekbench 与 PassMark 双数据源互为兜底,spark.db 缓存与出厂快照三级降级,型号搜索过滤,明暗主题",
+      "author": "Spark",
+      "homepage": "https://github.com/MrHan-Yd/spark-plugins/tree/master/hw-ladder",
+      "icon": "https://raw.githubusercontent.com/MrHan-Yd/spark-plugins/master/hw-ladder/0.1.0/icon.svg",
+      "runtime": "webview",
+      "latest": "0.1.0",
+      "permissions": [
+        "net"
+      ],
+      "versions": [
+        {
+          "version": "0.1.0",
+          "path": "hw-ladder/0.1.0",
+          "url": null,
+          "sha256": null,
+          "size": null,
+          "released": "2026-09-11",
+          "signature": {
+            "schema": 1,
+            "key_id": "spark-official-v1",
+            "algorithm": "ed25519",
+            "signature": "uFflRsVoszbir6vVhGy21YgoHGQSox3QOGjYML4exsDZbyhOi/yBy2IBM7W/W3qfIRSLRhVrr/dCucAx65Y3AQ=="
+          }
+        }
+      ]
     }
   ]
 }
