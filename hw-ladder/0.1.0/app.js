@@ -59,19 +59,24 @@ document.addEventListener('keydown', function (e) {
 
   /* ── 状态 ─────────────────────────────────────────────── */
 
-  var CAT_LABEL = { cpu: 'CPU', gpu: 'GPU', disk: '硬盘' };
+  var CAT_LABEL = { cpu: 'CPU', gpu: 'GPU', disk: '硬盘', ram: '内存', soc: '手机 SoC' };
   var REFRESH_HINT = '⟳ 刷新';
   var STALE_MS = 24 * 3600 * 1000;      // 自动刷新阈值
   var RETRY_GUARD_MS = 5 * 60 * 1000;   // 自动刷新失败后的重试保护(手动刷新不受限)
-  var PAGE = 300;
+  var BATCH = 60;                       // 滚动加载:首批/每批渲染行数
 
   var state = {
     cat: 'cpu',
     snaps: {},        // cat -> {snapshot, via, failures}
     busy: {},         // cat -> 该分类是否有进行中的联网刷新
-    compare: { cpu: [], gpu: [], disk: [] },  // 对比栏:每分类最多 4 条 {n,s,m,a}
+    compare: { cpu: [], gpu: [], disk: [], ram: [], soc: [] },  // 对比栏:每分类最多 4 条 {n,s,m,a}
     cmpCat: 'cpu',    // 对比 Tab 页内的分类
-    shown: PAGE,
+    detail: null,     // 详情弹层当前条目 {item}
+    shown: BATCH,     // 已渲染到的目标行数(滚动加载递增)
+    rendered: 0,      // 当前 DOM 里的行数(续渲染从此续起)
+    filteredCount: 0, // 当前过滤后的总条数
+    memShown: {},     // cat -> 离开时已加载行数(切回恢复,不从头再来)
+    memScroll: {},    // cat -> 离开时榜单滚动位置
     query: '',
   };
 
@@ -79,7 +84,7 @@ document.addEventListener('keydown', function (e) {
 
   var $ = function (id) { return document.getElementById(id); };
   var els = {
-    rows: $('rows'), more: $('more'), empty: $('empty'), headMetric: $('head-metric'),
+    rows: $('rows'), sentinel: $('sentinel'), empty: $('empty'), headMetric: $('head-metric'),
     srcBadge: $('src-badge'), statusText: $('status-text'), sourceSelect: $('source-select'),
     refresh: $('refresh'), notice: $('notice'), noticeText: $('notice-text'),
     search: $('search'), tabs: $('tabs'),
@@ -87,7 +92,10 @@ document.addEventListener('keydown', function (e) {
     viewLadder: $('view-ladder'), viewCompare: $('view-compare'),
     cmpCats: $('cmp-cats'), cmpMetric: $('cmp-metric'), cmpSearch: $('cmp-search'),
     cmpSuggest: $('cmp-suggest'), cmpSelChips: $('cmp-selchips'),
-    cmpTable: $('cmp-table'), cmpEmpty: $('cmp-empty')
+    cmpTable: $('cmp-table'), cmpEmpty: $('cmp-empty'),
+    detailMask: $('detail-mask'), detailName: $('detail-name'), detailMeta: $('detail-meta'),
+    detailMetric: $('detail-metric'), detailScore: $('detail-score'), detailRank: $('detail-rank'),
+    detailParams: $('detail-params'), detailSrc: $('detail-src'), detailCmp: $('detail-cmp')
   };
 
   function hasNet() {
@@ -113,7 +121,9 @@ document.addEventListener('keydown', function (e) {
     return label + ':' + f.error;
   }
 
-  function renderLadder() {
+  // rebuild !== false:清空重建(换分类/换快照/换查询/对比勾选变化);
+  // rebuild === false:滚动加载续渲染,只追加 [rendered, target) 区间的新行
+  function renderLadder(rebuild) {
     var rec = state.snaps[state.cat];
     var snap = rec && rec.snapshot;
     var cat = state.cat;
@@ -123,10 +133,12 @@ document.addEventListener('keydown', function (e) {
 
     if (!snap || !Array.isArray(snap.items)) {
       els.rows.textContent = '';
+      state.rendered = 0;
+      state.filteredCount = 0;
       var busy = !!state.busy[cat];
       els.empty.textContent = busy ? '抓取中…' : '暂无数据,所有数据源均不可用';
       els.empty.hidden = false;
-      els.more.hidden = true;
+      els.sentinel.hidden = true;
       els.srcBadge.textContent = '—';
       els.statusText.textContent = busy ? '抓取中…' : '暂无数据,所有数据源均不可用';
       return;
@@ -134,21 +146,29 @@ document.addEventListener('keydown', function (e) {
 
     var q = state.query.trim().toLowerCase();
     var items = snap.items;
+    var rankMap = {};   // 全榜名次(按快照顺序),搜索过滤后名次不变
+    for (var ri = 0; ri < snap.items.length; ri++) rankMap[snap.items[ri].n] = ri + 1;
     if (q) {
       items = [];
-      for (var i = 0; i < snap.items.length; i++) {
-        if (snap.items[i].n.toLowerCase().indexOf(q) >= 0) items.push(snap.items[i]);
+      for (var fi = 0; fi < snap.items.length; fi++) {
+        if (snap.items[fi].n.toLowerCase().indexOf(q) >= 0) items.push(snap.items[fi]);
       }
+    }
+    state.filteredCount = items.length;
+
+    if (rebuild !== false) {
+      els.rows.textContent = '';
+      state.rendered = 0;
     }
 
     var max = items.length ? items[0].s : 1;
     var pickedSet = {};
     var cmpArr = state.compare[cat];
     for (var ci = 0; ci < cmpArr.length; ci++) pickedSet[cmpArr[ci].n] = true;
+    var target = Math.min(state.shown, items.length);
     var frag = document.createDocumentFragment();
-    var shown = items.slice(0, state.shown);
-    for (var i = 0; i < shown.length; i++) {
-      var it = shown[i];
+    for (var i = state.rendered; i < target; i++) {
+      var it = items[i];
       var row = document.createElement('div');
       row.className = 'row' + (i < 3 && !q ? ' r' + (i + 1) : '') + (pickedSet[it.n] ? ' cmp-on' : '');
 
@@ -182,27 +202,39 @@ document.addEventListener('keydown', function (e) {
       score.textContent = fmtScore(it.s);
       row.appendChild(score);
 
+      (function (item) {
+        row.addEventListener('click', function () { openDetail(item.n); });
+      })(it);
+
       var cmpBtn = document.createElement('button');
       cmpBtn.className = 'cmp-add' + (pickedSet[it.n] ? ' on' : '');
       cmpBtn.title = pickedSet[it.n] ? '移出对比' : '加入对比';
       cmpBtn.textContent = pickedSet[it.n] ? '✓' : '＋';
       (function (item) {
-        cmpBtn.addEventListener('click', function () { window.HWL_COMPARE.toggleItem(item); });
+        cmpBtn.addEventListener('click', function (e) {
+          e.stopPropagation();   // 加对比不触发整行详情
+          window.HWL_COMPARE.toggleItem(item);
+        });
       })(it);
       row.appendChild(cmpBtn);
 
       frag.appendChild(row);
     }
-    els.rows.textContent = '';
+    state.rendered = target;
     els.rows.appendChild(frag);
     els.empty.textContent = '没有匹配的型号';
-    els.empty.hidden = shown.length > 0;
-    els.more.hidden = shown.length >= items.length;
-    if (shown.length < items.length) {
-      els.more.textContent = '显示更多(还有 ' + (items.length - shown.length).toLocaleString('en-US') + ' 条)';
-    }
+    els.empty.hidden = target > 0;
+    els.sentinel.hidden = target >= items.length;
 
     renderStatus(rec);
+  }
+
+  // 滚动加载:哨兵进入视口(含首屏未填满)时续渲染一批
+  function loadMore() {
+    if (state.cat === 'compare') return;
+    if (state.rendered >= state.filteredCount) return;
+    state.shown += BATCH;
+    renderLadder(false);
   }
 
   function buildSourceSelect(rec) {
@@ -250,6 +282,74 @@ document.addEventListener('keydown', function (e) {
     els.notice.hidden = false;
   }
 
+  /* ── 详情弹层 ─────────────────────────────────────────── */
+
+  function syncDetailCmp(item) {
+    var arr = state.compare[state.cat];
+    var picked = false;
+    for (var i = 0; i < arr.length; i++) if (arr[i].n === item.n) { picked = true; break; }
+    els.detailCmp.textContent = picked ? '移出对比' : '加入对比';
+    els.detailCmp.title = picked ? '从对比栏移除' : '加入底部对比栏';
+  }
+
+  function openDetail(name) {
+    var rec = state.snaps[state.cat];
+    var snap = rec && rec.snapshot;
+    var item = null, rank = null;
+    if (snap && Array.isArray(snap.items)) {
+      for (var i = 0; i < snap.items.length; i++) {
+        if (snap.items[i].n === name) { item = snap.items[i]; rank = i + 1; break; }
+      }
+    }
+    if (!item) return;
+    state.detail = { item: item };
+
+    els.detailName.textContent = item.n;
+    els.detailMeta.textContent = item.m || '';
+    els.detailMeta.hidden = !item.m;
+    els.detailMetric.textContent = snap && snap.metric ? snap.metric : '分数';
+    els.detailScore.textContent = fmtScore(item.s);
+    els.detailRank.textContent = rank ? '#' + rank : '未上榜';
+    els.detailRank.hidden = !rank;
+
+    // 参数逐行:计算行(相对榜首)+ 解析器带出的结构化属性(排名已在分数行展示,不重复)
+    els.detailParams.textContent = '';
+    var rows = [];
+    var top = (snap && Array.isArray(snap.items) && snap.items.length) ? snap.items[0].s : 0;
+    rows.push(['相对榜首', top ? Math.round(item.s / top * 100) + '%' : '—']);
+    var attrs = item.a || {};
+    var attrKeys = Object.keys(attrs).filter(function (k) { return k !== '排名'; });
+    for (var k = 0; k < attrKeys.length; k++) {
+      rows.push([attrKeys[k], window.HWL_COMPARE.fmtAttr(attrKeys[k], attrs[attrKeys[k]])]);
+    }
+    for (var r = 0; r < rows.length; r++) {
+      (function (pair) {
+        var prow = document.createElement('div');
+        prow.className = 'detail-prow';
+        var pk = document.createElement('div');
+        pk.className = 'detail-pkey';
+        pk.textContent = pair[0];
+        var pv = document.createElement('div');
+        pv.className = 'detail-pval';
+        pv.textContent = pair[1];
+        prow.appendChild(pk);
+        prow.appendChild(pv);
+        els.detailParams.appendChild(prow);
+      })(rows[r]);
+    }
+
+    els.detailSrc.textContent = snap
+      ? (window.HWL_SOURCES.SOURCE_LABEL[snap.source] || snap.source) + ' · 抓取于 ' + fmtTime(snap.fetched_at)
+      : '';
+    syncDetailCmp(item);
+    els.detailMask.hidden = false;
+  }
+
+  function closeDetail() {
+    els.detailMask.hidden = true;
+    state.detail = null;
+  }
+
   /* ── 取数编排 ─────────────────────────────────────────── */
 
   function isStale(snap) {
@@ -280,7 +380,7 @@ document.addEventListener('keydown', function (e) {
         fast = { snapshot: null, via: 'none', failures: [{ label: '缓存', error: '读取失败:' + ((e && e.message) || e) }] };
       }
       if (fast.snapshot) state.snaps[cat] = fast;
-      if (cat === state.cat) { state.shown = PAGE; renderView(); }
+      if (cat === state.cat) { state.shown = BATCH; renderView(); }
       else if (state.cat === 'compare' && cat === state.cmpCat) renderView();
 
       // 2) 决定是否联网
@@ -321,7 +421,7 @@ document.addEventListener('keydown', function (e) {
       if (r.snapshot) state.snaps[cat] = r;
       else r.via = (state.snaps[cat] || {}).via || 'none';
       if (cat === state.cat) {
-        state.shown = PAGE;
+        state.shown = BATCH;
         renderView();
         if (r.failures && r.failures.length) showNotice(r);
         else els.notice.hidden = true;
@@ -359,8 +459,13 @@ document.addEventListener('keydown', function (e) {
 
   function switchTab(cat) {
     if (cat === state.cat && cat !== 'compare') return;
+    var oldCat = state.cat;
+    if (oldCat !== 'compare') {
+      // 离开榜单分类前记住渲染进度与滚动位置,切回不从头再来
+      state.memShown[oldCat] = Math.max(state.memShown[oldCat] || BATCH, state.shown);
+      state.memScroll[oldCat] = els.viewLadder.scrollTop;
+    }
     state.cat = cat;
-    state.shown = PAGE;
     var tabs = els.tabs.querySelectorAll('.tab');
     for (var i = 0; i < tabs.length; i++) {
       tabs[i].classList.toggle('active', tabs[i].getAttribute('data-cat') === cat);
@@ -368,16 +473,24 @@ document.addEventListener('keydown', function (e) {
     if (cat === 'compare') {
       els.viewLadder.hidden = true;
       els.viewCompare.hidden = false;
+      els.refresh.disabled = true;        // 对比页无榜单可刷,避免点了没反应
+      els.sourceSelect.disabled = true;
+      els.search.hidden = true;           // 榜单搜索在对比页无用,只留对比页自己的搜索
+      window.HWL_COMPARE.updateTray();    // 榜单页的底部托盘不带入对比页
       window.HWL_COMPARE.onTabEnter();
       els.statusText.textContent = '对比模式';
       animView(els.viewCompare);
     } else {
       els.viewCompare.hidden = true;
       els.viewLadder.hidden = false;
+      els.refresh.disabled = false;
+      els.search.hidden = false;
       els.search.value = '';
       state.query = '';
+      state.shown = state.memShown[cat] || BATCH;   // 切回恢复之前的加载进度
       setBusy(cat, !!state.busy[cat]);   // 同步忙碌视觉(切回正在抓取的分类)
       renderView();
+      els.viewLadder.scrollTop = state.memScroll[cat] || 0;   // 恢复滚动位置
       if (!state.snaps[cat]) loadCat(cat);
       animView(els.rows);
     }
@@ -396,15 +509,18 @@ document.addEventListener('keydown', function (e) {
     clearTimeout(searchTimer);
     searchTimer = setTimeout(function () {
       state.query = els.search.value;
-      state.shown = PAGE;
+      state.shown = BATCH;
       renderLadder();
     }, 120);
   });
 
-  els.more.addEventListener('click', function () {
-    state.shown += PAGE;
-    renderLadder();
-  });
+  // 滚动加载:哨兵进入视口(含首屏未填满)就续渲染一批;rootMargin 提前 400px 预加载
+  if (typeof IntersectionObserver === 'function') {
+    var scrollIo = new IntersectionObserver(function (entries) {
+      if (entries[0] && entries[0].isIntersecting) loadMore();
+    }, { root: els.viewLadder, rootMargin: '400px' });
+    scrollIo.observe(els.sentinel);
+  }
 
   els.refresh.addEventListener('click', function () {
     if (state.busy[state.cat]) return;
@@ -420,6 +536,22 @@ document.addEventListener('keydown', function (e) {
 
   $('notice-close').addEventListener('click', function () {
     els.notice.hidden = true;
+  });
+
+  els.detailMask.addEventListener('click', function (e) {
+    if (e.target === els.detailMask) closeDetail();
+  });
+
+  $('detail-close').addEventListener('click', closeDetail);
+
+  els.detailCmp.addEventListener('click', function () {
+    if (!state.detail) return;
+    window.HWL_COMPARE.toggleItem(state.detail.item);
+    syncDetailCmp(state.detail.item);
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !els.detailMask.hidden) closeDetail();
   });
 
   /* ── 启动 ─────────────────────────────────────────────── */

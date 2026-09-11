@@ -7,11 +7,32 @@
   "main": "index.html",
   "icon": "icon.svg",
   "author": "Spark",
-  "description": "CPU/GPU/硬盘跑分天梯:Geekbench 与 PassMark 双数据源互为兜底,spark.db 缓存与出厂快照三级降级,型号搜索过滤与对比,明暗主题",
-  "permissions": ["net"],
-  "features": [
-    { "type": "keyword", "keyword": "cpu", "title": "硬件天梯", "subtitle": "CPU/GPU/硬盘跑分 · 双源互备 · 离线兜底", "mode": "page", "placeholder": "搜索型号,如 9950X / RTX 4090…" },
-    { "type": "keyword", "keyword": "天梯", "title": "硬件天梯", "subtitle": "CPU/GPU/硬盘跑分 · 双源互备 · 离线兜底", "mode": "page" }
+  "description": "CPU/GPU/内存/硬盘/手机SoC跑分天梯:Geekbench 与 PassMark 双数据源互为兜底,手机 SoC 走 lainbo 天梯(安兔兔),spark.db 缓存与出厂快照三级降级,型号搜索过滤与对比,明暗主题",
+  "permissions": [
+    "net"
   ],
-  "window": { "width": 1100, "height": 720, "minWidth": 680, "minHeight": 440, "resizable": true }
+  "features": [
+    {
+      "type": "keyword",
+      "keyword": "cpu",
+      "title": "硬件天梯",
+      "subtitle": "CPU/GPU/内存/硬盘/手机SoC 跑分 · 双源互备 · 离线兜底",
+      "mode": "page",
+      "placeholder": "搜索型号,如 9950X / RTX 4090…"
+    },
+    {
+      "type": "keyword",
+      "keyword": "天梯",
+      "title": "硬件天梯",
+      "subtitle": "CPU/GPU/内存/硬盘/手机SoC 跑分 · 双源互备 · 离线兜底",
+      "mode": "page"
+    }
+  ],
+  "window": {
+    "width": 1100,
+    "height": 720,
+    "minWidth": 680,
+    "minHeight": 440,
+    "resizable": true
+  }
 }

@@ -235,7 +235,7 @@
     {
       "id": "com.spark.hw-ladder",
       "name": "硬件天梯",
-      "description": "CPU/GPU/硬盘跑分天梯:Geekbench 与 PassMark 双数据源互为兜底,spark.db 缓存与出厂快照三级降级,型号搜索过滤,明暗主题",
+      "description": "CPU/GPU/内存/硬盘/手机SoC跑分天梯:Geekbench 与 PassMark 双数据源互为兜底,手机 SoC 走 lainbo 天梯(安兔兔),spark.db 缓存与出厂快照三级降级,型号搜索过滤,明暗主题",
       "author": "Spark",
       "homepage": "https://github.com/MrHan-Yd/spark-plugins/tree/master/hw-ladder",
       "icon": "https://raw.githubusercontent.com/MrHan-Yd/spark-plugins/master/hw-ladder/0.1.0/icon.svg",
@@ -256,7 +256,7 @@
             "schema": 1,
             "key_id": "spark-official-v1",
             "algorithm": "ed25519",
-            "signature": "UASHQ8eD/KrH6tl0nLGQ5ah4eh91WN+MYdm5LSPKEiidXcIbTiujO6+AwoC39VnZNmn1ghR1HFZjay+80YwqBw=="
+            "signature": "W0ItxAZPz8vstsF+NYama48Q3CBufdcxiznT8LKfV3TorUHmoDARCn3GKbQPzOibXVemdnvGbYKU3FrxYieqBg=="
           }
         }
       ]

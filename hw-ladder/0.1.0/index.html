@@ -17,6 +17,8 @@
       <button class="tab active" data-cat="cpu">CPU</button>
       <button class="tab" data-cat="gpu">GPU</button>
       <button class="tab" data-cat="disk">硬盘</button>
+      <button class="tab" data-cat="ram">内存</button>
+      <button class="tab" data-cat="soc">SoC</button>
       <button class="tab" data-cat="compare">对比</button>
     </nav>
     <div class="tools">
@@ -39,7 +41,7 @@
     </div>
     <div id="rows" class="rows"></div>
     <div id="empty" class="empty" hidden>没有匹配的型号</div>
-    <div class="more-wrap"><button id="more" class="more-btn" hidden>显示更多</button></div>
+    <div id="sentinel" class="sentinel" hidden></div>
   </main>
 
   <main id="view-compare" class="cmp-wrap" hidden>
@@ -63,6 +65,30 @@
     <button id="cmp-clear" class="ghost-btn" title="清空对比栏">清空</button>
   </div>
 
+  <div id="detail-mask" class="detail-mask" hidden>
+    <div class="detail-card" role="dialog" aria-modal="true">
+      <div class="detail-head">
+        <div class="detail-title">
+          <div id="detail-name" class="detail-name"></div>
+          <div id="detail-meta" class="detail-meta" hidden></div>
+        </div>
+        <button id="detail-close" class="ghost-btn" title="关闭">✕</button>
+      </div>
+      <div class="detail-scoreline">
+        <div class="detail-scorebox">
+          <div id="detail-metric" class="detail-metric"></div>
+          <div id="detail-score" class="detail-score"></div>
+        </div>
+        <div id="detail-rank" class="detail-rank"></div>
+      </div>
+      <div id="detail-params" class="detail-params"></div>
+      <div class="detail-foot">
+        <span id="detail-src" class="detail-src"></span>
+        <button id="detail-cmp" class="cmp-btn"></button>
+      </div>
+    </div>
+  </div>
+
   <footer class="statusbar">
     <span id="src-badge" class="src-badge">—</span>
     <span id="status-text" class="status-text">初始化…</span>
@@ -75,6 +101,8 @@
   <script src="data/builtin-cpu.js"></script>
   <script src="data/builtin-gpu.js"></script>
   <script src="data/builtin-disk.js"></script>
+  <script src="data/builtin-ram.js"></script>
+  <script src="data/builtin-soc.js"></script>
   <script src="sources.js"></script>
   <script src="compare.js"></script>
   <script src="app.js"></script>

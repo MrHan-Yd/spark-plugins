@@ -4,27 +4,35 @@
   "version": "0.1.0",
   "algorithm": "ed25519",
   "key_id": "spark-official-v1",
-  "signed_at": "2026-09-11T07:06:55Z",
+  "signed_at": "2026-09-11T08:34:37Z",
   "files": [
     {
       "path": "app.js",
-      "sha256": "8dce981322d41616ec9fb8db1d651350357f5e74e79a2d862b942d59b52e55b1"
+      "sha256": "7d2652d3021af884d5d0e2ae117e8e953099a7f546ce115c617d5df34e37fd2e"
     },
     {
       "path": "compare.js",
-      "sha256": "836d341070e35cedcfc0a17717b238ee55dc53276e82a36bdc432ee7d31fca32"
+      "sha256": "6f29ec7ac2c6d47366e439944b0caff249facc9d201c2ace4992ff70828a7cdb"
     },
     {
       "path": "data/builtin-cpu.js",
-      "sha256": "516fabba15f256c203ce0afc98f8680b230ca9b0fbf845177081051f17aef140"
+      "sha256": "7424621f2a26460f9b94835c6d2126ab4010f442310ddf4d608a8bd0b94848df"
     },
     {
       "path": "data/builtin-disk.js",
-      "sha256": "1f285e60965092764561a7a1b078f383d13b2778c5d4b2faa946bab6afc00991"
+      "sha256": "2dbd34b502c40a59111ba61ffbeb179d8ae21daf368ac46f493276c93719444f"
     },
     {
       "path": "data/builtin-gpu.js",
-      "sha256": "c1830500f16905cd6085bb82e855dac99981a7630c0156973b5a46353b746e0e"
+      "sha256": "ef02f8f947555b5c17a826a3ff01c696d63cad26ed614143d8dbf4263d3228ec"
+    },
+    {
+      "path": "data/builtin-ram.js",
+      "sha256": "16898b3097732d597e0ddc82c58eb0e95bbe98541bf3071160cb961e4761abdf"
+    },
+    {
+      "path": "data/builtin-soc.js",
+      "sha256": "e80b1b27552974671ec87e76b13a2db3d7238a5e5c10818acb9ce2941eed0368"
     },
     {
       "path": "icon.svg",
@@ -32,20 +40,20 @@
     },
     {
       "path": "index.html",
-      "sha256": "fd2e4f09a32c2cc931d3e3c61a21daf5368352ad780914130c4b183470ac5402"
+      "sha256": "b895a15ed0e8e076a6292370d66f07482a66b8a6bb0e7d5e3ccf09d065be2f1e"
     },
     {
       "path": "plugin.json",
-      "sha256": "51e59e27c351707c08fac5eba271871f9933d5539fd38e565ec37abf1915b9d7"
+      "sha256": "646c37e0ed481ece90115d24c2eab175cf0cdbb5dbcc6c1682e55faa5b0ed1e3"
     },
     {
       "path": "sources.js",
-      "sha256": "ea50a3485fb9b3b53d6868ad5c73a10b616e888d7a66d08e9123cd4bf7b62362"
+      "sha256": "39091650daf66f4f8c55296d03017340d1ffbf619a378fd59535d262683415e4"
     },
     {
       "path": "style.css",
-      "sha256": "392e85b68cacbce3ad7f6938e4db6a61c1e203b9ac62b1df9adc2b38e3d960d7"
+      "sha256": "7d1f5323fc239c03dbc5c0d6347c86c754a155960465265d5b3563a3fd2c7082"
     }
   ],
-  "signature": "UASHQ8eD/KrH6tl0nLGQ5ah4eh91WN+MYdm5LSPKEiidXcIbTiujO6+AwoC39VnZNmn1ghR1HFZjay+80YwqBw=="
+  "signature": "W0ItxAZPz8vstsF+NYama48Q3CBufdcxiznT8LKfV3TorUHmoDARCn3GKbQPzOibXVemdnvGbYKU3FrxYieqBg=="
 }

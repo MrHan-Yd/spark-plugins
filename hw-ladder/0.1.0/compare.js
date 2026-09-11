@@ -10,18 +10,22 @@
 
   // 各源可对比的结构化参数(榜单排名/分数/相对最高为通用行,不在此列)
   var ATTRS = {
-    'geekbench:cpu': ['核心', '频率'],
-    'geekbench:gpu': ['厂商'],
+    'geekbench:cpu': ['核心', '频率', '单核'],
+    'geekbench:gpu': ['厂商', 'Vulkan', 'Metal'],
     'passmark:cpu': ['性价比', '价格'],
     'passmark:gpu': ['性价比', '价格'],
-    'passmark:disk': ['容量', '性价比', '价格']
+    'passmark:disk': ['容量', '性价比', '价格'],
+    'passmark:ram': ['延迟', '写入', '价格'],
+    'lainbo:soc': ['厂商']
   };
 
   function fmtAttr(key, v) {
     if (v == null || v === '') return '—';
     if (key === '价格') return '$' + (+v).toLocaleString('en-US', { maximumFractionDigits: 2 });
-    if (key === '性价比' || key === '核心') {
-      return (+v).toLocaleString('en-US', { maximumFractionDigits: 2 });
+    if (typeof v === 'number') {
+      if (key === '延迟') return v.toLocaleString('en-US') + ' ns';
+      if (key === '写入') return v.toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' GB/s';
+      return v.toLocaleString('en-US', { maximumFractionDigits: 2 });
     }
     return String(v);
   }
@@ -89,8 +93,7 @@
     buildCats();
     var cat = deps.state.cmpCat;
     if (!deps.state.snaps[cat]) {
-      deps.els.statusText.textContent = '抓取中…';
-      deps.loadCat(cat);
+      deps.loadCat(cat);   // 进度/状态由 loadCat 与页面内「数据加载中…」负责,不在状态栏写死「抓取中…」
     }
     render();
   }
@@ -101,7 +104,7 @@
       setActiveCat();
       return;
     }
-    ['cpu', 'gpu', 'disk'].forEach(function (cat) {
+    ['cpu', 'gpu', 'disk', 'ram', 'soc'].forEach(function (cat) {
       var b = document.createElement('button');
       b.className = 'cat-chip' + (cat === deps.state.cmpCat ? ' active' : '');
       b.setAttribute('data-cat', cat);
@@ -188,7 +191,7 @@
     setActiveCat();
 
     els.cmpMetric.textContent = snap
-      ? deps.CAT_LABEL[cat] + ' · ' + snap.metric + '(' + global.HWL_SOURCES.SOURCE_LABEL[snap.source] + ')'
+      ? deps.CAT_LABEL[cat] + ' · ' + snap.metric
       : deps.CAT_LABEL[cat] + ' · 数据加载中…';
 
     // 已选 chips
@@ -241,13 +244,17 @@
     for (var i = 0; i < picked.length; i++) best = Math.max(best, picked[i].s);
     var attrs = ATTRS[snap.source + ':' + cat] || [];
 
+    // 每行写入同一列模板,保证参数列/各型号列在所有行间垂直对齐
+    var tpl = '120px repeat(' + picked.length + ', minmax(0,1fr))';
+
     var table = els.cmpTable;
-    table.style.gridTemplateColumns = '120px repeat(' + picked.length + ', minmax(0,1fr))';
+    table.style.gridTemplateColumns = '';
 
     function row(label, values, opts) {
       opts = opts || {};
       var d = document.createElement('div');
-      d.className = 'cmp-row' + (opts.head ? ' cmp-head-row' : '');
+      d.className = 'cmp-row' + (opts.head ? ' cmp-head-row' : '') + (opts.main ? ' cmp-main-row' : '');
+      d.style.gridTemplateColumns = tpl;
       var lab = document.createElement('div');
       lab.className = 'cmp-attr';
       lab.textContent = label;
@@ -271,6 +278,7 @@
     // 表头:参数 + 型号列(可移除)
     var head = document.createElement('div');
     head.className = 'cmp-row cmp-head-row';
+    head.style.gridTemplateColumns = tpl;
     var hLab = document.createElement('div');
     hLab.className = 'cmp-attr';
     hLab.textContent = '参数';
@@ -304,7 +312,7 @@
     }));
     row(snap.metric || '分数', picked.map(function (p) {
       return p.s.toLocaleString('en-US');
-    }), { best: bestIdx });
+    }), { best: bestIdx, main: true });
     for (var i = 0; i < attrs.length; i++) {
       (function (key) {
         row(key, picked.map(function (p) {
@@ -313,13 +321,26 @@
       })(attrs[i]);
     }
     row('相对最高', picked.map(function (p) {
-      return p.s === best ? '最高' : (best > 0 ? Math.round(p.s / best * 100) + '%' : '—');
+      var pct = best > 0 ? Math.round(p.s / best * 100) : 0;
+      var isBest = p.s === best;
+      var wrap = document.createElement('div');
+      wrap.className = 'cmp-rel' + (isBest ? ' best' : '');
+      var txt = document.createElement('span');
+      txt.textContent = isBest ? '最高' : pct + '%';
+      var track = document.createElement('div');
+      track.className = 'cmp-rel-track';
+      var fill = document.createElement('div');
+      fill.className = 'cmp-rel-fill';
+      fill.style.width = Math.max(2, pct) + '%';
+      track.appendChild(fill);
+      wrap.appendChild(txt);
+      wrap.appendChild(track);
+      return wrap;
     }), { best: bestIdx });
 
     if (picked.length === 2) {
       var note = document.createElement('div');
       note.className = 'cmp-note';
-      note.style.gridColumn = '1 / -1';
       var ratio = picked[0].s / picked[1].s;
       note.textContent = ratio >= 1
         ? picked[0].n + ' ≈ ' + ratio.toFixed(2) + '× ' + picked[1].n
@@ -369,6 +390,7 @@
     render: render,
     toggleItem: toggleItem,
     updateTray: updateTray,
+    fmtAttr: fmtAttr,
     clearCat: function (cat) { deps.state.compare[cat] = []; }
   };
 })(typeof window !== 'undefined' ? window : globalThis);
