@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "algorithm": "ed25519",
   "key_id": "spark-official-v1",
-  "signed_at": "2026-09-11T09:14:07Z",
+  "signed_at": "2026-09-11T09:47:02Z",
   "files": [
     {
       "path": "icon.svg",
@@ -12,7 +12,7 @@
     },
     {
       "path": "page.css",
-      "sha256": "4e0fb7edd89bde61896996aa9b73859e00622793d9b38af81462de81085af9dd"
+      "sha256": "7c3b8a640859dbe1d1609fb37fdeee245f32f2e8b6385d06302b8ba900a221f1"
     },
     {
       "path": "page.html",
@@ -20,16 +20,16 @@
     },
     {
       "path": "page.js",
-      "sha256": "d8a7d7b22dce7b751d5246c7ccdaeca0d15711af1cdbbcd7ee3943ad03d34881"
+      "sha256": "eef2ed4853184faa16c254e8c4dd5e542b5f736bb713e012ccbff201cfe38264"
     },
     {
       "path": "plugin.json",
-      "sha256": "34976151dd54375b97d38ce5e5abf00295044ba754f0e83c18f40f8cd0981f02"
+      "sha256": "7c5a4a98e244b99664b29d2d985a22dfa840af21aabdbfdfe4986f11e2969681"
     },
     {
       "path": "spark-plugin-process-killer.exe",
-      "sha256": "be0a23d46e6638c617c0f365df670fc963a26714062d2d859c25b8c1b6492d0a"
+      "sha256": "be42caca55b985bbce582424ec94b9cf1bcc5e69fb0590a0df01115e7c62710f"
     }
   ],
-  "signature": "9i/WQzt/bl3Qb6S2Yyh2ImRbjbNjQVJWkYkxhQo9V0ymd08DIrIq22UCEbKJLeT+q95dV4itXV3PZZC46FwXBQ=="
+  "signature": "i5oyOUUIpHlzSGQCPOBPTpRR3yY9zwd3SNmiwF7oy5/XpIk/TwMWlY2CiAaGGg61uQcZxj6lT/087hdCE0/XCQ=="
 }

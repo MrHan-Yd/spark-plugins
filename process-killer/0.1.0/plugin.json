@@ -21,7 +21,15 @@
     },
     {
       "type": "keyword",
-      "keyword": "进程",
+      "keyword": "进程终结者",
+      "title": "进程终结者",
+      "subtitle": "端口/PID/进程名聚合搜索 · 温和结束 · 强杀",
+      "mode": "page",
+      "placeholder": "回车打开 进程终结者…"
+    },
+    {
+      "type": "keyword",
+      "keyword": "终结者",
       "title": "进程终结者",
       "subtitle": "端口/PID/进程名聚合搜索 · 温和结束 · 强杀",
       "mode": "page",

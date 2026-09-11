@@ -286,6 +286,51 @@ fn main() {
         "不存在的 pid 报已退出(而非报错)",
     );
 
+    // 13) 前缀模糊:端口去掉末位查询,仍应命中占端口的进程(渐进收窄)
+    let port_s = port.to_string();
+    let port_prefix = &port_s[..port_s.len() - 1];
+    page(&mut input, 17, "search", json!({ "q": format!(":{port_prefix}") }));
+    let r = result_of(&read_frame(&mut output).unwrap());
+    check(
+        find_row(&r, self_pid),
+        &format!("端口前缀 :{port_prefix} 命中占用 {port} 的进程"),
+    );
+
+    // 14) 前缀模糊:纯数字 PID 去掉末位仍应命中
+    let pid_s = self_pid.to_string();
+    let pid_prefix = &pid_s[..pid_s.len() - 1];
+    page(&mut input, 18, "search", json!({ "q": pid_prefix }));
+    let r = result_of(&read_frame(&mut output).unwrap());
+    check(
+        find_row(&r, self_pid),
+        &format!("纯数字 {pid_prefix} 前缀命中 PID {self_pid}"),
+    );
+
+    // 15) 文本子序列模糊:「png」(缺 i)应命中 ping 子进程,且不靠连续子串
+    let mut child_d = spawn_child(std::path::Path::new("ping"));
+    std::thread::sleep(std::time::Duration::from_millis(500));
+    let d_pid = child_d.id();
+    page(&mut input, 19, "search", json!({ "q": "png" }));
+    let r = result_of(&read_frame(&mut output).unwrap());
+    check(find_row(&r, d_pid), "子序列「png」模糊命中 ping.exe");
+    page(&mut input, 20, "kill", json!({ "pid": d_pid, "mode": "force" }));
+    let r = result_of(&read_frame(&mut output).unwrap());
+    check(
+        r.pointer("/result/exited").and_then(|v| v.as_bool()) == Some(true),
+        "模糊用例子进程清场",
+    );
+    let _ = child_d.wait();
+
+    // 16) 无意义关键词仍然无结果(模糊不等于乱命中)
+    page(&mut input, 21, "search", json!({ "q": "zzzzqq" }));
+    let r = result_of(&read_frame(&mut output).unwrap());
+    check(
+        r.pointer("/result/rows")
+            .map(|v| v.as_array().map(|a| a.is_empty()).unwrap_or(false))
+            .unwrap_or(false),
+        "无意义关键词仍返回空结果",
+    );
+
     // shutdown 通知(无 id)→ 进程应退出
     send(
         &mut input,

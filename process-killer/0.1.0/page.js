@@ -12,7 +12,10 @@ function applyTheme(t) {
 }
 applyTheme((() => { try { return localStorage.getItem(THEME_KEY) || 'dark'; } catch (e) { return 'dark'; } })());
 $('#btnTheme').addEventListener('click', () => {
-  applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+  const root = document.documentElement;
+  root.classList.add('theming'); // 切换瞬间挂全页配色过渡类(page.css)
+  applyTheme(root.dataset.theme === 'dark' ? 'light' : 'dark');
+  setTimeout(() => root.classList.remove('theming'), 260);
 });
 
 /* ── toast ────────────────────────────── */
@@ -110,10 +113,10 @@ function fmtStartTime(sec) {
 }
 
 function tagClass(t) {
-  if (t === 'PID 精确' || t === 'PID') return 'pid';
+  if (t === 'PID 精确' || t === 'PID' || t === 'PID 前缀') return 'pid';
   if (t.startsWith('端口')) return 'port';
-  if (t === '名称精确') return 'exact';
-  if (t === '路径命中') return 'path';
+  if (t === '名称精确' || t === '名称模糊') return 'exact';
+  if (t === '路径命中' || t === '路径模糊') return 'path';
   return 'more';
 }
 
@@ -126,15 +129,16 @@ function render(r) {
   const list = $('#list');
   list.innerHTML = '';
   if (!r.rows || !r.rows.length) { renderNoHit(r); return; }
-  for (const row of r.rows) list.appendChild(buildRow(row));
+  r.rows.forEach((row, i) => list.appendChild(buildRow(row, i)));
   $('#stMeta').textContent =
     '命中 ' + r.total + (r.total > r.rows.length ? '(显示前 ' + r.rows.length + ')' : '') +
     ' / 全系统 ' + r.procs_total + ' 进程 · ' + r.took_ms + ' ms';
 }
 
-function buildRow(row) {
+function buildRow(row, i) {
   const el = document.createElement('div');
   el.className = 'row' + (S.meta && row.pid === S.meta.self_pid ? ' me' : '');
+  el.style.animationDelay = Math.min(i * 8, 240) + 'ms'; // 进场瀑布(page.css rowin)
 
   const rp = document.createElement('div');
   rp.className = 'rp mono';
@@ -245,7 +249,7 @@ function renderGuide() {
   h.textContent = '一个框,找到并结束任何进程';
   g.appendChild(h);
   const p = document.createElement('p');
-  p.textContent = '输入端口号、PID、进程名或路径关键词;条件用空格分隔(且关系)';
+  p.textContent = '输入端口号、PID、进程名或路径关键词;条件用空格分隔(且关系);支持模糊——数字少输几位、名称缺字也能命中';
   g.appendChild(p);
   const ex = document.createElement('div');
   ex.className = 'gex';
@@ -262,7 +266,7 @@ function renderGuide() {
   g.appendChild(ex);
   const tip = document.createElement('div');
   tip.className = 'gtip';
-  tip.innerHTML = '<b>:8080</b> 端口占用 · <b>pid:123</b> 指定 PID · 纯数字 = PID 或端口双查<br>「温和」向 GUI 程序发关闭请求,「强杀」立即终止';
+  tip.innerHTML = '<b>:8080</b> 端口占用 · <b>pid:123</b> 指定 PID · 纯数字 = PID 或端口双查,少输几位即出候选<br>「温和」向 GUI 程序发关闭请求,「强杀」立即终止';
   g.appendChild(tip);
   list.appendChild(g);
   $('#stMeta').textContent = '';
@@ -278,7 +282,7 @@ function renderNoHit(r) {
   h.textContent = '没有匹配的进程';
   g.appendChild(h);
   const p = document.createElement('p');
-  p.textContent = '换个关键词试试:端口(:8080)、PID(pid:123)、进程名或路径';
+  p.textContent = '换个关键词试试:端口(:8080)、PID(pid:123)、进程名或路径;模糊匹配下少输几位也行';
   g.appendChild(p);
   list.appendChild(g);
   $('#stMeta').textContent = '命中 0 / 全系统 ' + (r.procs_total || 0) + ' 进程 · ' + (r.took_ms || 0) + ' ms';

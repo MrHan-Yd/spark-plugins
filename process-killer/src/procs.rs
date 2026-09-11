@@ -1,10 +1,12 @@
 //! 进程枚举(sysinfo)+ 聚合查询解析与打分。
 //!
-//! 查询形态:
+//! 查询形态(精确命中之外带模糊候选,精确分数恒高于模糊,结果按相关度排序):
 //! - 空 → 无结果(页面显示引导);
-//! - 纯数字 → PID 精确 或 端口占用,任一命中即出(双路);
-//! - 条件序列(AND):`:8080` / `port:8080` / `端口:8080` → 端口;`pid:1234` → PID;
-//!   其余 token → 名称/路径子串(大小写不敏感)。
+//! - 纯数字 → PID 精确 + 端口占用精确,再各退一级**前缀模糊**(查 11111 输 11 即出候选,渐进收窄);
+//! - 条件序列(AND):`:8080` / `port:8080` / `端口:8080` → 端口(精确+前缀);
+//!   `pid:1234` → PID(精确+前缀);
+//! - 其余 token → 名称/路径子串(大小写不敏感),再退一级**子序列模糊**(打字缺字也命中,
+//!   如 `chrme` → chrome)。
 
 use serde::Serialize;
 use std::collections::HashMap;
@@ -56,6 +58,12 @@ pub enum Query {
 
 fn all_digits(s: &str) -> bool {
     !s.is_empty() && s.bytes().all(|b| b.is_ascii_digit())
+}
+
+/// 模糊(子序列)匹配:pat 的字符按原顺序逐个出现在 s 中即命中,不要求连续。
+fn is_subsequence(pat: &str, s: &str) -> bool {
+    let mut it = s.chars();
+    pat.chars().all(|pc| it.any(|sc| sc == pc))
 }
 
 pub fn parse_query(q: &str) -> Query {
@@ -173,18 +181,29 @@ pub fn collect(
         let (tags, score) = match query {
             Query::Empty => continue,
             Query::Num(n) => {
+                let ns = n.to_string();
                 let mut tags = Vec::new();
                 let mut score = 0.0;
                 let mut take = false;
-                if *n <= u32::MAX as u64 && pid == *n as u32 {
-                    take = true;
-                    tags.push("PID 精确".into());
-                    score += 100.0;
+                if *n <= u32::MAX as u64 {
+                    if pid == *n as u32 {
+                        take = true;
+                        tags.push("PID 精确".into());
+                        score += 100.0;
+                    } else if pid.to_string().starts_with(&ns) {
+                        take = true;
+                        tags.push("PID 前缀".into());
+                        score += 70.0;
+                    }
                 }
                 if *n <= 65535 && pents.iter().any(|e| e.port == *n as u16) {
                     take = true;
                     tags.push(format!("端口 {n}"));
                     score += 95.0;
+                } else if pents.iter().any(|e| e.port.to_string().starts_with(&ns)) {
+                    take = true;
+                    tags.push("端口 前缀".into());
+                    score += 65.0;
                 }
                 if !take {
                     continue;
@@ -257,18 +276,28 @@ fn cond_match(
 ) -> bool {
     match c {
         Cond::Pid(v) => {
+            let vs = v.to_string();
             if pid == *v {
                 tags.push("PID".into());
                 *score += 40.0;
+                true
+            } else if pid.to_string().starts_with(&vs) {
+                tags.push("PID 前缀".into());
+                *score += 25.0;
                 true
             } else {
                 false
             }
         }
         Cond::Port(v) => {
+            let vs = v.to_string();
             if pents.iter().any(|e| e.port == *v) {
                 tags.push(format!("端口 {v}"));
                 *score += 40.0;
+                true
+            } else if pents.iter().any(|e| e.port.to_string().starts_with(&vs)) {
+                tags.push("端口 前缀".into());
+                *score += 25.0;
                 true
             } else {
                 false
@@ -288,6 +317,14 @@ fn cond_match(
             } else if exe_l.contains(t.as_str()) {
                 tags.push("路径命中".into());
                 *score += 6.0;
+                true
+            } else if is_subsequence(t, &name_l) {
+                tags.push("名称模糊".into());
+                *score += 5.0;
+                true
+            } else if is_subsequence(t, &exe_l) {
+                tags.push("路径模糊".into());
+                *score += 2.0;
                 true
             } else {
                 false
@@ -381,5 +418,112 @@ mod tests {
     #[test]
     fn plain_tokens_lowercased() {
         assert_eq!(conds_of("ChRoMe"), vec![Cond::Text("chrome".into())]);
+    }
+
+    #[test]
+    fn cond_pid_prefix_fuzzy() {
+        let mut tags = Vec::new();
+        let mut score = 0.0;
+        // 前缀:pid 123 命中 1234(模糊标签、低于精确分)
+        assert!(cond_match(&Cond::Pid(123), "x", "x", &[], 1234, &mut tags, &mut score));
+        assert_eq!(tags, vec!["PID 前缀".to_string()]);
+        assert!(score < 40.0);
+        // 精确命中仍走精确分支
+        tags.clear();
+        score = 0.0;
+        assert!(cond_match(&Cond::Pid(123), "x", "x", &[], 123, &mut tags, &mut score));
+        assert_eq!(tags, vec!["PID".to_string()]);
+        assert!(score >= 40.0);
+        // 无关 pid 不命中(前缀也救不了)
+        tags.clear();
+        score = 0.0;
+        assert!(!cond_match(&Cond::Pid(123), "x", "x", &[], 987, &mut tags, &mut score));
+    }
+
+    #[test]
+    fn cond_port_prefix_fuzzy() {
+        let pents = vec![PortEntry {
+            proto: "tcp",
+            addr: "127.0.0.1".into(),
+            port: 11111,
+            state: "LISTEN".into(),
+        }];
+        let mut tags = Vec::new();
+        let mut score = 0.0;
+        // 查 111 → 前缀命中 11111
+        assert!(cond_match(&Cond::Port(111), "x", "x", &pents, 1, &mut tags, &mut score));
+        assert_eq!(tags, vec!["端口 前缀".to_string()]);
+        // 精确优先
+        tags.clear();
+        score = 0.0;
+        assert!(cond_match(&Cond::Port(11111), "x", "x", &pents, 1, &mut tags, &mut score));
+        assert!(tags.iter().any(|t| t.contains("11111")));
+        // 无关端口不命中
+        tags.clear();
+        score = 0.0;
+        assert!(!cond_match(&Cond::Port(22), "x", "x", &pents, 1, &mut tags, &mut score));
+    }
+
+    #[test]
+    fn cond_text_fuzzy_tiers() {
+        let mut tags = Vec::new();
+        let mut score = 0.0;
+        // 缺字子序列:chrme → chrome 模糊命中(连续子串都失败后才走这级)
+        assert!(cond_match(
+            &Cond::Text("chrme".into()),
+            "chrome.exe",
+            "c:/x/chrome.exe",
+            &[],
+            1,
+            &mut tags,
+            &mut score
+        ));
+        assert_eq!(tags, vec!["名称模糊".to_string()]);
+        // 连续子串命中时不打模糊标签
+        tags.clear();
+        assert!(cond_match(
+            &Cond::Text("hrom".into()),
+            "chrome.exe",
+            "c:/x/chrome.exe",
+            &[],
+            1,
+            &mut tags,
+            &mut score
+        ));
+        assert!(tags.is_empty());
+        // 名称全失败 → exe 子序列兜底
+        tags.clear();
+        score = 0.0;
+        assert!(cond_match(
+            &Cond::Text("prgra".into()),
+            "zzz.exe",
+            "c:/program files/x.exe",
+            &[],
+            1,
+            &mut tags,
+            &mut score
+        ));
+        assert_eq!(tags, vec!["路径模糊".to_string()]);
+        // 真不匹配
+        tags.clear();
+        score = 0.0;
+        assert!(!cond_match(
+            &Cond::Text("xyzw".into()),
+            "chrome.exe",
+            "c:/x/chrome.exe",
+            &[],
+            1,
+            &mut tags,
+            &mut score
+        ));
+    }
+
+    #[test]
+    fn subsequence_basics() {
+        assert!(is_subsequence("cme", "chrome.exe"));
+        assert!(!is_subsequence("emc", "chrome.exe")); // 乱序不通过
+        assert!(is_subsequence("进终结", "进程终结者.exe"));
+        assert!(!is_subsequence("结终", "进程终结者.exe"));
+        assert!(is_subsequence("", "anything")); // 空 pattern 平凡命中
     }
 }
