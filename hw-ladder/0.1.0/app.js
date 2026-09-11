@@ -69,6 +69,7 @@ document.addEventListener('keydown', function (e) {
     cat: 'cpu',
     snaps: {},        // cat -> {snapshot, via, failures}
     busy: {},         // cat -> 该分类是否有进行中的联网刷新
+    compare: { cpu: [], gpu: [], disk: [] },  // 对比栏:每分类最多 CMP_MAX 条 {n,s,m}
     shown: PAGE,
     query: '',
   };
@@ -80,7 +81,10 @@ document.addEventListener('keydown', function (e) {
     rows: $('rows'), more: $('more'), empty: $('empty'), headMetric: $('head-metric'),
     srcBadge: $('src-badge'), statusText: $('status-text'), sourceSelect: $('source-select'),
     refresh: $('refresh'), notice: $('notice'), noticeText: $('notice-text'),
-    search: $('search'), tabs: $('tabs')
+    search: $('search'), tabs: $('tabs'),
+    cmpTray: $('cmp-tray'), cmpChips: $('cmp-chips'), cmpOpen: $('cmp-open'),
+    cmpClear: $('cmp-clear'), cmpOverlay: $('cmp-overlay'), cmpBody: $('cmp-body'),
+    cmpTitle: $('cmp-title'), cmpClose: $('cmp-close')
   };
 
   function hasNet() {
@@ -112,6 +116,7 @@ document.addEventListener('keydown', function (e) {
     var cat = state.cat;
     els.headMetric.textContent = snap && snap.metric ? snap.metric : '分数';
     buildSourceSelect(rec);
+    updateTray();
 
     if (!snap || !Array.isArray(snap.items)) {
       els.rows.textContent = '';
@@ -134,12 +139,15 @@ document.addEventListener('keydown', function (e) {
     }
 
     var max = items.length ? items[0].s : 1;
+    var pickedSet = {};
+    var cmpArr = state.compare[cat];
+    for (var ci = 0; ci < cmpArr.length; ci++) pickedSet[cmpArr[ci].n] = true;
     var frag = document.createDocumentFragment();
     var shown = items.slice(0, state.shown);
     for (var i = 0; i < shown.length; i++) {
       var it = shown[i];
       var row = document.createElement('div');
-      row.className = 'row' + (i < 3 && !q ? ' r' + (i + 1) : '');
+      row.className = 'row' + (i < 3 && !q ? ' r' + (i + 1) : '') + (pickedSet[it.n] ? ' cmp-on' : '');
 
       var rank = document.createElement('div');
       rank.className = 'rank';
@@ -170,6 +178,15 @@ document.addEventListener('keydown', function (e) {
       score.className = 'score';
       score.textContent = fmtScore(it.s);
       row.appendChild(score);
+
+      var cmpBtn = document.createElement('button');
+      cmpBtn.className = 'cmp-add' + (pickedSet[it.n] ? ' on' : '');
+      cmpBtn.title = pickedSet[it.n] ? '移出对比' : '加入对比';
+      cmpBtn.textContent = pickedSet[it.n] ? '✓' : '＋';
+      (function (item) {
+        cmpBtn.addEventListener('click', function () { toggleCompare(item); });
+      })(it);
+      row.appendChild(cmpBtn);
 
       frag.appendChild(row);
     }
@@ -320,6 +337,126 @@ document.addEventListener('keydown', function (e) {
     }
   }
 
+  /* ── 对比 ─────────────────────────────────────────────── */
+
+  var CMP_MAX = 4;
+
+  function itemsLookup(items, name) {
+    for (var i = 0; i < items.length; i++) if (items[i].n === name) return items[i];
+    return null;
+  }
+
+  function toggleCompare(item) {
+    var arr = state.compare[state.cat];
+    for (var i = 0; i < arr.length; i++) {
+      if (arr[i].n === item.n) { arr.splice(i, 1); updateTray(); render(); return; }
+    }
+    if (arr.length >= CMP_MAX) {
+      els.statusText.textContent = '最多同时对比 ' + CMP_MAX + ' 个型号';
+      return;
+    }
+    arr.push({ n: item.n, s: item.s, m: item.m });
+    updateTray();
+    render();
+  }
+
+  function updateTray() {
+    var arr = state.compare[state.cat];
+    els.cmpTray.hidden = arr.length === 0;
+    els.cmpChips.textContent = '';
+    for (var i = 0; i < arr.length; i++) {
+      (function (idx) {
+        var chip = document.createElement('span');
+        chip.className = 'cmp-chip';
+        var t = document.createElement('span');
+        t.textContent = arr[idx].n;
+        t.title = arr[idx].n;
+        var x = document.createElement('button');
+        x.textContent = '✕';
+        x.title = '移出对比';
+        x.addEventListener('click', function () {
+          state.compare[state.cat].splice(idx, 1);
+          updateTray();
+          render();
+        });
+        chip.appendChild(t);
+        chip.appendChild(x);
+        els.cmpChips.appendChild(chip);
+      })(i);
+    }
+    els.cmpOpen.disabled = arr.length < 2;
+    els.cmpOpen.textContent = arr.length >= 2 ? '对比(' + arr.length + ')' : '对比';
+  }
+
+  function openCompare() {
+    var cat = state.cat;
+    var arr = state.compare[cat];
+    var rec = state.snaps[cat];
+    var snap = rec && rec.snapshot;
+    if (arr.length < 2) return;
+    var items = snap && Array.isArray(snap.items) ? snap.items : null;
+    var rankMap = {};
+    if (items) {
+      for (var i = 0; i < items.length; i++) rankMap[items[i].n] = i + 1;
+    }
+    var picked = arr.map(function (c) {
+      return (items && itemsLookup(items, c.n)) || { n: c.n, s: c.s, m: c.m };
+    });
+    var best = -Infinity;
+    for (var i = 0; i < picked.length; i++) best = Math.max(best, picked[i].s);
+
+    els.cmpTitle.textContent = '对比 · ' + CAT_LABEL[cat] + (snap && snap.metric ? '(' + snap.metric + ')' : '');
+    els.cmpBody.textContent = '';
+    els.cmpBody.style.gridTemplateColumns = 'repeat(' + picked.length + ', minmax(0,1fr))';
+    for (var i = 0; i < picked.length; i++) {
+      var p = picked[i];
+      var card = document.createElement('div');
+      card.className = 'cmp-card' + (p.s === best ? ' best' : '');
+      var rank = document.createElement('div');
+      rank.className = 'rank' + (p.s === best ? ' lead' : '');
+      rank.textContent = rankMap[p.n] ? '#' + rankMap[p.n] : '—';
+      card.appendChild(rank);
+      var name = document.createElement('div');
+      name.className = 'name';
+      name.textContent = p.n;
+      card.appendChild(name);
+      var score = document.createElement('div');
+      score.className = 'score';
+      score.textContent = fmtScore(p.s);
+      card.appendChild(score);
+      var bar = document.createElement('div');
+      bar.className = 'bar';
+      var fill = document.createElement('i');
+      fill.style.width = best > 0 ? Math.max(1, Math.round(p.s / best * 100)) + '%' : '100%';
+      bar.appendChild(fill);
+      card.appendChild(bar);
+      var rel = document.createElement('div');
+      rel.className = 'rel';
+      rel.textContent = p.s === best ? '最高' : '相当于最高的 ' + (best > 0 ? Math.round(p.s / best * 100) : 0) + '%';
+      card.appendChild(rel);
+      if (p.m) {
+        var meta = document.createElement('div');
+        meta.className = 'meta';
+        meta.textContent = p.m;
+        card.appendChild(meta);
+      }
+      els.cmpBody.appendChild(card);
+    }
+    if (picked.length === 2) {
+      var note = document.createElement('div');
+      note.className = 'cmp-note';
+      note.style.gridColumn = '1 / -1';
+      var ratio = picked[0].s / picked[1].s;
+      note.textContent = ratio >= 1
+        ? picked[0].n + ' ≈ ' + ratio.toFixed(2) + '× ' + picked[1].n
+        : picked[1].n + ' ≈ ' + (1 / ratio).toFixed(2) + '× ' + picked[0].n;
+      els.cmpBody.appendChild(note);
+    }
+    els.cmpOverlay.hidden = false;
+  }
+
+  function closeCompare() { els.cmpOverlay.hidden = true; }
+
   /* ── 事件 ─────────────────────────────────────────────── */
 
   els.tabs.addEventListener('click', function (e) {
@@ -338,6 +475,11 @@ document.addEventListener('keydown', function (e) {
     setBusy(cat, !!state.busy[cat]);   // 同步忙碌视觉(切回正在抓取的分类)
     render();
     if (!state.snaps[cat]) loadCat(cat);
+
+    // 切分类过渡:重触发榜单上浮淡入
+    els.rows.classList.remove('anim-in');
+    void els.rows.offsetWidth;
+    els.rows.classList.add('anim-in');
   });
 
   var searchTimer = null;
@@ -362,7 +504,22 @@ document.addEventListener('keydown', function (e) {
 
   els.sourceSelect.addEventListener('change', function () {
     if (state.busy[state.cat]) return;
+    state.compare[state.cat] = [];   // 换源口径不同,清空该分类对比栏
     loadCat(state.cat, { force: true, preferred: els.sourceSelect.value || null });
+  });
+
+  els.cmpOpen.addEventListener('click', openCompare);
+  els.cmpClear.addEventListener('click', function () {
+    state.compare[state.cat] = [];
+    updateTray();
+    render();
+  });
+  els.cmpClose.addEventListener('click', closeCompare);
+  els.cmpOverlay.addEventListener('click', function (e) {
+    if (e.target === els.cmpOverlay) closeCompare();
+  });
+  document.addEventListener('keydown', function (e) {
+    if ((e.key || '').toLowerCase() === 'escape' && !els.cmpOverlay.hidden) closeCompare();
   });
 
   $('notice-close').addEventListener('click', function () {

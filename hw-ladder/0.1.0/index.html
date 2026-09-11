@@ -34,11 +34,19 @@
       <div class="col-rank">#</div>
       <div class="col-main">型号</div>
       <div class="col-score" id="head-metric">分数</div>
+      <div class="col-cmp"></div>
     </div>
     <div id="rows" class="rows"></div>
     <div id="empty" class="empty" hidden>没有匹配的型号</div>
     <div class="more-wrap"><button id="more" class="more-btn" hidden>显示更多</button></div>
   </main>
+
+  <div id="cmp-tray" class="cmp-tray" hidden>
+    <span class="cmp-label">对比栏</span>
+    <div id="cmp-chips" class="cmp-chips"></div>
+    <button id="cmp-open" class="cmp-btn" disabled>对比</button>
+    <button id="cmp-clear" class="ghost-btn" title="清空对比栏">清空</button>
+  </div>
 
   <footer class="statusbar">
     <span id="src-badge" class="src-badge">—</span>
@@ -48,6 +56,17 @@
     <select id="source-select" title="切换数据源"></select>
     <button id="refresh" class="refresh-btn" title="强制刷新(重新联网抓取)">⟳ 刷新</button>
   </footer>
+
+  <div id="cmp-overlay" class="cmp-overlay" hidden>
+    <div class="cmp-panel" role="dialog" aria-label="硬件对比">
+      <div class="cmp-head">
+        <span id="cmp-title">对比</span>
+        <button id="cmp-close" class="ghost-btn" title="关闭(Esc)">✕</button>
+      </div>
+      <div id="cmp-body" class="cmp-body"></div>
+      <div class="cmp-tip">同一分类内对比;分数口径以当前数据源为准</div>
+    </div>
+  </div>
 
   <script src="data/builtin-cpu.js"></script>
   <script src="data/builtin-gpu.js"></script>
