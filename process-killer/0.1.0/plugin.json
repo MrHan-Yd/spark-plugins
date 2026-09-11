@@ -1,0 +1,39 @@
+{
+  "id": "com.spark.process-killer",
+  "name": "进程终结者",
+  "version": "0.1.0",
+  "api_version": 2,
+  "runtime": "native",
+  "main": "spark-plugin-process-killer.exe",
+  "page": "page.html",
+  "icon": "icon.svg",
+  "author": "Spark",
+  "description": "一个搜索框聚合查找进程:端口号 / PID / 进程名 / 路径关键词都能命中,温和结束或强杀一键完成",
+  "homepage": "https://github.com/MrHan-Yd/spark-plugins/tree/master/process-killer",
+  "features": [
+    {
+      "type": "keyword",
+      "keyword": "kill",
+      "title": "进程终结者",
+      "subtitle": "端口/PID/进程名聚合搜索 · 温和结束 · 强杀",
+      "mode": "page",
+      "placeholder": "回车打开 进程终结者…"
+    },
+    {
+      "type": "keyword",
+      "keyword": "进程",
+      "title": "进程终结者",
+      "subtitle": "端口/PID/进程名聚合搜索 · 温和结束 · 强杀",
+      "mode": "page",
+      "placeholder": "回车打开 进程终结者…"
+    }
+  ],
+  "window": {
+    "width": 980,
+    "height": 640,
+    "min_width": 720,
+    "min_height": 420,
+    "resizable": true
+  },
+  "permissions": ["clipboard"]
+}

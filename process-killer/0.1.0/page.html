@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>进程终结者</title>
+<link rel="stylesheet" href="page.css">
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 128 128" aria-hidden="true">
+        <rect x="6" y="6" width="116" height="116" rx="30" fill="var(--panel3)"/>
+        <circle cx="64" cy="64" r="25" fill="none" stroke="var(--danger)" stroke-width="7.5"/>
+        <path d="M64 13v17M64 98v17M13 64h17M98 64h17" stroke="var(--danger)" stroke-width="7.5" stroke-linecap="round"/>
+        <circle cx="64" cy="64" r="7" fill="var(--danger)"/>
+      </svg>
+      <div class="bt"><b>进程终结者</b><span>端口 / PID / 进程名 · 一框聚合搜索</span></div>
+    </div>
+    <div class="tools">
+      <button id="btnTheme" class="tb icon" title="切换明暗主题">
+        <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M20 14.5A8.8 8.8 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
+        <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="searchwrap">
+    <svg class="sicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+      <circle cx="11" cy="11" r="7"/><path d="M11 4V6.5M11 15.5V18M4 11h2.5M15.5 11H18"/><path d="M20.5 20.5 16.4 16.4"/>
+    </svg>
+    <input id="q" type="text" spellcheck="false" autocomplete="off"
+           placeholder="端口号 / PID / 进程名 / 路径关键词…(:8080 指定端口,pid:123 指定 PID)">
+    <button id="btnClear" class="sclear hidden" title="清空">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <button id="btnGo" class="sgo">搜索</button>
+  </div>
+
+  <main id="list" class="list"></main>
+
+  <footer class="status">
+    <span id="stDot" class="dot"></span>
+    <span id="stText">连接插件中…</span>
+    <span class="grow"></span>
+    <span id="stMeta"></span>
+    <button id="btnRefresh" class="tb" title="重新搜索(进程快照会实时刷新)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 3v5h-5"/></svg>刷新
+    </button>
+  </footer>
+</div>
+
+<!-- 结束进程确认弹窗 -->
+<div id="modal" class="modal">
+  <div class="mcard">
+    <b id="mdTitle">结束进程</b>
+    <p id="mdBody"></p>
+    <p id="mdWarn" class="mdwarn hidden">进程未退出,可能弹了保存窗口或属于无窗口程序——要改用强杀吗?</p>
+    <div class="mfoot">
+      <button id="btnMdCancel" class="btn">取消</button>
+      <button id="btnMdOk" class="btn primary">确定</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status"></div>
+
+<script src="page.js"></script>
+</body>
+</html>

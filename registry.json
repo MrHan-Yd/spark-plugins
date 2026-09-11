@@ -2,7 +2,7 @@
   "schema": 1,
   "name": "Spark 官方插件仓库",
   "zipball_url": "https://github.com/MrHan-Yd/spark-plugins/archive/refs/heads/master.zip",
-  "updated": "2026-09-09T00:00:00Z",
+  "updated": "2026-09-11T09:20:00Z",
   "plugins": [
     {
       "id": "com.spark.json-formatter",
@@ -257,6 +257,39 @@
             "key_id": "spark-official-v1",
             "algorithm": "ed25519",
             "signature": "W0ItxAZPz8vstsF+NYama48Q3CBufdcxiznT8LKfV3TorUHmoDARCn3GKbQPzOibXVemdnvGbYKU3FrxYieqBg=="
+          }
+        }
+      ]
+    },
+    {
+      "id": "com.spark.process-killer",
+      "name": "进程终结者",
+      "description": "一个搜索框聚合查找进程:端口号 / PID / 进程名 / 路径关键词都能命中,温和结束或强杀一键完成",
+      "author": "Spark",
+      "homepage": "https://github.com/MrHan-Yd/spark-plugins/tree/master/process-killer",
+      "icon": "https://raw.githubusercontent.com/MrHan-Yd/spark-plugins/master/process-killer/0.1.0/icon.svg",
+      "runtime": "native",
+      "latest": "0.1.0",
+      "permissions": [
+        "clipboard"
+      ],
+      "tags": [
+        "开发工具",
+        "系统"
+      ],
+      "versions": [
+        {
+          "version": "0.1.0",
+          "path": "process-killer/0.1.0",
+          "url": null,
+          "sha256": null,
+          "size": null,
+          "released": "2026-09-11",
+          "signature": {
+            "schema": 1,
+            "key_id": "spark-official-v1",
+            "algorithm": "ed25519",
+            "signature": "9i/WQzt/bl3Qb6S2Yyh2ImRbjbNjQVJWkYkxhQo9V0ymd08DIrIq22UCEbKJLeT+q95dV4itXV3PZZC46FwXBQ=="
           }
         }
       ]
