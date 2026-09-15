@@ -104,6 +104,17 @@ html[data-theme='dark'] {
   --shadow-2: 0 8px 24px -10px rgba(0, 0, 0, .65);
   --shadow-pop: 0 18px 46px -18px rgba(0, 0, 0, .75);
   --glass: blur(16px) saturate(1.25);
+
+  /* hljs token 配色(10 类,对 --code-bg) */
+  --hl-comment: #6b7c96;
+  --hl-keyword: #c9a9f5;
+  --hl-builtin: #4fd3b4;
+  --hl-string: #e6bd7c;
+  --hl-number: #ef9d84;
+  --hl-variable: #9db8f5;
+  --hl-function: #8fd8f0;
+  --hl-operator: #8fa0bb;
+  --hl-meta: #7f93b5;
 }
 
 html[data-theme='light'] {
@@ -159,6 +170,16 @@ html[data-theme='light'] {
   --shadow-2: 0 10px 26px -12px rgba(16, 24, 40, .20);
   --shadow-pop: 0 18px 40px -18px rgba(16, 24, 40, .24);
   --glass: blur(16px);
+
+  --hl-comment: #62718a;
+  --hl-keyword: #7c4fd0;
+  --hl-builtin: #0b6e5b;
+  --hl-string: #96631a;
+  --hl-number: #b04a35;
+  --hl-variable: #2f5fb8;
+  --hl-function: #1a6f96;
+  --hl-operator: #55617a;
+  --hl-meta: #5a6a8a;
 }
 
 /* ── 2 基础与骨架 ──────────────────────────────────────────── */
@@ -452,26 +473,15 @@ html[data-theme='light'] #btn-theme .ic { --mi: var(--ic-moon); }
 .md pre:not(.code pre) { padding: 14px var(--sp-5); background: var(--code-bg); border: 1px solid var(--code-border);
   border-radius: var(--r-md); overflow-x: auto; }
 
-.hljs-comment, .hljs-quote { color: #6b7c96; font-style: italic; }
-.hljs-keyword, .hljs-selector-tag, .hljs-tag { color: #c9a9f5; }
-html[data-theme='light'] .hljs-comment, html[data-theme='light'] .hljs-quote { color: #62718a; }
-html[data-theme='light'] .hljs-keyword, html[data-theme='light'] .hljs-selector-tag { color: #7c4fd0; }
-.hljs-built_in, .hljs-symbol, .hljs-bullet { color: #4fd3b4; }
-html[data-theme='light'] .hljs-built_in, html[data-theme='light'] .hljs-symbol { color: #0b6e5b; }
-.hljs-string, .hljs-regexp, .hljs-addition { color: #e6bd7c; }
-html[data-theme='light'] .hljs-string, html[data-theme='light'] .hljs-regexp, html[data-theme='light'] .hljs-addition { color: #96631a; }
-.hljs-number, .hljs-literal, .hljs-deletion { color: #ef9d84; }
-html[data-theme='light'] .hljs-number, html[data-theme='light'] .hljs-literal, html[data-theme='light'] .hljs-deletion { color: #b04a35; }
-.hljs-variable, .hljs-template-variable, .hljs-attr, .hljs-property { color: #9db8f5; }
-html[data-theme='light'] .hljs-variable, html[data-theme='light'] .hljs-template-variable,
-html[data-theme='light'] .hljs-attr, html[data-theme='light'] .hljs-property { color: #2f5fb8; }
-.hljs-function, .hljs-title, .hljs-class, .hljs-section { color: #8fd8f0; }
-html[data-theme='light'] .hljs-function, html[data-theme='light'] .hljs-title, html[data-theme='light'] .hljs-class,
-html[data-theme='light'] .hljs-section { color: #1a6f96; }
-.hljs-operator, .hljs-punctuation, .hljs-subst { color: #8fa0bb; }
-html[data-theme='light'] .hljs-operator, html[data-theme='light'] .hljs-punctuation { color: #55617a; }
-.hljs-meta, .hljs-meta .hljs-keyword, .hljs-doctag { color: #7f93b5; }
-html[data-theme='light'] .hljs-meta, html[data-theme='light'] .hljs-doctag { color: #5a6a8a; }
+.hljs-comment, .hljs-quote { color: var(--hl-comment); font-style: italic; }
+.hljs-keyword, .hljs-selector-tag, .hljs-tag { color: var(--hl-keyword); }
+.hljs-built_in, .hljs-symbol, .hljs-bullet { color: var(--hl-builtin); }
+.hljs-string, .hljs-regexp, .hljs-addition { color: var(--hl-string); }
+.hljs-number, .hljs-literal, .hljs-deletion { color: var(--hl-number); }
+.hljs-variable, .hljs-template-variable, .hljs-attr, .hljs-property { color: var(--hl-variable); }
+.hljs-function, .hljs-title, .hljs-class, .hljs-section { color: var(--hl-function); }
+.hljs-operator, .hljs-punctuation, .hljs-subst { color: var(--hl-operator); }
+.hljs-meta, .hljs-meta .hljs-keyword, .hljs-doctag { color: var(--hl-meta); }
 .hljs-emphasis { font-style: italic; }
 .hljs-strong { font-weight: 600; }
 
@@ -483,6 +493,7 @@ html[data-theme='light'] .hljs-meta, html[data-theme='light'] .hljs-doctag { col
 .lnk { border: 0; border-radius: 5px; background: transparent; padding: 0 var(--sp-2); height: 18px;
   font-size: 11.5px; color: var(--accent-text); cursor: pointer; flex: none; }
 .lnk:hover { background: var(--bg-hover); text-decoration: underline; }
+.lnk:disabled { opacity: .45; pointer-events: none; }
 .upd { margin-left: auto; display: flex; align-items: center; gap: var(--sp-3); flex: none; }
 .btn-upd { height: 20px; padding: 0 var(--sp-3); border: 0; border-radius: var(--r-xs);
   background: transparent; color: var(--fg-muted); font-size: 11.5px; cursor: pointer;

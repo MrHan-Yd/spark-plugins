@@ -25,12 +25,15 @@ var OVERLAY_KEY = 'lc_idx_overlay';
 var spark = global.spark || null;
 
 function withTimeout(p, ms, label) {
-  return Promise.race([
-    Promise.resolve(p),
-    new Promise(function (_, rej) {
-      setTimeout(function () { rej(new Error((label || '操作') + '超时(' + Math.round(ms / 1000) + 's)')); }, ms);
-    })
-  ]);
+  var timer;
+  var loser = new Promise(function (_, rej) {
+    timer = setTimeout(function () { rej(new Error((label || '操作') + '超时(' + Math.round(ms / 1000) + 's)')); }, ms);
+  });
+  /* race 出结果即清 timer,防超时定时器挂着闭包白跑满全程 */
+  return Promise.race([Promise.resolve(p), loser]).then(
+    function (v) { clearTimeout(timer); return v; },
+    function (e) { clearTimeout(timer); throw e; }
+  );
 }
 
 /* ── 出网:归一到 {status, text()} ── */
@@ -54,15 +57,17 @@ function netFetchText(url) {
 }
 
 function fetchFirst(urls) {
-  var i = 0;
-  function tryOne() {
-    if (i >= urls.length) return Promise.reject(new Error('全部数据源不可达'));
-    return netFetchText(urls[i++]).catch(function (e) {
-      if (i >= urls.length) throw e;
-      return tryOne();
+  var errors = [];
+  function tryOne(i) {
+    if (i >= urls.length) {
+      return Promise.reject(new Error('全部数据源不可达(' + errors.join(' | ') + ')'));
+    }
+    return netFetchText(urls[i]).catch(function (e) {
+      errors.push((i === 0 ? '主源' : '备源') + ':' + (e && e.message ? e.message : e));
+      return tryOne(i + 1);
     });
   }
-  return tryOne();
+  return tryOne(0);
 }
 
 /* ── 持久化:spark.db 优先,localStorage 兜底(db 挂起超时也回退) ── */
@@ -96,15 +101,26 @@ function dbSet(key, val) {
 }
 
 function dbDel(key) {
-  var useDb = spark && spark.db && typeof spark.db.set === 'function';
-  var first;
-  if (useDb) {
-    try { first = withTimeout(spark.db.set(key, null), STORE_TIMEOUT_MS, '缓存清理').catch(function () {}); }
-    catch (e) { first = Promise.resolve(); }
-  } else first = Promise.resolve();
-  return first.then(function () {
-    try { global.localStorage.removeItem('lcmd_' + key); } catch (e) { /* 忽略 */ }
+  /* 优先文档承诺的 spark.db.remove;宿主没有 remove 才降级 set(key,null);
+     失败返回 false(不静默),让「恢复出厂」能如实报错 */
+  var chain = Promise.reject();
+  if (spark && spark.db) {
+    if (typeof spark.db.remove === 'function') {
+      chain = chain.catch(function () {
+        try { return withTimeout(spark.db.remove(key), STORE_TIMEOUT_MS, '缓存清理'); }
+        catch (e) { return Promise.reject(e); }
+      });
+    } else if (typeof spark.db.set === 'function') {
+      chain = chain.catch(function () {
+        try { return withTimeout(spark.db.set(key, null), STORE_TIMEOUT_MS, '缓存清理'); }
+        catch (e) { return Promise.reject(e); }
+      });
+    }
+  }
+  chain = chain.catch(function () {
+    global.localStorage.removeItem('lcmd_' + key);
   });
+  return chain.then(function () { return true; }).catch(function () { return false; });
 }
 
 /* ── 远端索引校验闸:结构漂移即拒收 ── */
@@ -125,10 +141,16 @@ function validateRemoteIndex(raw) {
 
 /* ── 检查更新 ──
 
-checkIndex({onProgress}) → {added:[{n,d}], totalRemote, source}
-覆盖层只增不替换:仅收录出厂索引中不存在的命令;旧覆盖层条目保留。 */
+checkIndex({onProgress}) → {added:[{n,d}], totalRemote, source} | {cancelled:true}
+覆盖层只增不替换:仅收录出厂索引中不存在的命令;旧覆盖层条目保留。
+代际闸:期间发生「恢复出厂」(writeGen 递增)时,本次更新放弃写回,返回 cancelled。 */
+var DESC_MAX = 2000;      // 单条简介上限(超限视为上游投毒/脏数据,不收录)
+var OVERLAY_MAX = 5000;   // 覆盖层条目上限,超限整体按无覆盖层处理
+var writeGen = 0;         // 恢复出厂即自增,使在途 checkIndex 的落库作废
+
 UPD.checkIndex = function (opts) {
   opts = opts || {};
+  var myGen = writeGen;
   var onProgress = typeof opts.onProgress === 'function' ? opts.onProgress : function () {};
   onProgress(4, '读取本地覆盖层…');
   return UPD.loadOverlay().then(function (overlay) {
@@ -148,10 +170,11 @@ UPD.checkIndex = function (opts) {
         var n = names[j];
         if (known[n] || have[n]) continue;
         var d = remote[n].d || '';
-        if (!d.trim()) continue;
+        if (!d.trim() || d.length > DESC_MAX) continue;
         added.push({ n: n, d: d });
         have[n] = true;
       }
+      if (writeGen !== myGen) return { cancelled: true, added: [], totalRemote: names.length, overlay: null };
       onProgress(90, '保存索引覆盖层…');
       var overlayOut = { schema: 1, built: new Date().toISOString().replace(/\.\d+Z$/, 'Z'), added: added };
       return dbSet(OVERLAY_KEY, overlayOut).then(function () {
@@ -166,17 +189,27 @@ UPD.checkIndex = function (opts) {
 UPD.loadOverlay = function () {
   return dbGet(OVERLAY_KEY).then(function (v) {
     if (!v || v.schema !== 1 || !Array.isArray(v.added)) return null;
+    if (v.added.length > OVERLAY_MAX) return null;
+    var seen = {};
     var clean = [];
     for (var i = 0; i < v.added.length; i++) {
       var e = v.added[i];
-      if (e && typeof e.n === 'string' && typeof e.d === 'string' && NAME_RE.test(e.n)) clean.push({ n: e.n, d: e.d });
+      if (e && typeof e.n === 'string' && typeof e.d === 'string' && NAME_RE.test(e.n)
+          && e.d.length <= DESC_MAX && !seen[e.n]) {
+        seen[e.n] = true;
+        clean.push({ n: e.n, d: e.d });
+      }
     }
     return { schema: 1, built: v.built || null, added: clean };
   });
 };
 
+/* 恢复出厂:自增代际作废在途更新,再清覆盖层;失败上抛让 UI 如实报错 */
 UPD.clearOverlay = function () {
-  return dbDel(OVERLAY_KEY);
+  writeGen++;
+  return dbDel(OVERLAY_KEY).then(function (ok) {
+    if (!ok) throw new Error('清理覆盖层失败(db 与 localStorage 均不可用)');
+  });
 };
 
 /* ── 覆盖层命令的正文按需拉取(缓存 db lc_doc:<name>) ── */
@@ -185,14 +218,17 @@ function docUrl(name) {
   return DOC_URLS.map(function (tpl) { return tpl.replace('<N>', encodeURIComponent(name)); });
 }
 
+function validDoc(md, name) {
+  return typeof md === 'string' && md.length > 30 && md.indexOf(name) >= 0;
+}
+
 UPD.fetchDoc = function (name) {
   var key = 'lc_doc:' + name;
   return dbGet(key).then(function (cached) {
-    if (typeof cached === 'string' && cached.length > 30) return cached;
+    /* 缓存命中必须过与网络路径同一套内容校验,脏缓存视为未命中回源 */
+    if (validDoc(cached, name)) return cached;
     return fetchFirst(docUrl(name)).then(function (md) {
-      if (typeof md !== 'string' || md.length < 30 || md.indexOf(name) < 0) {
-        throw new Error('远端文档内容异常');
-      }
+      if (!validDoc(md, name)) throw new Error('远端文档内容异常');
       return dbSet(key, md).then(function () { return md; });
     });
   });

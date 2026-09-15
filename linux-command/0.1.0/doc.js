@@ -20,6 +20,8 @@ function markedParse(md) {
 function sanitize(html) {
   var DOMPurify = global.DOMPurify;
   if (!DOMPurify) throw new Error('DOMPurify 未加载');
+  /* 危险 URI(javascript:/data:/vbscript:)依赖 DOMPurify 默认 ALLOWED_URI_REGEXP 拦截,此处未覆写;
+     升级 vendor 需复查该默认白名单仍不含这三种 scheme */
   return DOMPurify.sanitize(html, {
     FORBID_TAGS: FORBID_TAGS.split('|'),
     FORBID_ATTR: FORBID_ATTR.split('|')
@@ -70,10 +72,13 @@ DOC.render = function (md, article) {
     btn.setAttribute('aria-label', '复制代码');
     btn.innerHTML = '<i class="ic ic-copy"></i>';
     box.appendChild(btn);
-    if (hljs && highlighted < 30) {
+    if (hljs) {
+      /* 语言类统一追加(31+ 块只上样式不高亮,保持渲染一致性) */
       var cls = code.className || '';
       if (!/(^|\s)language-/.test(cls) && !/(^|\s)hljs(\s|$)/.test(cls)) code.classList.add('language-bash');
-      try { hljs.highlightElement(code); highlighted++; } catch (e) { /* 高亮失败不影响可读 */ }
+      if (highlighted < 30) {
+        try { hljs.highlightElement(code); highlighted++; } catch (e) { /* 高亮失败不影响可读 */ }
+      }
     }
   }
 

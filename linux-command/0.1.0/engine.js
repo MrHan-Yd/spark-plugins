@@ -137,19 +137,33 @@ ENGINE.ensureChunk = function (letter, docBase) {
   if (global.LCDC_DOCS && global.LCDC_DOCS[letter]) { loaded[letter] = true; return Promise.resolve(); }
   var d = global.document;
   if (!d) return Promise.reject(new Error('无 document,无法加载分块'));
-  pending[letter] = new Promise(function (resolve, reject) {
+  var p;
+  p = new Promise(function (resolve, reject) {
+    /* dead 标记:超时/失败后,迟到的 onload/onerror 不得触碰模块级 pending/loaded,
+       否则会清掉重试请求的新 Promise(弱网下重复注入 <script>) */
+    var dead = false;
     var s = d.createElement('script');
-    var timer = setTimeout(function () { cleanup(); pending[letter] = null; reject(new Error('分块加载超时')); }, FAILED_WAIT_MS);
-    function cleanup() { clearTimeout(timer); if (s.parentNode) s.parentNode.removeChild(s); }
+    var timer = setTimeout(function () { finish(false, new Error('分块加载超时')); }, FAILED_WAIT_MS);
+    function finish(ok, err) {
+      if (dead) return;
+      dead = true;
+      clearTimeout(timer);
+      s.onload = null; s.onerror = null;
+      if (s.parentNode) s.parentNode.removeChild(s);
+      if (pending[letter] === p) pending[letter] = null;
+      if (ok) { loaded[letter] = true; resolve(); }
+      else reject(err);
+    }
     s.src = (docBase || 'data/') + 'doc-' + letter + '.js';
     s.onload = function () {
-      if (global.LCDC_DOCS && global.LCDC_DOCS[letter]) { loaded[letter] = true; cleanup(); resolve(); }
-      else { cleanup(); pending[letter] = null; reject(new Error('分块内容缺失: ' + letter)); }
+      if (global.LCDC_DOCS && global.LCDC_DOCS[letter]) finish(true);
+      else finish(false, new Error('分块内容缺失: ' + letter));
     };
-    s.onerror = function () { cleanup(); pending[letter] = null; reject(new Error('分块加载失败: ' + letter)); };
+    s.onerror = function () { finish(false, new Error('分块加载失败: ' + letter)); };
     (d.head || d.body).appendChild(s);
   });
-  return pending[letter];
+  pending[letter] = p;
+  return p;
 };
 
 ENGINE.hasChunk = function (letter) {

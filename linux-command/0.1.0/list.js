@@ -192,7 +192,9 @@ function moveSel(delta) {
   var at = st.selName ? names.indexOf(st.selName) : -1;
   var next = at < 0 ? (delta > 0 ? 0 : names.length - 1) : Math.min(names.length - 1, Math.max(0, at + delta));
   st.selName = names[next];
-  if (next >= st.rendered) { while (st.rendered < next + 1) renderMore(); }
+  /* 有界补渲染(614 条最多 11 批,64 为双保险),依赖 results 只增不减的不变量 */
+  var guard = 0;
+  while (st.rendered < next + 1 && guard++ < 64) renderMore();
   syncSelRow();
   var rows = ctx.els.list.querySelectorAll('.row');
   for (var i = 0; i < rows.length; i++) {

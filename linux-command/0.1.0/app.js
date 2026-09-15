@@ -54,10 +54,12 @@ function loadPrefs() {
   return Promise.resolve();
 }
 
-function savePrefs() {
+function savePrefs(immediate) {
   if (sparkApi && sparkApi.db) {
-    if (saveTimer) clearTimeout(saveTimer);
-    saveTimer = setTimeout(function () { try { sparkApi.db.set('prefs', prefs); } catch (e) { /* 忽略 */ } }, 300);
+    if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
+    var write = function () { try { sparkApi.db.set('prefs', prefs); } catch (e) { /* 忽略 */ } };
+    if (immediate) write(); /* 关窗路径立即冲刷,防抖定时器等不到跑 */
+    else saveTimer = setTimeout(write, 300);
   } else {
     try { localStorage.setItem('lcmd_prefs', JSON.stringify(prefs)); } catch (e) { /* 忽略 */ }
   }
@@ -122,24 +124,30 @@ document.addEventListener('animationend', function (e) {
 
 function rebuildIndex(overlay) {
   var all = (window.LCMD_INDEX || []).slice();
+  var added = 0;
   if (overlay && Array.isArray(overlay.added)) {
-    for (var i = 0; i < overlay.added.length; i++) {
-      var e = overlay.added[i];
+    var seen = {};
+    for (var i = 0; i < all.length; i++) seen[all[i].n] = true;
+    for (var k = 0; k < overlay.added.length; k++) {
+      var e = overlay.added[k];
+      /* 去重:出厂同名条目优先,覆盖层脏数据/重复项一律跳过 */
+      if (!e || !e.n || seen[e.n] || FACTORY_NAMES[e.n]) continue;
+      seen[e.n] = true;
       all.push({ n: e.n, d: e.d, py: '', pi: '' });
+      added++;
     }
   }
   state.index = all;
-  applyFooterOverlay(overlay);
+  overlayCount = added;
+  applyFooterOverlay();
 }
 
 var overlayCount = 0;
-function applyFooterOverlay(overlay) {
-  var n = overlay && Array.isArray(overlay.added) ? overlay.added.length : 0;
-  overlayCount = n;
-  els.btnRestore.hidden = n === 0;
-  if (n > 0) {
+function applyFooterOverlay() {
+  els.btnRestore.hidden = overlayCount === 0;
+  if (overlayCount > 0) {
     els.srcDot.classList.add('online');
-    els.srcText.textContent = '在线索引 · +' + n + ' 条 · 出厂 ' + META.upstream;
+    els.srcText.textContent = '在线索引 · +' + overlayCount + ' 条 · 出厂 ' + META.upstream;
   } else {
     els.srcDot.classList.remove('online');
     els.srcText.textContent = '出厂数据 · ' + META.upstream + ' · ' + META.count + ' 条';
@@ -155,6 +163,14 @@ function runQuery(rebuild) {
   state.results = E.query(state.index, {
     q: state.q, letter: state.letter, favsOnly: state.favsOnly, favSet: favSet
   });
+  /* 悬空选中清理:结果集重建后,旧 selName 不在新结果中即作废,防 Enter 打开被淘汰的旧命令 */
+  if (state.selName) {
+    var alive = false;
+    for (var i = 0; i < state.results.length; i++) {
+      if (state.results[i].entry.n === state.selName) { alive = true; break; }
+    }
+    if (!alive) state.selName = null;
+  }
   applyScopeChip();
   LIST.renderList(rebuild);
 }
@@ -376,6 +392,13 @@ function docPaneOpen(open) {
 /* ── 键盘(↑↓/Enter 委托 list.js 的选行;Esc 逐级退出) ── */
 
 function openSelected() {
+  if (state.selName) {
+    var alive = false;
+    for (var i = 0; i < state.results.length; i++) {
+      if (state.results[i].entry.n === state.selName) { alive = true; break; }
+    }
+    if (!alive) state.selName = null;
+  }
   if (!state.selName) {
     if (state.results.length) state.selName = state.results[0].entry.n;
     else return;
@@ -417,6 +440,8 @@ function setUpdBusy(busy, pct, text) {
   els.btnUpd.classList.toggle('busy', !!busy);
   els.btnUpd.hidden = !!busy;
   els.updProg.hidden = !busy;
+  /* 更新在途时锁定恢复出厂,防并发写回覆盖层(updater 代际闸兜底) */
+  els.btnRestore.disabled = !!busy;
   if (busy) {
     els.progFill.style.width = (pct || 0) + '%';
     els.progText.textContent = text || '';
@@ -429,6 +454,7 @@ els.btnUpd.addEventListener('click', function () {
   setUpdBusy(true, 4, '读取覆盖层…');
   UPD.checkIndex({ onProgress: function (pct, text) { setUpdBusy(true, pct, text); } }).then(function (res) {
     setUpdBusy(false);
+    if (res.cancelled) return; /* 期间已恢复出厂,本次更新作废:不重建列表、不打扰 */
     rebuildIndex(res.overlay);
     LIST.renderList(true);
     if (res.added.length > 0) toast('更新完成,新增 ' + res.added.length + ' 条命令');
@@ -440,14 +466,18 @@ els.btnUpd.addEventListener('click', function () {
 });
 
 els.btnRestore.addEventListener('click', function () {
+  if (els.btnRestore.disabled) return;
+  els.btnRestore.disabled = true;
   UPD.clearOverlay().then(function () {
     return UPD.loadOverlay();
   }).then(function (overlay) {
     rebuildIndex(overlay);
     LIST.renderList(true);
     toast('已恢复出厂索引');
-  }).catch(function () {
-    toast('恢复出厂失败', true);
+  }).catch(function (e) {
+    toast('恢复出厂失败:' + ((e && e.message) || '未知原因'), true);
+  }).then(function () {
+    els.btnRestore.disabled = false;
   });
 });
 
@@ -560,7 +590,7 @@ function boot() {
 
 if (sparkApi && sparkApi.onEnter) {
   sparkApi.onEnter(function () { boot(); });
-  if (sparkApi.onClose) sparkApi.onClose(function () { savePrefs(); });
+  if (sparkApi.onClose) sparkApi.onClose(function () { savePrefs(true); /* 立即冲刷,防抖窗口内关窗不丢收藏 */ });
 } else {
   boot();
 }
