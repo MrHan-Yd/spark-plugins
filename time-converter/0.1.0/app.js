@@ -8,7 +8,7 @@ var sparkApi = window.spark || null;
 var $ = function (id) { return document.getElementById(id); };
 var els = {
   input: $('input'), kind: $('kind'), cards: $('cards'), idle: $('idle'),
-  error: $('error'), errorMsg: $('error-msg'), errorHint: $('error-hint'),
+  error: $('error'), errorMsg: $('error-msg'), errorCode: $('error-code'), errorHint: $('error-hint'),
   status: $('status-text'), toast: $('toast'),
   overlay: $('overlay'), help: $('help'), tplIn: $('tpl-in'), tplOut: $('tpl-out'),
   tplErr: $('tpl-err'), wcRows: $('wc-rows'), btnTheme: $('btn-theme')
@@ -58,23 +58,39 @@ function debounce(fn, ms) {
 }
 
 var toastTimer = null;
-function toast(msg) {
+function toast(msg, isErr) {
   els.toast.textContent = msg;
+  els.toast.classList.toggle('err', !!isErr);
   els.toast.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(function () { els.toast.classList.remove('show'); }, 1800);
 }
 
-function copyText(v) {
+function copyText(v, btn) {
   var p = sparkApi && sparkApi.clipboard
     ? sparkApi.clipboard.writeText(v)
     : (navigator.clipboard ? navigator.clipboard.writeText(v) : Promise.reject({ code: 'PERMISSION_DENIED' }));
-  p.then(function () { toast('已复制:' + truncVal(v)); }).catch(function (e) {
-    toast(e && e.code === 'PERMISSION_DENIED' ? '复制失败:请在 设置-插件 中授权剪贴板' : '复制失败');
+  p.then(function () {
+    toast('已复制:' + truncVal(v));
+    if (btn) {  // 行内对勾反馈(蓝图 M6/P1)
+      btn.classList.add('copied');
+      setTimeout(function () { btn.classList.remove('copied'); }, 900);
+    }
+  }).catch(function (e) {
+    toast(e && e.code === 'PERMISSION_DENIED' ? '复制失败:请在 设置-插件 中授权剪贴板' : '复制失败', true);
   });
 }
 
 function truncVal(s) { return s.length > 48 ? s.slice(0, 48) + '…' : s; }
+
+/* 值写入 + 变更闪动(蓝图 M1):文本未变的节点不动,避免连续输入满屏闪 */
+function setVal(el, text) {
+  if (!el || el.textContent === text) return;
+  el.textContent = text;
+  el.classList.remove('flash');
+  void el.offsetWidth;
+  el.classList.add('flash');
+}
 
 /* ── 转换管线 ── */
 
@@ -129,6 +145,7 @@ function renderError(error) {
   els.cards.classList.add('stale');
   els.error.hidden = false;
   els.errorMsg.textContent = error && error.message ? error.message : '解析失败';
+  els.errorCode.textContent = error && error.code ? error.code : '';
   if (error && error.hint) {
     els.errorHint.hidden = false;
     els.errorHint.textContent = error.hint;
@@ -160,8 +177,7 @@ function fillCards(cards) {
   cards.forEach(function (card) {
     if (card.id === 'unix') {
       card.rows.forEach(function (r, i) {
-        var el = $('v-unix-' + ['s', 'ms', 'us', 'ns'][i]);
-        if (el) el.textContent = r.value;
+        setVal($('v-unix-' + ['s', 'ms', 'us', 'ns'][i]), r.value);
       });
       document.querySelectorAll('.row .row-value[id^="v-unix-"]').forEach(function (el) {
         el.parentElement.classList.remove('row-origin');
@@ -177,20 +193,20 @@ function fillCards(cards) {
       fillWorldclock(card.rows);
     } else if (card.id === 'template') {
       if (card.error) {
-        els.tplOut.textContent = '';
+        setVal(els.tplOut, '');
         els.tplErr.hidden = false;
         els.tplErr.textContent = (card.error.message || '模板渲染失败') + (card.error.position !== undefined ? '(位置 ' + card.error.position + ')' : '');
       } else {
-        els.tplOut.textContent = card.value;
+        setVal(els.tplOut, card.value);
         els.tplErr.hidden = true;
       }
       if (card.note !== undefined && els.tplIn.value !== card.note) els.tplIn.value = card.note;
     } else if (cardEls[card.id]) {
       if (card.error) {
-        cardEls[card.id].textContent = '——';
+        setVal(cardEls[card.id], '——');
         cardEls[card.id].title = card.error.message || '不可显示';
       } else {
-        cardEls[card.id].textContent = card.value;
+        setVal(cardEls[card.id], card.value);
         cardEls[card.id].title = '';
       }
       if (card.id === 'iso-local') $('n-iso-local').textContent = card.note || '';
@@ -215,7 +231,7 @@ function fillWorldclock(rows) {
     btn.className = 'row-copy';
     btn.textContent = '⧉';
     btn.title = '复制';
-    btn.addEventListener('click', function () { copyText(r.value); });
+    btn.addEventListener('click', function () { copyText(r.value, btn); });
     div.appendChild(lab);
     div.appendChild(val);
     div.appendChild(btn);
@@ -239,6 +255,9 @@ function useAsInput(v) {
   run();
   els.input.focus();
   els.input.setSelectionRange(els.input.value.length, els.input.value.length);
+  els.input.classList.remove('pulse');
+  void els.input.offsetWidth;
+  els.input.classList.add('pulse');
 }
 
 els.input.addEventListener('input', runDebounced);
@@ -250,7 +269,7 @@ document.addEventListener('click', function (e) {
   var copyBtn = e.target.closest && e.target.closest('[data-copy]');
   if (copyBtn) {
     var src = $(copyBtn.getAttribute('data-val'));
-    if (src) copyText(src.textContent);
+    if (src) copyText(src.textContent, copyBtn);
     return;
   }
   var useBtn = e.target.closest && e.target.closest('[data-use]');
@@ -264,6 +283,12 @@ document.addEventListener('click', function (e) {
     els.input.value = chip.getAttribute('data-fill');
     run();
     els.input.focus();
+    return;
+  }
+  /* 单值卡值点击回填(蓝图 §3.7/M5;日历卡无回填语义,'——' 为错误占位) */
+  var cardVal = e.target.closest && e.target.closest('.card-value, #tpl-out');
+  if (cardVal && cardVal.id !== 'v-calendar' && cardVal.textContent && cardVal.textContent !== '——') {
+    useAsInput(cardVal.textContent);
     return;
   }
   var rowVal = e.target.closest && e.target.closest('.row-value[id^="v-unix-"]');
