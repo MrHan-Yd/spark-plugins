@@ -52,7 +52,7 @@
       </div>
     </div>
 
-    <div id="error" class="errbox" hidden>
+    <div id="error" class="errbox" role="alert" hidden>
       <span id="error-code" class="err-code"></span>
       <div id="error-msg" class="err-msg"></div>
       <div id="error-hint" class="err-hint" hidden></div>
@@ -101,7 +101,7 @@
 
       <section class="card">
         <div class="card-head"><span class="card-title">中文格式</span>
-          <div class="card-acts"><button class="act" data-val="v-chinese" data-copy title="复制">⧉</button><button class="act" data-val="v-chinese" data-use title="作为输入">↩</button></div>
+          <div class="card-acts"><button class="act" data-val="v-chinese" data-copy title="复制">⧉</button></div>
         </div>
         <div class="card-value" id="v-chinese"></div>
       </section>
@@ -144,7 +144,7 @@
   <aside id="help" class="drawer">
     <div class="close-row"><button id="help-close" class="ghost-btn">关闭</button></div>
     <h2>帮助 · 时间转换</h2>
-    <p class="sub">输入任意格式,自动识别并转换为全部输出格式。点卡片值回填为新输入。</p>
+    <p class="sub">输入任意格式,自动识别并转换为全部输出格式。点卡片值可回填为新输入(日历、中文格式卡除外)。</p>
     <h3>支持输入格式</h3>
     <table class="help-table"><tbody id="help-formats"></tbody></table>
     <h3>相对时间表达</h3>
@@ -161,7 +161,7 @@
       · 两位年份:00-68 → 20xx,69-99 → 19xx。
     </div>
   </aside>
-  <div id="toast" class="toast"></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script src="engine.js"></script>
   <script src="app.js"></script>

@@ -52,7 +52,8 @@ button {
 
   --z-scrim: 40; --z-drawer: 50; --z-toast: 60;
 
-  --h-top: 50px; --h-status: 28px; --h-input: 44px; --h-seg: 34px;
+  --h-top: 50px; --h-status: 28px; --h-input: 44px; --h-seg: 34px; --h-act: 22px;
+  --w-drawer: 392px;
 
   --dur-1: 90ms; --dur-2: 150ms; --dur-3: 220ms; --dur-4: 190ms; --dur-5: 340ms;
   --ease-out: cubic-bezier(.22, 1, .36, 1);
@@ -89,6 +90,7 @@ html[data-theme='light'] {
   --fg-muted: #5b6678;
   --fg-faint: #616b7c;
   --fg-mono: #0f1b2a;
+  --fg-disabled: var(--fg-faint);
   --accent: #10a97a;
   --accent-text: #0a7a5c;
   --accent-contrast: #04231a;
@@ -130,6 +132,7 @@ html[data-theme='dark'] {
   --fg-muted: #9aa7be;
   --fg-faint: #7f8ba1;
   --fg-mono: #d8e7f8;
+  --fg-disabled: var(--fg-faint);
   --accent: #35d3a1;
   --accent-text: #35d3a1;
   --accent-contrast: #06170f;
@@ -440,13 +443,13 @@ html[data-theme='dark'] {
   display: grid;
   grid-template-columns: 20px 1fr;
   column-gap: 10px;
-  row-gap: 4px;
+  row-gap: 6px;
   align-items: start;
   margin: 2px 0 var(--sp-4);
   padding: 11px 14px;
   border: 1px solid var(--danger-line);
   border-left: 3px solid var(--danger);
-  border-radius: var(--r-md);
+  border-radius: 12px;
   background: var(--danger-wash);
   animation: err-in var(--dur-3) var(--ease-out);
   transition: background-color 200ms var(--ease-io), border-color 200ms var(--ease-io);
@@ -456,7 +459,7 @@ html[data-theme='dark'] {
 .errbox::before {
   content: '!';
   grid-column: 1;
-  grid-row: 1 / span 4;
+  grid-row: 1 / span 2;
   width: 20px;
   height: 20px;
   border-radius: 50%;
@@ -558,8 +561,10 @@ html[data-theme='dark'] {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* 错误态降噪:不上浮、入场动画停用、操作钮锁定(M4) */
-.cards.stale .card { animation: none; transform: none; }
+/* 错误态降噪:不上浮、操作钮锁定(M4)。
+   不得给 .stale 加 animation:none——animation-name 的 none↔card-in 翻转会重建动画实例,
+   导致错误↔成功切换时整组卡片重放入场 */
+.cards.stale .card { transform: none; }
 .cards.stale .card:hover {
   transform: none;
   border-color: var(--border-subtle);
@@ -765,14 +770,14 @@ html[data-theme='dark'] {
 
 .card-value.mono { font-size: var(--fs-md); line-height: var(--lh-md); }
 
-/* hover 左侧青碧竖条 = 「可点回填」识别符 */
-.card-value:not(#v-calendar):hover,
+/* hover 左侧青碧竖条 = 「可点回填」识别符(日历卡/中文格式卡除外,其展示形态无法回填) */
+.card-value:not(#v-calendar):not(#v-chinese):hover,
 #tpl-out:hover {
   background: var(--accent-wash);
   color: var(--accent-text);
 }
 
-.card-value:not(#v-calendar):hover::before,
+.card-value:not(#v-calendar):not(#v-chinese):hover::before,
 #tpl-out:hover::before {
   content: '';
   position: absolute;
@@ -784,7 +789,7 @@ html[data-theme='dark'] {
   background: var(--accent);
 }
 
-.card-value:not(#v-calendar):active,
+.card-value:not(#v-calendar):not(#v-chinese):active,
 #tpl-out:active { background: var(--accent-soft); }
 
 #v-calendar {
@@ -793,7 +798,8 @@ html[data-theme='dark'] {
   cursor: default;
 }
 
-#v-calendar:hover { background: transparent; }
+/* 中文格式卡的展示形态(星期/上下午修饰)无法被解析器回填,不提供可点邀请 */
+#v-chinese { cursor: default; }
 
 /* 值刷新闪动(M1):仅文本变化的节点由 JS 加 .flash */
 .flash { animation: flash-accent 260ms var(--ease-out); }

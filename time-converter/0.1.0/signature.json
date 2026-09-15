@@ -4,11 +4,11 @@
   "version": "0.1.0",
   "algorithm": "ed25519",
   "key_id": "spark-official-v1",
-  "signed_at": "2026-09-15T02:41:19Z",
+  "signed_at": "2026-09-15T03:47:57Z",
   "files": [
     {
       "path": "app.js",
-      "sha256": "bc612ca928e6ff60e0184d22685042d2cab42d20a6931d0a68d9a7dd83be5e02"
+      "sha256": "c09a21c7398a486830ead77fa2c335bc5e295dcc1f3a24905eeba5332ed950ee"
     },
     {
       "path": "engine.js",
@@ -20,7 +20,7 @@
     },
     {
       "path": "index.html",
-      "sha256": "eeb4225440368fd2cd2d6f01e850023e6b52a35955b4bdee452c3dba32e5fddc"
+      "sha256": "46bb1b2d33e7393e1074f68dafd81b7d7cd4e7c0a0ea7907e16e90b645a10e4f"
     },
     {
       "path": "plugin.json",
@@ -28,8 +28,8 @@
     },
     {
       "path": "style.css",
-      "sha256": "9f0b8baa5d2b0b0f8b77e42ae312cfb316d182ff990b115a62cca0b3b98672eb"
+      "sha256": "c649e9f4948188b337a17bdc2468cf423d7c633c153393a14a7bcb2267f5e67c"
     }
   ],
-  "signature": "MJx9Z655TTalNP73SDl/lYkSS5heYMT567KwRx6etW95dbGj4hq2HuliNBMdp83vdGPRdl+4jUuMNcqUV4jpCA=="
+  "signature": "87OKPpSbryn6ZbenTBsFer1RrRnQo1d4FjjxRdm0JxHpm/Ivy45qyJ9f3zxn+nK1hkTRMfXZ4NiLmhmAM6xODA=="
 }

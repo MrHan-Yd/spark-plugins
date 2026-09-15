@@ -72,9 +72,10 @@ function copyText(v, btn) {
     : (navigator.clipboard ? navigator.clipboard.writeText(v) : Promise.reject({ code: 'PERMISSION_DENIED' }));
   p.then(function () {
     toast('已复制:' + truncVal(v));
-    if (btn) {  // 行内对勾反馈(蓝图 M6/P1)
+    if (btn) {  /* 行内对勾反馈(蓝图 M6);计时器挂按钮上,连点互不干扰 */
       btn.classList.add('copied');
-      setTimeout(function () { btn.classList.remove('copied'); }, 900);
+      if (btn._copiedTimer) clearTimeout(btn._copiedTimer);
+      btn._copiedTimer = setTimeout(function () { btn.classList.remove('copied'); btn._copiedTimer = null; }, 900);
     }
   }).catch(function (e) {
     toast(e && e.code === 'PERMISSION_DENIED' ? '复制失败:请在 设置-插件 中授权剪贴板' : '复制失败', true);
@@ -91,6 +92,13 @@ function setVal(el, text) {
   void el.offsetWidth;
   el.classList.add('flash');
 }
+
+/* 闪动播完立即摘类:display:none 会取消动画,残留 .flash 会在卡组恢复显示时整屏重放 */
+document.addEventListener('animationend', function (e) {
+  if (e.target && e.target.classList && e.target.classList.contains('flash')) {
+    e.target.classList.remove('flash');
+  }
+});
 
 /* ── 转换管线 ── */
 
@@ -160,6 +168,7 @@ function renderError(error) {
 
 function renderIdle() {
   lastOkPoint = null;
+  document.querySelectorAll('.flash').forEach(function (el) { el.classList.remove('flash'); });
   els.idle.hidden = false;
   els.error.hidden = true;
   els.cards.hidden = true;
@@ -268,7 +277,15 @@ els.input.addEventListener('keydown', function (e) {
 document.addEventListener('click', function (e) {
   var copyBtn = e.target.closest && e.target.closest('[data-copy]');
   if (copyBtn) {
-    var src = $(copyBtn.getAttribute('data-val'));
+    var key = copyBtn.getAttribute('data-val');
+    /* 世界时钟首行等行值由 JS 动态生成、无静态 id,按 v-wc-<序号> 取当下行值 */
+    if (key && key.indexOf('v-wc-') === 0) {
+      var wcRow = els.wcRows.children[Number(key.slice(5))];
+      var wcVal = wcRow && wcRow.querySelector('.row-value');
+      if (wcVal) copyText(wcVal.textContent, copyBtn);
+      return;
+    }
+    var src = $(key);
     if (src) copyText(src.textContent, copyBtn);
     return;
   }
@@ -285,9 +302,11 @@ document.addEventListener('click', function (e) {
     els.input.focus();
     return;
   }
-  /* 单值卡值点击回填(蓝图 §3.7/M5;日历卡无回填语义,'——' 为错误占位) */
+  /* 单值卡值点击回填(蓝图 §3.7/M5);日历卡与中文格式卡的展示形态无法被引擎回填,排除;
+     '——' 为单卡越界占位 */
   var cardVal = e.target.closest && e.target.closest('.card-value, #tpl-out');
-  if (cardVal && cardVal.id !== 'v-calendar' && cardVal.textContent && cardVal.textContent !== '——') {
+  if (cardVal && cardVal.id !== 'v-calendar' && cardVal.id !== 'v-chinese' &&
+      cardVal.textContent && cardVal.textContent !== '——') {
     useAsInput(cardVal.textContent);
     return;
   }
@@ -349,14 +368,19 @@ els.tplIn.addEventListener('input', function () {
 });
 
 /* 帮助抽屉 */
+var overlayTimer = null;
 function openHelp() {
+  /* 取消尚未落地的隐藏计时,否则关→立刻重开时遮罩会被误藏 */
+  if (overlayTimer) { clearTimeout(overlayTimer); overlayTimer = null; }
   els.overlay.hidden = false;
   requestAnimationFrame(function () { els.overlay.classList.add('show'); els.help.classList.add('open'); });
 }
 function closeHelp() {
+  /* 先清旧计时:多次 close 并发时保证最多一个待执行隐藏,否则重开后遮罩会被误藏 */
+  if (overlayTimer) clearTimeout(overlayTimer);
   els.overlay.classList.remove('show');
   els.help.classList.remove('open');
-  setTimeout(function () { els.overlay.hidden = true; }, 200);
+  overlayTimer = setTimeout(function () { els.overlay.hidden = true; overlayTimer = null; }, 200);
 }
 $('btn-help').addEventListener('click', openHelp);
 $('help-close').addEventListener('click', closeHelp);
