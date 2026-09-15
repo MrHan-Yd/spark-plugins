@@ -394,6 +394,40 @@
         }
       }
     ]
-  }
+  },
+    {
+      "id": "com.spark.linux-command",
+      "name": "Linux 命令查询",
+      "description": "614 条 Linux 命令中文文档离线速查:名称/拼音/简介秒搜,首字母 A-Z 浏览,收藏与最近查看,代码高亮一键复制,可选联网检查上游更新",
+      "author": "Spark",
+      "homepage": "https://github.com/MrHan-Yd/spark-plugins/tree/master/linux-command",
+      "icon": "https://raw.githubusercontent.com/MrHan-Yd/spark-plugins/master/linux-command/0.1.0/icon.svg",
+      "runtime": "webview",
+      "latest": "0.1.0",
+      "permissions": [
+        "net",
+        "clipboard"
+      ],
+      "tags": [
+        "开发工具",
+        "实用工具"
+      ],
+      "versions": [
+        {
+          "version": "0.1.0",
+          "path": "linux-command/0.1.0",
+          "url": null,
+          "sha256": null,
+          "size": null,
+          "released": "2026-09-15",
+          "signature": {
+            "schema": 1,
+            "key_id": "spark-official-v1",
+            "algorithm": "ed25519",
+            "signature": "CAfa7mITX32E9XrqaeCsJEq15xzQ9FObYrjgpAvbfmymDTFQf5Eoatityru1X0kwGezqMn/9RP7ViZE0Os9QAg=="
+          }
+        }
+      ]
+    }
   ]
 }

@@ -1,0 +1,45 @@
+{
+  "id": "com.spark.linux-command",
+  "name": "Linux 命令查询",
+  "version": "0.1.0",
+  "api_version": 2,
+  "runtime": "webview",
+  "main": "index.html",
+  "icon": "icon.svg",
+  "author": "Spark",
+  "description": "614 条 Linux 命令中文文档离线速查:名称/拼音/简介秒搜,首字母 A-Z 浏览,收藏与最近查看,代码高亮一键复制,可选联网检查上游更新",
+  "permissions": ["net", "clipboard"],
+  "features": [
+    {
+      "type": "keyword",
+      "keyword": "linux",
+      "title": "Linux 命令查询",
+      "subtitle": "614 条命令中文文档 · 离线 · 拼音搜索",
+      "mode": "page",
+      "placeholder": "搜索命令,如 tar / 压缩 / yasuo…"
+    },
+    {
+      "type": "keyword",
+      "keyword": "命令",
+      "title": "Linux 命令查询",
+      "subtitle": "614 条命令中文文档 · 离线 · 拼音搜索",
+      "mode": "page",
+      "placeholder": "搜索命令,如 tar / 压缩 / yasuo…"
+    },
+    {
+      "type": "keyword",
+      "keyword": "man",
+      "title": "Linux 命令查询",
+      "subtitle": "614 条命令中文文档 · 离线 · 拼音搜索",
+      "mode": "page",
+      "placeholder": "搜索命令,如 tar / 压缩 / yasuo…"
+    }
+  ],
+  "window": {
+    "width": 1080,
+    "height": 700,
+    "min_width": 640,
+    "min_height": 480,
+    "resizable": true
+  }
+}
