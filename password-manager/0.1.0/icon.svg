@@ -1,13 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 底板：60×60 圆角方块居中于 64×64（左右上下各留 2），与仓库其它插件图标一致 -->
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#8b5cf6"/>
-      <stop offset="1" stop-color="#4c1d95"/>
+      <stop offset="0" stop-color="#a78bfa"/>
+      <stop offset="1" stop-color="#5b21b6"/>
     </linearGradient>
   </defs>
   <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#bg)"/>
-  <path d="M32 9 17 15.4v11.9c0 8.6 6.2 16.6 15 18.7 8.8-2.1 15-10.1 15-18.7V15.4L32 9Z"
-        fill="none" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round"/>
-  <circle cx="32" cy="25.6" r="4.4" fill="#ffffff"/>
-  <path d="M30.2 28.8h3.6l1.1 7.6h-5.8l1.1-7.6Z" fill="#ffffff"/>
+
+  <!-- 盾牌：以 x=32 轴对称，y 范围 9.5~54.5（中心 32，与底板同心）
+       描边 3.5，加描边后包围盒 11.25~52.75 × 7.75~56.25 → 四边留白均为 5.75/9.25，视觉居中 -->
+  <path d="M32 9.5 51 16.5v15c0 10-7.5 18.5-19 23-11.5-4.5-19-13-19-23v-15L32 9.5Z"
+        fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linejoin="round"/>
+
+  <!-- 锁孔：圆心 (32,29.5)、柄为下宽上窄的梯形，整体关于 x=32 对称，与圆融合成一体 -->
+  <circle cx="32" cy="29.5" r="5.5" fill="#ffffff"/>
+  <path d="M29.4 32.6h5.2l1.2 11.4h-7.6l1.2-11.4Z" fill="#ffffff"/>
 </svg>

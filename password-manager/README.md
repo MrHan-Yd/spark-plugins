@@ -52,9 +52,11 @@ Spark webview 插件：**本地加密密码保险库**。搜索框输入 `pwd` /
 
 ```bash
 node password-manager/tests/vault-test.mjs   # 42 项：SHA-256/AES-256-CBC/bcrypt 标准向量 + 保险库端到端
-node password-manager/tests/ui-smoke.mjs     # 48 项：真实 Chrome 无头 + CDP 走完整用户路径（含截图）
+node password-manager/tests/ui-smoke.mjs     # 69 项：真实 Chrome 无头 + CDP 走完整用户路径（含截图）
+node password-manager/tests/icon-test.mjs    # 9 项：图标光栅化后量包围盒，校验四边留白对称
 ```
 
 - 密码学正确性以公开测试向量为准：SHA-256 对 NIST FIPS 180-4，AES-256-CBC 对 NIST SP 800-38A F.2.5，并与 Node/OpenSSL 逐字节交叉验证随机 300 组；bcrypt 对官方已知答案向量。
 - 数据层覆盖：错误密码/篡改密文/坏 PKCS7 均被拒绝，改开门密码后旧密码失效且数据不变。
 - 界面冒烟覆盖：建库 → 新增 → 复制 → 搜索 → 分组 → 生成器 → 导出 → 锁定 → 解锁还原 → 快捷键，零未捕获异常。
+- 图标自检把 SVG 光栅化成像素算白色图形的包围盒：居中偏差 ≤0.8、上下左右留白对称、四周留白 ≥4、图形占底板宽度 ≥60%（第一版就是纵向偏高 4.6/64，肉眼只觉得「有点怪」）。
