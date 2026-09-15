@@ -2,7 +2,7 @@
   "schema": 1,
   "name": "Spark 官方插件仓库",
   "zipball_url": "https://github.com/MrHan-Yd/spark-plugins/archive/refs/heads/master.zip",
-  "updated": "2026-09-15T08:30:00Z",
+  "updated": "2026-09-15T02:00:00Z",
   "plugins": [
     {
       "id": "com.spark.json-formatter",
@@ -325,6 +325,39 @@
             "key_id": "spark-official-v1",
             "algorithm": "ed25519",
             "signature": "i5oyOUUIpHlzSGQCPOBPTpRR3yY9zwd3SNmiwF7oy5/XpIk/TwMWlY2CiAaGGg61uQcZxj6lT/087hdCE0/XCQ=="
+          }
+        }
+      ]
+    },
+    {
+      "id": "com.spark.time-converter",
+      "name": "时间转换",
+      "description": "时间戳/日期多格式互转:秒/毫秒/微秒/纳秒自适应,ISO 8601、RFC 2822、中文日期、相对时间(3天前/+2h)自动识别,自定义 token 模板,世界时钟时区换算",
+      "author": "Spark",
+      "homepage": "https://github.com/MrHan-Yd/spark-plugins/tree/master/time-converter",
+      "icon": "https://raw.githubusercontent.com/MrHan-Yd/spark-plugins/master/time-converter/0.1.0/icon.svg",
+      "runtime": "webview",
+      "latest": "0.1.0",
+      "permissions": [
+        "clipboard"
+      ],
+      "tags": [
+        "开发工具",
+        "实用工具"
+      ],
+      "versions": [
+        {
+          "version": "0.1.0",
+          "path": "time-converter/0.1.0",
+          "url": null,
+          "sha256": null,
+          "size": null,
+          "released": "2026-09-15",
+          "signature": {
+            "schema": 1,
+            "key_id": "spark-official-v1",
+            "algorithm": "ed25519",
+            "signature": "t5rxgQ9acwOakKVGBY4slXZnDBHxVGTCOVEPmXYz/+x00Wev0ranBmNuINzBLyAggyeCFjgQZyEHkEe+kl9YDw=="
           }
         }
       ]

@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "plugin_id": "com.spark.time-converter",
+  "version": "0.1.0",
+  "algorithm": "ed25519",
+  "key_id": "spark-official-v1",
+  "signed_at": "2026-09-15T01:59:24Z",
+  "files": [
+    {
+      "path": "app.js",
+      "sha256": "fed976addc03f3465d5a61886fd2ff1c84630b77be4746dcd9d49f567d7c6792"
+    },
+    {
+      "path": "engine.js",
+      "sha256": "ac5daebbd9ec563b878c35990f7f8317879fd129da945d1eb9cc930d645e9d8e"
+    },
+    {
+      "path": "icon.svg",
+      "sha256": "0eee76054dd1de0ff423a173909c2f998630d4219dfeee78683d671620990601"
+    },
+    {
+      "path": "index.html",
+      "sha256": "badc3f55dde80086818a9c189842f7cdef9a30f73c4a4c54e3a211471f25a973"
+    },
+    {
+      "path": "plugin.json",
+      "sha256": "b38c82115c10ec765e1e56f6b68d8f58dfb77746fea3d2cefda6778869e2903f"
+    },
+    {
+      "path": "style.css",
+      "sha256": "aae46b32f1a59f6a06027b7cc0871d0d3e7a142eed25b3b6870c5bfcbd2594e7"
+    }
+  ],
+  "signature": "t5rxgQ9acwOakKVGBY4slXZnDBHxVGTCOVEPmXYz/+x00Wev0ranBmNuINzBLyAggyeCFjgQZyEHkEe+kl9YDw=="
+}

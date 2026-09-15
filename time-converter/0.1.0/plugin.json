@@ -1,0 +1,45 @@
+{
+  "id": "com.spark.time-converter",
+  "name": "时间转换",
+  "version": "0.1.0",
+  "api_version": 2,
+  "runtime": "webview",
+  "main": "index.html",
+  "icon": "icon.svg",
+  "author": "Spark",
+  "description": "时间戳/日期多格式互转:秒/毫秒/微秒/纳秒自适应,ISO 8601、RFC 2822、中文日期、相对时间(3天前/+2h)自动识别,自定义 token 模板,世界时钟时区换算",
+  "permissions": ["clipboard"],
+  "features": [
+    {
+      "type": "keyword",
+      "keyword": "time",
+      "title": "时间转换",
+      "subtitle": "时间戳 · 日期 · 时区 · 相对时间",
+      "mode": "page",
+      "placeholder": "输入时间戳、日期或相对时间,如 1700000000 / 2024-1-1 / +3d…"
+    },
+    {
+      "type": "keyword",
+      "keyword": "时间戳",
+      "title": "时间转换",
+      "subtitle": "时间戳 · 日期 · 时区 · 相对时间",
+      "mode": "page",
+      "placeholder": "输入时间戳、日期或相对时间…"
+    },
+    {
+      "type": "keyword",
+      "keyword": "时间转换",
+      "title": "时间转换",
+      "subtitle": "时间戳 · 日期 · 时区 · 相对时间",
+      "mode": "page",
+      "placeholder": "输入时间戳、日期或相对时间…"
+    }
+  ],
+  "window": {
+    "width": 900,
+    "height": 660,
+    "min_width": 560,
+    "min_height": 420,
+    "resizable": true
+  }
+}

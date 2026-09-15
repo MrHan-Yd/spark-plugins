@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="zh-Hans" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>时间转换</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16Zm1-8.6V6h-2v6.4l4.5 2.7 1-1.7-3.5-2.1Z"/></svg>
+      <span>时间转换</span>
+    </div>
+    <div class="tools">
+      <button id="btn-now" class="ghost-btn" title="填入当前毫秒时间戳">现在</button>
+      <button id="btn-clear" class="ghost-btn">清空</button>
+      <button id="btn-help" class="ghost-btn">帮助</button>
+      <button id="btn-theme" class="ghost-btn" title="切换明暗主题">🌙</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-row">
+      <input id="input" type="text" placeholder="输入时间戳、日期或相对时间,如 1700000000 / 2024-1-1 / +3d…" spellcheck="false" autocomplete="off">
+      <div class="zoneswitch" id="zoneswitch" title="无时区字符串的解释方式(自动保存)">
+        <button id="zone-local" class="zone-btn active">本地</button>
+        <button id="zone-utc" class="zone-btn">UTC</button>
+      </div>
+    </div>
+    <div class="hero-sub">
+      <span id="kind" class="badge" hidden></span>
+    </div>
+  </section>
+
+  <main class="stage">
+    <div id="idle" class="idle">
+      <p>输入任意时间戳或日期,实时转换全部格式——试试:</p>
+      <div class="chips">
+        <button class="chip" data-fill="1700000000">1700000000</button>
+        <button class="chip" data-fill="1700000000123456789">纳秒戳</button>
+        <button class="chip" data-fill="2024-01-01T12:30:45Z">ISO 8601</button>
+        <button class="chip" data-fill="Mon, 15 Sep 2026 16:30:00 +0800">RFC 2822</button>
+        <button class="chip" data-fill="2024年1月1日 12时30分">中文日期</button>
+        <button class="chip" data-fill="2024/1/1 12:30">2024/1/1</button>
+        <button class="chip" data-fill="20240101123025">紧凑 14 位</button>
+        <button class="chip" data-fill="12:30">时刻</button>
+        <button class="chip" data-fill="+3d">+3d</button>
+        <button class="chip" data-fill="3天前">3天前</button>
+        <button class="chip" data-fill="now+1d-3h">now+1d-3h</button>
+      </div>
+    </div>
+
+    <div id="error" class="errbox" hidden>
+      <div id="error-msg" class="err-msg"></div>
+      <div id="error-hint" class="err-hint" hidden></div>
+    </div>
+
+    <div id="cards" class="cards" hidden>
+      <section class="card">
+        <div class="card-head"><span class="card-title">Unix 时间戳</span><span class="card-note" id="n-unix"></span>
+          <div class="card-acts"><button class="act" data-val="v-unix-s" data-copy title="复制主行">⧉</button></div>
+        </div>
+        <div class="rows">
+          <div class="row"><span class="row-label">秒</span><span class="row-value mono" id="v-unix-s"></span><button class="row-copy" data-val="v-unix-s" data-copy title="复制">⧉</button></div>
+          <div class="row"><span class="row-label">毫秒</span><span class="row-value mono" id="v-unix-ms"></span><button class="row-copy" data-val="v-unix-ms" data-copy title="复制">⧉</button></div>
+          <div class="row"><span class="row-label">微秒</span><span class="row-value mono" id="v-unix-us"></span><button class="row-copy" data-val="v-unix-us" data-copy title="复制">⧉</button></div>
+          <div class="row"><span class="row-label">纳秒</span><span class="row-value mono" id="v-unix-ns"></span><button class="row-copy" data-val="v-unix-ns" data-copy title="复制">⧉</button></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><span class="card-title">ISO 8601 (UTC)</span>
+          <div class="card-acts"><button class="act" data-val="v-iso-utc" data-copy title="复制">⧉</button><button class="act" data-val="v-iso-utc" data-use title="作为输入">↩</button></div>
+        </div>
+        <div class="card-value mono" id="v-iso-utc"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><span class="card-title">ISO 8601 (本地)</span><span class="card-note" id="n-iso-local"></span>
+          <div class="card-acts"><button class="act" data-val="v-iso-local" data-copy title="复制">⧉</button><button class="act" data-val="v-iso-local" data-use title="作为输入">↩</button></div>
+        </div>
+        <div class="card-value mono" id="v-iso-local"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><span class="card-title">本地时间</span>
+          <div class="card-acts"><button class="act" data-val="v-local" data-copy title="复制">⧉</button><button class="act" data-val="v-local" data-use title="作为输入">↩</button></div>
+        </div>
+        <div class="card-value mono" id="v-local"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><span class="card-title">RFC 2822</span>
+          <div class="card-acts"><button class="act" data-val="v-rfc2822" data-copy title="复制">⧉</button><button class="act" data-val="v-rfc2822" data-use title="作为输入">↩</button></div>
+        </div>
+        <div class="card-value mono" id="v-rfc2822"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><span class="card-title">中文格式</span>
+          <div class="card-acts"><button class="act" data-val="v-chinese" data-copy title="复制">⧉</button><button class="act" data-val="v-chinese" data-use title="作为输入">↩</button></div>
+        </div>
+        <div class="card-value" id="v-chinese"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><span class="card-title">相对时间</span>
+          <div class="card-acts"><button class="act" data-val="v-human" data-copy title="复制">⧉</button></div>
+        </div>
+        <div class="card-value" id="v-human"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><span class="card-title">日历信息</span></div>
+        <div class="card-value" id="v-calendar"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><span class="card-title">世界时钟</span>
+          <div class="card-acts"><button class="act" data-val="v-wc-0" data-copy title="复制首行">⧉</button></div>
+        </div>
+        <div class="rows" id="wc-rows"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><span class="card-title">自定义模板</span>
+          <div class="card-acts"><button class="act" data-val="tpl-out" data-copy title="复制">⧉</button></div>
+        </div>
+        <input id="tpl-in" class="tpl-input" spellcheck="false" autocomplete="off" placeholder="YYYY-MM-DD HH:mm:ss">
+        <div class="mono" id="tpl-out"></div>
+        <div id="tpl-err" hidden></div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="status">
+    <span id="status-text">就绪</span>
+  </footer>
+
+  <div id="overlay" class="overlay" hidden></div>
+  <aside id="help" class="drawer">
+    <div class="close-row"><button id="help-close" class="ghost-btn">关闭</button></div>
+    <h2>帮助 · 时间转换</h2>
+    <p class="sub">输入任意格式,自动识别并转换为全部输出格式。点卡片值回填为新输入。</p>
+    <h3>支持输入格式</h3>
+    <table class="help-table"><tbody id="help-formats"></tbody></table>
+    <h3>相对时间表达</h3>
+    <table class="help-table"><tbody id="help-units"></tbody></table>
+    <div class="note">月/年按日历进位并钳制月末:1 月 31 日 +1mo → 2 月 29 日(闰年)。`+1mo` 以 UTC 墙钟计算保证确定性。</div>
+    <h3>模板 Token</h3>
+    <table class="help-table"><tbody id="help-tokens"></tbody></table>
+    <h3>边界说明</h3>
+    <div class="note">
+      · 无时区字符串(如 2024-01-01 12:00)按「本地 | UTC」开关解释,选择会自动保存。<br>
+      · 11~12 位数字无法判断秒/毫秒,会提示补全。<br>
+      · RFC 2822 时区名按 RFC 语义:CST = 美中 -06:00(非中国标准时间)。<br>
+      · 可显示范围:公历年 1-9999;闰秒不支持(23:59:60 拒绝)。<br>
+      · 两位年份:00-68 → 20xx,69-99 → 19xx。
+    </div>
+  </aside>
+  <div id="toast" class="toast"></div>
+
+  <script src="engine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
