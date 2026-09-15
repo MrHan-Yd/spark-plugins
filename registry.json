@@ -2,7 +2,7 @@
   "schema": 1,
   "name": "Spark 官方插件仓库",
   "zipball_url": "https://github.com/MrHan-Yd/spark-plugins/archive/refs/heads/master.zip",
-  "updated": "2026-09-11T09:47:00Z",
+  "updated": "2026-09-15T08:30:00Z",
   "plugins": [
     {
       "id": "com.spark.json-formatter",
@@ -15,6 +15,10 @@
       "latest": "0.1.0",
       "permissions": [
         "clipboard"
+      ],
+      "tags": [
+        "开发工具",
+        "文本处理"
       ],
       "versions": [
         {
@@ -45,6 +49,10 @@
       "permissions": [
         "clipboard"
       ],
+      "tags": [
+        "开发工具",
+        "文本处理"
+      ],
       "versions": [
         {
           "version": "0.1.0",
@@ -74,6 +82,9 @@
       "permissions": [
         "clipboard"
       ],
+      "tags": [
+        "开发工具"
+      ],
       "versions": [
         {
           "version": "0.1.0",
@@ -101,6 +112,10 @@
       "runtime": "native",
       "latest": "0.1.0",
       "permissions": [],
+      "tags": [
+        "实用工具",
+        "系统"
+      ],
       "versions": [
         {
           "version": "0.1.0",
@@ -129,6 +144,10 @@
       "latest": "0.1.0",
       "permissions": [
         "clipboard"
+      ],
+      "tags": [
+        "开发工具",
+        "实用工具"
       ],
       "versions": [
         {
@@ -159,6 +178,10 @@
       "permissions": [
         "notify"
       ],
+      "tags": [
+        "文档",
+        "实用工具"
+      ],
       "versions": [
         {
           "version": "0.1.0",
@@ -186,6 +209,10 @@
       "runtime": "native",
       "latest": "0.1.0",
       "permissions": [],
+      "tags": [
+        "系统",
+        "网络"
+      ],
       "versions": [
         {
           "version": "0.1.0",
@@ -215,6 +242,10 @@
       "permissions": [
         "clipboard"
       ],
+      "tags": [
+        "开发工具",
+        "文本处理"
+      ],
       "versions": [
         {
           "version": "0.1.0",
@@ -243,6 +274,10 @@
       "latest": "0.1.0",
       "permissions": [
         "net"
+      ],
+      "tags": [
+        "实用工具",
+        "硬件"
       ],
       "versions": [
         {
