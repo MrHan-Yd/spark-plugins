@@ -95,3 +95,7 @@ application-local.properties
 hosts-switcher/0.1.0/backups/
 # password-manager 冒烟测试产出的截图(运行时产物,不进仓库)
 password-manager/tests/screenshots/
+
+# ----- Agent 宿主运行产物(追溯事件流、快照、diff,不进仓库) -----
+# 源码在 .agents/runner/,产物在 .agents/trace/
+.agents/trace/
