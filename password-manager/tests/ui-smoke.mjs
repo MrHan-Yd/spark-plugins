@@ -165,6 +165,18 @@ await waitFor('!document.getElementById("screen-setup").hidden', '建库页出�
 ok('首次打开进入「设置开门密码」页', true);
 await setVal('setup-pw', 'Test-开门-1234');
 ok('强度条随输入出现', await evaluate('!document.getElementById("setup-strength").hidden'));
+ok('强度区只给长度提示，不再列「缺少大小写」等校验项',
+  (await evaluate('document.getElementById("setup-strength-issues") === null')) &&
+  (await text('#setup-strength-hint')).includes('4 位以上'));
+
+/* 下限只卡 4 位：3 位被拒（4 位纯数字放行由 vault-test 覆盖） */
+await setVal('setup-pw', '123');
+await setVal('setup-pw2', '123');
+await click('#btn-setup');
+await waitFor('!document.getElementById("setup-err").hidden', '3 位被拒');
+ok('3 位开门密码被拒（阈值为 4 位）', (await text('#setup-err')).includes('至少 4 位'), await text('#setup-err'));
+
+await setVal('setup-pw', 'Test-开门-1234');
 await setVal('setup-hint', '测试用提示');
 await setVal('setup-pw2', 'Test-开门-1235');
 await click('#btn-setup');

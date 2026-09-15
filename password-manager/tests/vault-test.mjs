@@ -182,11 +182,20 @@ await t('setup：开门密码以 bcrypt 密文存储（cost=10，无明文残留
   assert.ok(ct.length > 0);
 });
 
-await t('weak 开门密码被拒（<6 位）', async () => {
+await t('开门密码只卡「至少 4 位」，不校验大小写/字符种类', async () => {
   const s2 = memStore(); V.setStore(s2);
-  await assert.rejects(() => V.setup('12345'), /至少 6 位/);
-  V.setStore(store);
-  await V.init(); await V.unlock(PW);
+  await assert.rejects(() => V.setup('123'), /至少 4 位/);
+  await V.setup('1234');                       /* 纯数字 4 位 → 放行 */
+  assert.equal(V.isUnlocked(), true);
+  V.lock();
+  await V.unlock('1234');                      /* 且能正常解锁 */
+  assert.equal(V.isUnlocked(), true);
+  const s3 = memStore(); V.setStore(s3);
+  await V.setup('abcd');                       /* 纯小写 4 位 → 放行 */
+  assert.equal(V.isUnlocked(), true);
+  V.setStore(store); V.lock();
+  await V.init(); await V.unlock(PW);          /* 回到主测试保险库 */
+  assert.equal(V.isUnlocked(), true);
 });
 
 await t('upsert：新增 3 条并落盘（密文中不含任何明文）', async () => {
@@ -294,7 +303,7 @@ await t('修改开门密码：旧密码失效、新密码可解锁、数据不�
   const before = JSON.stringify(V.query({}).map((r) => [r.title, r.username, r.password]));
   const NEW = 'NewPass-2026-新';
   await assert.rejects(() => V.changeMasterPassword('错的密码', NEW), /WRONG_PASSWORD/);
-  await assert.rejects(() => V.changeMasterPassword(PW, '12345'), /至少 6 位/);
+  await assert.rejects(() => V.changeMasterPassword(PW, '123'), /至少 4 位/);
   await V.changeMasterPassword(PW, NEW);
   assert.match(store._raw.get('pm.meta').bcrypt, /^\$2a\$10\$/);
   V.lock();

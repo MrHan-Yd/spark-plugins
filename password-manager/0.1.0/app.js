@@ -184,6 +184,7 @@ document.addEventListener('keydown', function (e) {
   }
 
   /* ══════════ 建库 ══════════ */
+  /* 建库页的强度提示：只给「够不够长」的参考，不作为校验（≥4 位即可） */
   function updateSetupStrength() {
     var pw = $('setup-pw').value;
     var box = $('setup-strength');
@@ -192,17 +193,15 @@ document.addEventListener('keydown', function (e) {
     box.hidden = false;
     box.setAttribute('data-level', String(s.level));
     $('setup-strength-bar').style.width = Math.max(6, Math.min(100, (s.bits / 128) * 100)) + '%';
-    $('setup-strength-label').textContent = s.label + '（约 ' + s.bits + ' bit 熵）';
-    $('setup-strength-bits').textContent = s.level >= 3 ? '可用' : '建议再加长一点';
-    var issues = $('setup-strength-issues');
-    issues.innerHTML = s.issues.map(function (i) { return '<li>' + esc(i) + '</li>'; }).join('');
-    issues.hidden = s.issues.length === 0;
+    $('setup-strength-label').textContent = s.label;
+    $('setup-strength-bits').textContent = '约 ' + s.bits + ' bit 熵';
+    $('setup-strength-hint').textContent = '4 位以上就能用，不限制字符种类；越长越难被穷举。';
   }
 
   function doSetup() {
     var pw = $('setup-pw').value, pw2 = $('setup-pw2').value;
     showErr('setup-err', '');
-    if (!pw || pw.length < 6) return showErr('setup-err', '开门密码至少 6 位');
+    if (!pw || pw.length < 4) return showErr('setup-err', '开门密码至少 4 位');
     if (pw !== pw2) return showErr('setup-err', '两次输入不一致');
     var btn = $('btn-setup');
     btn.disabled = true;
@@ -759,10 +758,10 @@ document.addEventListener('keydown', function (e) {
     ask({ title: '修改开门密码', text: '先验证当前开门密码。', input: true, password: true, inputLabel: '当前开门密码', ok: '下一步' })
       .then(function (oldPw) {
         if (!oldPw) return null;
-        return ask({ title: '设置新开门密码', text: '新密码至少 6 位。修改后旧密码立即失效。', input: true, password: true, inputLabel: '新开门密码', ok: '下一步' })
+        return ask({ title: '设置新开门密码', text: '至少 4 位，不限制字符种类。修改后旧密码立即失效。', input: true, password: true, inputLabel: '新开门密码', ok: '下一步' })
           .then(function (np) {
             if (!np) return null;
-            if (np.length < 6) { toast('新开门密码至少 6 位', 'err'); return null; }
+            if (np.length < 4) { toast('新开门密码至少 4 位', 'err'); return null; }
             return ask({ title: '确认新开门密码', input: true, password: true, inputLabel: '再输一次', ok: '确认修改' })
               .then(function (np2) {
                 if (!np2) return null;

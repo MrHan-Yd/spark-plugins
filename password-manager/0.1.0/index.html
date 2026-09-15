@@ -27,14 +27,14 @@
       <label class="field">
         <span class="field-label">开门密码</span>
         <span class="field-input">
-          <input id="setup-pw" type="password" autocomplete="new-password" spellcheck="false" placeholder="至少 6 位，建议 12 位以上混合字符">
+          <input id="setup-pw" type="password" autocomplete="new-password" spellcheck="false" placeholder="至少 4 位，长一点更安全">
           <button type="button" class="reveal" data-reveal="setup-pw" title="显示/隐藏">👁</button>
         </span>
       </label>
       <div class="strength" id="setup-strength" hidden>
         <div class="strength-bar"><i id="setup-strength-bar"></i></div>
         <div class="strength-text"><span id="setup-strength-label"></span><span id="setup-strength-bits"></span></div>
-        <ul class="strength-issues" id="setup-strength-issues"></ul>
+        <div class="strength-hint" id="setup-strength-hint"></div>
       </div>
 
       <label class="field">

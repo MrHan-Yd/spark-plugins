@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "algorithm": "ed25519",
   "key_id": "spark-official-v1",
-  "signed_at": "2026-09-15T06:25:19Z",
+  "signed_at": "2026-09-15T06:34:48Z",
   "files": [
     {
       "path": "VENDORS.md",
@@ -12,7 +12,7 @@
     },
     {
       "path": "app.js",
-      "sha256": "15d4b11ab2ae6c5999e2acd374891535125bdc679173e9d604ffe02c0cf4f0c8"
+      "sha256": "a726126bc62a54b975c4c1ad7beaa261b6da582e34371f5d36713cbe8d35c9b9"
     },
     {
       "path": "bcrypt.js",
@@ -28,7 +28,7 @@
     },
     {
       "path": "index.html",
-      "sha256": "ce825867d2e90e2011b1cf87e6297c7059d3b7beb9a254d69db8311e2b803778"
+      "sha256": "d44910de7d623339b1bd71645182798240a95cf3fc79d03e63c55b78289b5e8e"
     },
     {
       "path": "plugin.json",
@@ -36,12 +36,12 @@
     },
     {
       "path": "style.css",
-      "sha256": "b77d79535bc42a2f4d7c59004b5ddb08f189444dabe72e94fe8cef993fed5993"
+      "sha256": "f67847cbaf5daf3be1e177f2b803822c73ed66b05d7844ebad1b48d03815986c"
     },
     {
       "path": "vault.js",
-      "sha256": "42cbd35eeffd00ffbc82f22bbfa198089ef2f82e8d79ec3b27fbbed266ebb0ce"
+      "sha256": "654cba30eedc7fc8321581a496070c833318d542fa54cdd2b987943e8b4aa301"
     }
   ],
-  "signature": "NniL2faBlJhcS8wvqy5oJUeha47aRhwmvWiUW0Qjy7K2qkNkFJUtmOtvLqJPF2tbCYpsKetEKKYv77c+8F1YCQ=="
+  "signature": "+TqhqCyG7KU1lcy15FkW63F4ZVYJB6Mc8VPguOdscedXU9Xe1PZEBc4AX5b4/NL0c2r3wY2z1pt02xuIF/czAQ=="
 }

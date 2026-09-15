@@ -139,8 +139,9 @@ var Vault = (function () {
   /* 首次建库：设置开门密码 */
   function setup(masterPassword, opts) {
     var bcrypt = getBcrypt();
-    if (!masterPassword || String(masterPassword).length < 6) {
-      return Promise.reject(new Error('开门密码至少 6 位'));
+    /* 只卡「至少 4 位」这一条底线：不校验大小写、数字、符号，长度全凭用户自己权衡 */
+    if (!masterPassword || String(masterPassword).length < 4) {
+      return Promise.reject(new Error('开门密码至少 4 位'));
     }
     var salt = newSalt();
     return bcrypt.hash(bcryptInput(masterPassword), salt).then(function (hashStr) {
@@ -399,7 +400,7 @@ var Vault = (function () {
     return bcrypt.hash(bcryptInput(oldPw), salt0).then(function (h) {
       var C = getCryptoBox();
       if (!C.equalBytes(C.utf8Bytes(h), C.utf8Bytes(String(meta.bcrypt)))) throw new Error('WRONG_PASSWORD');
-      if (!newPw || String(newPw).length < 6) throw new Error('新开门密码至少 6 位');
+      if (!newPw || String(newPw).length < 4) throw new Error('新开门密码至少 4 位');
       return bcrypt.hash(bcryptInput(newPw), newSalt());
     }).then(function (nh) {
       key = keyFromHash(nh);
