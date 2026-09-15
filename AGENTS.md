@@ -2,7 +2,15 @@
 
 给在本仓库工作的 AI agent 的硬性约定。人类开发者同样适用,agent 必须遵守。
 
-## 1. 插件页面:样式与 JS 必须独立文件
+## 1. Agent Client Protocol (ACP) 规范
+
+Agent 在处理本仓库的任何任务时，必须遵循以下 Agent Client Protocol (ACP) 交互与控制规范：
+
+- **上下文与能力**：Agent 须通过 initialize 握手识别客户端能力，优先依赖 ACP 动态推送的 Workspace Diff 和环境状态，不向开发者索要已有上下文。
+- **修改与工具调用**：修改代码优先输出结构化 Patch/Diff，执行终端命令或文件覆盖等副作用操作须过 ACP 权限中间件校验。
+- **异常处理**：发生错误必须按 JSON-RPC 2.0 返回标准 Error Code，禁止静默挂起。
+
+## 2. 插件页面:样式与 JS 必须独立文件
 
 插件页面(webview 的 `index.html`、native 的 `page.html`)是**结构文件**,
 不允许长成内联 `<style>`/`<script>` 的单文件巨石。标准三件套:
@@ -23,17 +31,17 @@
 ### 提取做法
 
 1. **机械抽取,禁止手抄**——用脚本按块抽出或整段复制原文,保证内容与原文件逐字一致:
-   ```bash
-   # 以 page.html → page.css / page.js 为例
-   awk '/^<style>$/{f=1;next} /^<\/style>$/{f=0} f' page.html > page.css
-   awk '/^<script>$/{f=1;next} /^<\/script>$/{f=0} f' page.html > page.js
-   # 然后把 <style>…</style> 与 <script>…</script> 块替换为下面的引用
-   ```
+
+        # 以 page.html → page.css / page.js 为例
+        awk '/^<style>$/{f=1;next} /^<\/style>$/{f=0} f' page.html > page.css
+        awk '/^<script>$/{f=1;next} /^<\/script>$/{f=0} f' page.html > page.js
+        # 然后把 <style>…</style> 与 <script>…</script> 块替换为下面的引用
+
 2. HTML 里改为引用(相对路径,与页面同目录;插件页面以自身目录为根加载):
-   ```html
-   <link rel="stylesheet" href="style.css">
-   <script src="app.js"></script>
-   ```
+
+        <link rel="stylesheet" href="style.css">
+        <script src="app.js"></script>
+
 3. 文件命名与上表一致,不发明新名字;不放进子目录(例外:`pdf-toolkit` 的 JS 已由 owner
    归档到 `js/` 子目录,见下方正例)。
 4. 迁移后自检:JS 过 `node --check <file>.js`;CSS/JS 行数用 `wc -l` 复核。
@@ -44,25 +52,25 @@
 - ✅ `code-calc/0.1.0/`:index.html 87 行 + style.css 196 行 + app.js 688 行 + engine.js 1210 行
 - ✅ `local-search/0.1.0/`:page.html 93 行 + page.css 156 行 + page.js 390 行
 - ✅ `pdf-toolkit/0.1.0/`:index.html 359 行 + style.css 403 行 + js/(app.js 597 + tools.js 591
-  + merge.js 410 + engine.js 938 + convert.js 554;JS 已归档 `js/` 子目录——owner 2026-09-08 决定,
-  本插件例外于"不放进子目录",页面引用 `js/*.js`)(外壳/工具/合并编辑器/引擎/转换五层拆分)
+    + merge.js 410 + engine.js 938 + convert.js 554;JS 已归档 `js/` 子目录——owner 2026-09-08 决定,
+      本插件例外于"不放进子目录",页面引用 `js/*.js`)(外壳/工具/合并编辑器/引擎/转换五层拆分)
 - ❌ `compare/0.1.0/index.html`(2823 行)、`json-formatter/0.1.0/index.html`(1185 行):
   历史单文件巨石,**不要求立刻重写**;但 agent 一旦要改它们,先按阈值判断是否顺手提取。
 
-## 2. 其它硬性约束
+## 3. 其它硬性约束
 
 - 新插件页面一律带「页面加固」段(禁默认右键菜单 + capture keydown 拦 F12/F5/Ctrl+P/Ctrl+Shift+I|J|C,
   Ctrl+R 非编辑焦点才拦;input/textarea 豁免右键拦截):代码模板见 `docs/插件开发/WebView插件开发.md` §12
   与 `Native插件开发.md` §12,参考实现 `hosts-switcher/0.1.0/page.js`「页面加固」段。
 - **发布物完整性:提交前后必须机械核对,exe/二进制资源是重灾区**(local-search 的 exe、pdf-toolkit 的
   179 个 cmaps、hosts-switcher 的 exe 都实际漏过/差点漏):
-  1. `git add <插件>/0.1.0/` **整目录添加,禁止挑文件**——exe、bcmap、字体、vendor 等二进制一律随目录进;
-  2. add 后 `git status --short` 该目录**必须干净**(无 `??` 残留);exe 是最常漏的单件,另跑
-     `git ls-files <插件>/0.1.0/*.exe` 确认非空(native 插件);
-  3. 提交后核对数量:`git ls-files <插件>/0.1.0` 条数 **减 1**(signature.json 自身)= 包内
-     `signature.json` 清单条数,不一致必须补提交——市场走 master zipball,缺文件会在 zipball 双向
-     校验时拒装;
-  4. 运行时产物(如 `0.1.0/backups/`)不进 git,规则在 .gitignore 维护。
+    1. `git add <插件>/0.1.0/` **整目录添加,禁止挑文件**——exe、bcmap、字体、vendor 等二进制一律随目录进;
+    2. add 后 `git status --short` 该目录**必须干净**(无 `??` 残留);exe 是最常漏的单件,另跑
+       `git ls-files <插件>/0.1.0/*.exe` 确认非空(native 插件);
+    3. 提交后核对数量:`git ls-files <插件>/0.1.0` 条数 **减 1**(signature.json 自身)= 包内
+       `signature.json` 清单条数,不一致必须补提交——市场走 master zipball,缺文件会在 zipball 双向
+       校验时拒装;
+    4. 运行时产物(如 `0.1.0/backups/`)不进 git,规则在 .gitignore 维护。
 - 发布物直接在 `<插件>/<版本>/` 目录内迭代;开发阶段**不新建版本目录、不改版本号**。
 - 涉及 exe 的改动:`cargo build --release` 后把产物复制进版本目录,文件名与 `plugin.json` 的 `main` 一致。
 - 改完页面文件后跑 `node --check` 校验 JS;改完协议/Rust 跑 `cargo run --example smoke` 冒烟。

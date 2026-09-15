@@ -1,320 +1,320 @@
 <!doctype html>
-<html lang="zh-Hans" data-theme="dark">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="dark light">
+<html lang="zh-Hans" data-theme="dark" data-page-node-id="bHgzqdP1FN0YvAgD71eizp">
+<head data-page-node-id="MkvLEgL3GFSPxrg9ul0Ci5">
+  <meta charset="utf-8" data-page-node-id="HtvIYD4He8PaRI1Zn7hExW">
+  <meta name="viewport" content="width=device-width, initial-scale=1" data-page-node-id="qLN6pOEkSjHUamMnTepIgi">
+  <meta name="color-scheme" content="dark light" data-page-node-id="WmLrSqjnDNhZuBoLgHGeQ9">
   <title>密码管家</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" data-page-node-id="4WonTMqkVcw45SNKhtG1C6">
 </head>
-<body>
+<body data-page-node-id="aimQMxlrkMSFnDC3YCtHoF">
 
   <!-- ══════════ 启动中 ══════════ -->
-  <div id="boot" class="boot">
-    <div class="boot-spinner" aria-hidden="true"></div>
-    <p>正在读取保险库…</p>
+  <div id="boot" class="boot" data-page-node-id="H0HkCQEr2O9gXlTnAC6x3c">
+    <div class="boot-spinner" aria-hidden="true" data-page-node-id="yZKK8SM4FoeGQKx11N0GGb"></div>
+    <p data-page-node-id="BZ4fyerjYqQUJQm2xTE0Hu">正在读取保险库…</p>
   </div>
 
   <!-- ══════════ 首次建库 ══════════ -->
-  <section id="screen-setup" class="screen gate" hidden>
-    <div class="gate-card">
-      <div class="gate-mark" aria-hidden="true">
-        <svg viewBox="0 0 24 24"><path d="M12 1 4 4.5v7.2c0 5 3.4 9.6 8 10.8 4.6-1.2 8-5.8 8-10.8V4.5L12 1Zm0 5.2a2.6 2.6 0 0 1 1.3 4.85V14h-2.6v-2.95A2.6 2.6 0 0 1 12 6.2Z"/></svg>
+  <section id="screen-setup" class="screen gate" hidden data-page-node-id="UZwE732VT7JModOeqlnP5T">
+    <div class="gate-card" data-page-node-id="0apXs9BqlyxEcaKmUcZKE4">
+      <div class="gate-mark" aria-hidden="true" data-page-node-id="0OebRu9vk7dJ1tBSdrrbIS">
+        <svg viewBox="0 0 24 24" data-page-node-id="CNsCxBUKO6e032M3ZbGW6H"><path d="M12 1 4 4.5v7.2c0 5 3.4 9.6 8 10.8 4.6-1.2 8-5.8 8-10.8V4.5L12 1Zm0 5.2a2.6 2.6 0 0 1 1.3 4.85V14h-2.6v-2.95A2.6 2.6 0 0 1 12 6.2Z" data-page-node-id="2YHu7m79Y5w1NjG1IG2MEL"/></svg>
       </div>
-      <h1>设置开门密码</h1>
-      <p class="gate-sub">开门密码只在本机使用，<b>不会被保存，也无法找回</b>。请务必自行记牢。</p>
+      <h1 data-page-node-id="KX9RzLnFezXu34nY4AreGg">设置开门密码</h1>
+      <p class="gate-sub" data-page-node-id="Z5QCsQeW4zffCMKyL8Z4V1">开门密码只在本机使用，<b data-page-node-id="QoBcEBam2MEb3HWUhypvJK">不会被保存，也无法找回</b>。请务必自行记牢。</p>
 
-      <label class="field">
-        <span class="field-label">开门密码</span>
-        <span class="field-input">
-          <input id="setup-pw" type="password" autocomplete="new-password" spellcheck="false" placeholder="至少 4 位，长一点更安全">
-          <button type="button" class="reveal" data-reveal="setup-pw" title="显示/隐藏">👁</button>
+      <label class="field" data-page-node-id="VB9D1uiL3grn4NbSDNfzzO">
+        <span class="field-label" data-page-node-id="v0ryROhv4rnIHIBWjS8K8c">开门密码</span>
+        <span class="field-input" data-page-node-id="nwpu7oQLCFufw9WLeqytQR">
+          <input id="setup-pw" type="password" autocomplete="new-password" spellcheck="false" placeholder="至少 4 位，长一点更安全" data-page-node-id="UVw4QRjZtRmZLLbOUiSTy6">
+          <button type="button" class="reveal" data-reveal="setup-pw" title="显示/隐藏" data-page-node-id="z2aEuYltLgJT0rixKETeu6">👁</button>
         </span>
       </label>
-      <div class="strength" id="setup-strength" hidden>
-        <div class="strength-bar"><i id="setup-strength-bar"></i></div>
-        <div class="strength-text"><span id="setup-strength-label"></span><span id="setup-strength-bits"></span></div>
-        <div class="strength-hint" id="setup-strength-hint"></div>
+      <div class="strength" id="setup-strength" hidden data-page-node-id="Ys6xa04C8c2PXMI45bq3ih">
+        <div class="strength-bar" data-page-node-id="GfucDmgt8lE1zmQeIc1QpP"><i id="setup-strength-bar" data-page-node-id="RVo6fmwfBUXxSz6h07DVIV"></i></div>
+        <div class="strength-text" data-page-node-id="EHNvVGM0nXw9vtZ6XDmtID"><span id="setup-strength-label" data-page-node-id="LDN4OQOTuVOPBmKnVZ4d94"></span><span id="setup-strength-bits" data-page-node-id="H48LreznBCBARQlHY0dtzi"></span></div>
+        <div class="strength-hint" id="setup-strength-hint" data-page-node-id="Ix8JVPDWjpEuBi7f35Xnyg"></div>
       </div>
 
-      <label class="field">
-        <span class="field-label">再输一次</span>
-        <span class="field-input">
-          <input id="setup-pw2" type="password" autocomplete="new-password" spellcheck="false" placeholder="再次输入以确认">
-          <button type="button" class="reveal" data-reveal="setup-pw2" title="显示/隐藏">👁</button>
+      <label class="field" data-page-node-id="2n06clkHj0WKjRmCBm2mXf">
+        <span class="field-label" data-page-node-id="fE3DcroG78UxBp9tcTyMqF">再输一次</span>
+        <span class="field-input" data-page-node-id="4E63gqbXEyExwWnELHrQFo">
+          <input id="setup-pw2" type="password" autocomplete="new-password" spellcheck="false" placeholder="再次输入以确认" data-page-node-id="H9CPBFoyu8XmTlAwHIMKR0">
+          <button type="button" class="reveal" data-reveal="setup-pw2" title="显示/隐藏" data-page-node-id="SEDt90Mdz3rDTwOQLKzrKK">👁</button>
         </span>
       </label>
 
-      <label class="field">
-        <span class="field-label">密码提示<span class="field-hint">（可选，明文保存，别写密码本身）</span></span>
-        <input id="setup-hint" type="text" spellcheck="false" placeholder="例如：老家的门牌号 + 常用符号">
+      <label class="field" data-page-node-id="9BcMpSBGvx3QACvjEjtAhH">
+        <span class="field-label" data-page-node-id="mEr9rxndAJTMz522CS7WXl">密码提示<span class="field-hint" data-page-node-id="FSBMZjDiouH8IJck0r26oj">（可选，明文保存，别写密码本身）</span></span>
+        <input id="setup-hint" type="text" spellcheck="false" placeholder="例如：老家的门牌号 + 常用符号" data-page-node-id="LoZuedznQj3UEB5fhuD00C">
       </label>
 
-      <div class="errbox" id="setup-err" hidden></div>
-      <button id="btn-setup" class="primary big">建立保险库</button>
-      <p class="gate-foot">落盘前会先做 BCrypt 加盐哈希，再用它派生的 AES-256 密钥加密全部帐号。</p>
+      <div class="errbox" id="setup-err" hidden data-page-node-id="zoXw9H58cDrmO4JSvTbWy8"></div>
+      <button id="btn-setup" class="primary big" data-page-node-id="D1IMVRBAWxnAcIEvcM8t9C">建立保险库</button>
+      <p class="gate-foot" data-page-node-id="nPMRXcsThk3c3lG3fLAIIT">落盘前会先做 BCrypt 加盐哈希，再用它派生的 AES-256 密钥加密全部帐号。</p>
     </div>
   </section>
 
   <!-- ══════════ 解锁 ══════════ -->
-  <section id="screen-lock" class="screen gate" hidden>
-    <div class="gate-card">
-      <div class="gate-mark" aria-hidden="true">
-        <svg viewBox="0 0 24 24"><path d="M17 9V7a5 5 0 0 0-10 0v2H5.8A1.8 1.8 0 0 0 4 10.8v9.4A1.8 1.8 0 0 0 5.8 22h12.4a1.8 1.8 0 0 0 1.8-1.8v-9.4A1.8 1.8 0 0 0 18.2 9H17Zm-8-2a3 3 0 0 1 6 0v2H9V7Zm4.9 9.6V19h-3.8v-2.4a2.2 2.2 0 1 1 3.8 0Z"/></svg>
+  <section id="screen-lock" class="screen gate" hidden data-page-node-id="Igvlnv0E3uyEtpzoNBLPst">
+    <div class="gate-card" data-page-node-id="dI2SPaLOTCYAEgTxrcaFKR">
+      <div class="gate-mark" aria-hidden="true" data-page-node-id="qszpxhVbUJXD0ZMpCMmBEC">
+        <svg viewBox="0 0 24 24" data-page-node-id="IXPCnCWd3ae7EEBKrvaE3g"><path d="M17 9V7a5 5 0 0 0-10 0v2H5.8A1.8 1.8 0 0 0 4 10.8v9.4A1.8 1.8 0 0 0 5.8 22h12.4a1.8 1.8 0 0 0 1.8-1.8v-9.4A1.8 1.8 0 0 0 18.2 9H17Zm-8-2a3 3 0 0 1 6 0v2H9V7Zm4.9 9.6V19h-3.8v-2.4a2.2 2.2 0 1 1 3.8 0Z" data-page-node-id="Wb46LWGTKek5NU2jfaCUD3"/></svg>
       </div>
-      <h1>保险库已锁定</h1>
-      <p class="gate-sub" id="lock-sub">输入开门密码后解密全部帐号。</p>
+      <h1 data-page-node-id="NRR8mz0f9tkj6c1YQDfP2R">保险库已锁定</h1>
+      <p class="gate-sub" id="lock-sub" data-page-node-id="TRuxnRVn0WR7xCEl1CjPzw">输入开门密码后解密全部帐号。</p>
 
-      <label class="field">
-        <span class="field-label">开门密码</span>
-        <span class="field-input">
-          <input id="lock-pw" type="password" autocomplete="current-password" spellcheck="false" placeholder="输入开门密码">
-          <button type="button" class="reveal" data-reveal="lock-pw" title="显示/隐藏">👁</button>
+      <label class="field" data-page-node-id="MKRNceNAIhtcSV8glm1GTQ">
+        <span class="field-label" data-page-node-id="PWiLWPpoVodbWsSb6OWAWh">开门密码</span>
+        <span class="field-input" data-page-node-id="GgO4PQ6wN1TUEOQS5nxrXE">
+          <input id="lock-pw" type="password" autocomplete="current-password" spellcheck="false" placeholder="输入开门密码" data-page-node-id="a88CylpCp3y6Xj0E6i4FVt">
+          <button type="button" class="reveal" data-reveal="lock-pw" title="显示/隐藏" data-page-node-id="PX5z0y3SYXfPUrEZbrVnP7">👁</button>
         </span>
       </label>
-      <div class="caps" id="lock-caps" hidden>⚠ 大写锁定已开启（Caps Lock）</div>
-      <div class="errbox" id="lock-err" hidden></div>
-      <button id="btn-unlock" class="primary big">开门</button>
-      <p class="gate-foot" id="lock-hint" hidden></p>
-      <p class="gate-foot">忘记开门密码 = 数据无法恢复（本地无任何后门与恢复码）。<a href="#" id="link-reset">格式化并重建？</a></p>
+      <div class="caps" id="lock-caps" hidden data-page-node-id="aCfEnWeKYXfq6wZIR2PijV">⚠ 大写锁定已开启（Caps Lock）</div>
+      <div class="errbox" id="lock-err" hidden data-page-node-id="f3bn5qTsVGBFssgPGD84Xo"></div>
+      <button id="btn-unlock" class="primary big" data-page-node-id="n8ffdYa9xRQ08mDWNWEmQZ">开门</button>
+      <p class="gate-foot" id="lock-hint" hidden data-page-node-id="R7wpazbP1HGZQOrOs43s4H"></p>
+      <p class="gate-foot" data-page-node-id="DioEblw02JAx4W9ZQkOyfr">忘记开门密码 = 数据无法恢复（本地无任何后门与恢复码）。<a href="#" id="link-reset" data-page-node-id="AqXmnSrLW0I4ldF4EoiTKB">格式化并重建？</a></p>
     </div>
   </section>
 
   <!-- ══════════ 主界面 ══════════ -->
-  <section id="screen-main" class="screen main" hidden>
-    <header class="top">
-      <div class="brand">
-        <svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1 4 4.5v7.2c0 5 3.4 9.6 8 10.8 4.6-1.2 8-5.8 8-10.8V4.5L12 1Zm0 5.2a2.6 2.6 0 0 1 1.3 4.85V14h-2.6v-2.95A2.6 2.6 0 0 1 12 6.2Z"/></svg>
-        <span>密码管家</span>
+  <section id="screen-main" class="screen main" hidden data-page-node-id="r3fuEbbEL8coXI8FFVb7qS">
+    <header class="top" data-page-node-id="Sr76xVnPB7yxkS8Min5Ye0">
+      <div class="brand" data-page-node-id="PodFSkUYNOb0q0KDGCw4Gf">
+        <svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true" data-page-node-id="fnNwurmsspxNDDRLJIpcTp"><path d="M12 1 4 4.5v7.2c0 5 3.4 9.6 8 10.8 4.6-1.2 8-5.8 8-10.8V4.5L12 1Zm0 5.2a2.6 2.6 0 0 1 1.3 4.85V14h-2.6v-2.95A2.6 2.6 0 0 1 12 6.2Z" data-page-node-id="Q4vAgClkomGg9PsXfMXsUT"/></svg>
+        <span data-page-node-id="rbhNCea5Mpn0IExTbwDnrs">密码管家</span>
       </div>
-      <div class="search">
-        <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2a8 8 0 1 0 4.9 14.3l5 5 1.4-1.4-5-5A8 8 0 0 0 10 2Zm0 2a6 6 0 1 1 0 12 6 6 0 0 1 0-12Z"/></svg>
-        <input id="search" type="text" spellcheck="false" autocomplete="off" placeholder="搜索标题 / 用户名 / 网址 / 备注 / 标签…   Ctrl+K">
-        <button id="search-clear" class="search-clear" title="清空" hidden>×</button>
+      <div class="search" data-page-node-id="m6CArNOfe3CwQVVp9pjjou">
+        <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true" data-page-node-id="vOXhajGgVYdyGRitWSFypU"><path d="M10 2a8 8 0 1 0 4.9 14.3l5 5 1.4-1.4-5-5A8 8 0 0 0 10 2Zm0 2a6 6 0 1 1 0 12 6 6 0 0 1 0-12Z" data-page-node-id="NBbpMtCPXOMUsd1nDBgNG0"/></svg>
+        <input id="search" type="text" spellcheck="false" autocomplete="off" placeholder="搜索标题 / 用户名 / 网址 / 备注 / 标签…   Ctrl+K" data-page-node-id="BJY3iRKV4PyIbYVsAdUcMs">
+        <button id="search-clear" class="search-clear" title="清空" hidden data-page-node-id="K28kDI4mDFf4F69aPD3n4j">×</button>
       </div>
-      <div class="tools">
-        <button id="btn-new" class="ghost-btn accent" title="新增帐号（Ctrl+N）">＋ 新增</button>
-        <button id="btn-gen" class="ghost-btn" title="生成随机密码">生成</button>
-        <span class="tool-sep"></span>
-        <button id="btn-io" class="ghost-btn" title="导入 / 导出">导入导出</button>
-        <button id="btn-help" class="ghost-btn" title="帮助与安全说明">帮助</button>
-        <button id="btn-settings" class="ghost-btn" title="设置">设置</button>
-        <button id="btn-theme" class="ghost-btn icon" title="切换明暗主题">🌙</button>
-        <button id="btn-lock" class="ghost-btn icon" title="立即锁定">🔒</button>
+      <div class="tools" data-page-node-id="UGOQIUVHWDSiKqAoej3fUE">
+        <button id="btn-new" class="ghost-btn accent" title="新增帐号（Ctrl+N）" data-page-node-id="0u5dQY2V3pFBgx0DHwJHof">＋ 新增</button>
+        <button id="btn-gen" class="ghost-btn" title="生成随机密码" data-page-node-id="4pacsqEdAheKKM1dsKaTy6">生成</button>
+        <span class="tool-sep" data-page-node-id="6Ha746gPfGAnllyD15nnTz"></span>
+        <button id="btn-io" class="ghost-btn" title="导入 / 导出" data-page-node-id="nmUeMDl4ycthZ9iHCzfQnQ">导入导出</button>
+        <button id="btn-help" class="ghost-btn" title="帮助与安全说明" data-page-node-id="5FIERWYbtReIHvTUoeeNvV">帮助</button>
+        <button id="btn-settings" class="ghost-btn" title="设置" data-page-node-id="6SaVpiBg3DkhvFjvH1dUTy">设置</button>
+        <button id="btn-theme" class="ghost-btn icon" title="切换明暗主题" data-page-node-id="IC5azuweWWAfmnGLdd2wj5">🌙</button>
+        <button id="btn-lock" class="ghost-btn icon" title="立即锁定" data-page-node-id="Xvd8EFpgIKAyUXEo4Y1wq6">🔒</button>
       </div>
     </header>
 
-    <div class="body">
-      <aside class="sidebar">
-        <nav class="grouplist" id="group-list"></nav>
-        <div class="sidebar-foot">
-          <button id="btn-add-group" class="ghost-btn wide">＋ 新建分组</button>
-          <div class="sidebar-tip">把帐号拖到分组上即可移动；拖动分组可排序。</div>
+    <div class="body" data-page-node-id="h8ygIc0E4dzlaXnZ2fFbat">
+      <aside class="sidebar" data-page-node-id="J3RBLPzdLaE3Nqw0P0jEgc">
+        <nav class="grouplist" id="group-list" data-page-node-id="OHfjAHrGRjsDfY5RYn5swF"></nav>
+        <div class="sidebar-foot" data-page-node-id="bbOb6XFGPXgQap479AjZkp">
+          <button id="btn-add-group" class="ghost-btn wide" data-page-node-id="BEtn2NujJrLHDEYppeGb8X">＋ 新建分组</button>
+          <div class="sidebar-tip" data-page-node-id="r4W2JFj5stEjKfGuJWy9Em">把帐号拖到分组上即可移动；拖动分组可排序。</div>
         </div>
       </aside>
 
-      <main class="listwrap">
-        <div class="listhead">
-          <span id="list-title">全部帐号</span>
-          <span class="list-count" id="list-count"></span>
-          <div class="listhead-right">
-            <select id="sort" class="mini-select" title="排序方式">
-              <option value="order">手动排序</option>
-              <option value="title">按标题</option>
-              <option value="updated">按修改时间</option>
-              <option value="created">按创建时间</option>
+      <main class="listwrap" data-page-node-id="zxQ6jKZNWbwPegjcVEj3Pr">
+        <div class="listhead" data-page-node-id="dBmfTumkS9Ps9w9CIsahwi">
+          <span id="list-title" data-page-node-id="HhEIWZKJ27N1pAF17Ab7Zo">全部帐号</span>
+          <span class="list-count" id="list-count" data-page-node-id="RMDvwqUzAO4luWWzbBaR6j"></span>
+          <div class="listhead-right" data-page-node-id="jmjcys1q5H3yc54E5a66Tc">
+            <select id="sort" class="mini-select" title="排序方式" data-page-node-id="lEIGSeqvV5jNTMGw31LSqI">
+              <option value="order" data-page-node-id="4vyIJjuSjzLXHh8OY26U71">手动排序</option>
+              <option value="title" data-page-node-id="586ov7gu4I1yC3XKY44W9o">按标题</option>
+              <option value="updated" data-page-node-id="kHQJsRC7g7vtSsEYjkfw8W">按修改时间</option>
+              <option value="created" data-page-node-id="3CvORuF9BJQxaTDaeriyoW">按创建时间</option>
             </select>
           </div>
         </div>
-        <div class="list" id="list"></div>
-        <div class="list-empty" id="list-empty" hidden></div>
+        <div class="list" id="list" data-page-node-id="TwDlJpsHXM9BNUHf67suFs"></div>
+        <div class="list-empty" id="list-empty" hidden data-page-node-id="7nd5ZDkHTRummuYADB1Aam"></div>
       </main>
 
-      <aside class="detail" id="detail"></aside>
+      <aside class="detail" id="detail" data-page-node-id="IiL4F1KqpMh4EazjGQy3kL"></aside>
     </div>
 
-    <footer class="status">
-      <span id="status-text">就绪</span>
-      <span class="status-right" id="status-right"></span>
+    <footer class="status" data-page-node-id="cUoX3uj7ZWZh45kj6ydcqD">
+      <span id="status-text" data-page-node-id="3ZX01hQCJSgGgySZFbvCWe">就绪</span>
+      <span class="status-right" id="status-right" data-page-node-id="Gtvgn4Rm5MArEpc9YA2Tn0"></span>
     </footer>
   </section>
 
   <!-- ══════════ 侧滑面板 ══════════ -->
-  <div id="scrim" class="scrim" hidden></div>
+  <div id="scrim" class="scrim" hidden data-page-node-id="n2l2brhWjDZ2q4xvW7NHit"></div>
 
-  <aside id="panel-gen" class="panel" hidden>
-    <div class="panel-head"><h2>生成密码</h2><button class="ghost-btn panel-close" data-close-panel>关闭</button></div>
-    <div class="panel-body">
-      <h3>结果</h3>
-      <div class="gen-out">
-        <span id="gen-out" class="mono"></span>
-        <button id="gen-copy" class="ghost-btn">复制</button>
+  <aside id="panel-gen" class="panel" hidden data-page-node-id="WyvimH96UhumQas9EZqerH">
+    <div class="panel-head" data-page-node-id="o2NKJu4GxGVb5UfYh0VOrX"><h2 data-page-node-id="WlY0eYAmdeM938XLA3bDgW">生成密码</h2><button class="ghost-btn panel-close" data-close-panel data-page-node-id="agPuj49nE9svDoeAxZNXNX">关闭</button></div>
+    <div class="panel-body" data-page-node-id="C6ChOkxw3cP3uAkE753b45">
+      <h3 data-page-node-id="ibHKunx0YjeTS9QsC6oyJ1">结果</h3>
+      <div class="gen-out" data-page-node-id="CuGB8lD5TtVEAJVWkEpe8j">
+        <span id="gen-out" class="mono" data-page-node-id="I7P3rVUROzpFDpGIaz8IRx"></span>
+        <button id="gen-copy" class="ghost-btn" data-page-node-id="lnc7g6ZhDksAmVCcitmDC8">复制</button>
       </div>
-      <div class="strength" id="gen-strength">
-        <div class="strength-bar"><i id="gen-sbar"></i></div>
-        <div class="strength-text"><span id="gen-slabel"></span><span id="gen-sbits"></span></div>
+      <div class="strength" id="gen-strength" data-page-node-id="BdAqfdjeG550zyFIsD8zpQ">
+        <div class="strength-bar" data-page-node-id="OPMACVK9d3izF4Upn5ZPfr"><i id="gen-sbar" data-page-node-id="0sxoAArJAkIqfalScCeOii"></i></div>
+        <div class="strength-text" data-page-node-id="j1HStO3zVL5aAyssXFZ3Ko"><span id="gen-slabel" data-page-node-id="Gvvx1WKBr6UCylNPiO7TNS"></span><span id="gen-sbits" data-page-node-id="5wr8suRHix56tBKEGuk1H6"></span></div>
       </div>
-      <div class="btn-row">
-        <button id="gen-again" class="primary">换一个</button>
-        <button id="gen-save" class="ghost-btn">设为默认</button>
+      <div class="btn-row" data-page-node-id="wCOTVc1lND2CZCvRRPoYbJ">
+        <button id="gen-again" class="primary" data-page-node-id="Y5wokIP4Ne1DSMhbBS1vvE">换一个</button>
+        <button id="gen-save" class="ghost-btn" data-page-node-id="vtGsSROyih2PfWPyP6MlAi">设为默认</button>
       </div>
 
-      <h3>规则</h3>
-      <div class="row-set"><span>长度</span>
-        <input id="gen-len" class="range" type="range" min="8" max="64" value="16">
-        <b class="mono" id="gen-len-v">16</b>
+      <h3 data-page-node-id="FFIwQb7butmUnqRN9BC1NY">规则</h3>
+      <div class="row-set" data-page-node-id="vMHMppFyiYLvzgOqZIclho"><span data-page-node-id="gdLRs7qfymO26ZPVEKrtPR">长度</span>
+        <input id="gen-len" class="range" type="range" min="8" max="64" value="16" data-page-node-id="dzWjmFFgzEKqOD3t6YAAwY">
+        <b class="mono" id="gen-len-v" data-page-node-id="HxweW2S6WTGBKK4YEWRlCW">16</b>
       </div>
-      <label class="row-set"><span>大写字母 A-Z</span><input type="checkbox" id="gen-upper" checked></label>
-      <label class="row-set"><span>小写字母 a-z</span><input type="checkbox" id="gen-lower" checked></label>
-      <label class="row-set"><span>数字 0-9</span><input type="checkbox" id="gen-digit" checked></label>
-      <label class="row-set"><span>符号 !@#$%^&amp;*</span><input type="checkbox" id="gen-symbol" checked></label>
-      <label class="row-set"><span>排除易混淆字符 Il1O0o</span><input type="checkbox" id="gen-noamb"></label>
-      <p class="note">用「换一个」可连续生成；记不住的密码不是好密码——建议直接复制到目标站点，不要手抄。</p>
+      <label class="row-set" data-page-node-id="krfNLMLnLHcf02F9kogjqg"><span data-page-node-id="HfQ4qT8OQXXcY59lnwQQpT">大写字母 A-Z</span><input type="checkbox" id="gen-upper" checked data-page-node-id="3qDZEeTKQimShgFJSgYe9y"></label>
+      <label class="row-set" data-page-node-id="B0vTpKc885hFqB43eEHR91"><span data-page-node-id="wUFEYpL7PzuCiXaztBA2yK">小写字母 a-z</span><input type="checkbox" id="gen-lower" checked data-page-node-id="4h9SZrpI9R1DuCAw9osWCs"></label>
+      <label class="row-set" data-page-node-id="SYvpgTV8BoYHf8IBQkmnQ8"><span data-page-node-id="FvdVVIAvqk9RRdiOo5MswM">数字 0-9</span><input type="checkbox" id="gen-digit" checked data-page-node-id="0U2BOlDufHnuvhuDA2Dgrm"></label>
+      <label class="row-set" data-page-node-id="cayEazanM7nguFBlP2KJyr"><span data-page-node-id="wLPKW96X8nw3xXs5FRWa0m">符号 !@#$%^&amp;*</span><input type="checkbox" id="gen-symbol" checked data-page-node-id="ukg2fJDHdS9C24946DfbA8"></label>
+      <label class="row-set" data-page-node-id="wmPC0ZvfLuNW1fnu54maGe"><span data-page-node-id="8A0fH3Pflp67WYMxobRCYZ">排除易混淆字符 Il1O0o</span><input type="checkbox" id="gen-noamb" data-page-node-id="MwNaYdS8e34t8MBK04a79B"></label>
+      <p class="note" data-page-node-id="CJuPEEEgK27xXMDpWtLEkN">用「换一个」可连续生成；记不住的密码不是好密码——建议直接复制到目标站点，不要手抄。</p>
     </div>
   </aside>
 
-  <aside id="panel-settings" class="panel" hidden>
-    <div class="panel-head"><h2>设置</h2><button class="ghost-btn panel-close" data-close-panel>关闭</button></div>
-    <div class="panel-body">
-      <h3>安全</h3>
-      <div class="row-set"><span>自动锁定</span>
-        <select id="set-autolock" class="mini-select">
-          <option value="0">不自动锁定</option>
-          <option value="60">1 分钟</option>
-          <option value="300">5 分钟</option>
-          <option value="600">10 分钟</option>
-          <option value="1800">30 分钟</option>
-          <option value="3600">1 小时</option>
+  <aside id="panel-settings" class="panel" hidden data-page-node-id="ufDEFulGdIH5dRetlpUtpg">
+    <div class="panel-head" data-page-node-id="loU1aTAkxSzaqhCpKUnQ1Y"><h2 data-page-node-id="GxeK4iWDgvJD7xxUWXR23t">设置</h2><button class="ghost-btn panel-close" data-close-panel data-page-node-id="dmy9i0TeqOKW2GIjiFc6yV">关闭</button></div>
+    <div class="panel-body" data-page-node-id="5tA8dcCzUapBVxHTQD8oPT">
+      <h3 data-page-node-id="d71cxVXAp93VxgHjNGOCtH">安全</h3>
+      <div class="row-set" data-page-node-id="KOtHWEUVTpOxpPjIQDGu6a"><span data-page-node-id="NGeQLwV4u5Eu52rCmCA2tG">自动锁定</span>
+        <select id="set-autolock" class="mini-select" data-page-node-id="qj5dc1wkuynz5fFCSAKHUc">
+          <option value="0" data-page-node-id="77E0JzuGxoj015uJzDdm5x">不自动锁定</option>
+          <option value="60" data-page-node-id="FoSIzvJ8CvCsDm51EMaMkn">1 分钟</option>
+          <option value="300" data-page-node-id="tsHZp3zWxnWX4OutTCgcs9">5 分钟</option>
+          <option value="600" data-page-node-id="wHrno5yGEQJUCAlPprn7Dx">10 分钟</option>
+          <option value="1800" data-page-node-id="WWlMJTQKnJ7GGrrex5cJDD">30 分钟</option>
+          <option value="3600" data-page-node-id="76UEmoNOk9Ai8Nlo8DZDiA">1 小时</option>
         </select>
       </div>
-      <div class="row-set"><span>复制后自动清空剪贴板</span>
-        <select id="set-clip" class="mini-select">
-          <option value="0">不清空</option>
-          <option value="10">10 秒</option>
-          <option value="20">20 秒</option>
-          <option value="30">30 秒</option>
-          <option value="60">60 秒</option>
+      <div class="row-set" data-page-node-id="T77ZwUsOhRv6qGxT0h71pV"><span data-page-node-id="UAFEcbkhsNkgkSL2Cy6EYI">复制后自动清空剪贴板</span>
+        <select id="set-clip" class="mini-select" data-page-node-id="462dBi2P7wfPe2zQCCDWtv">
+          <option value="0" data-page-node-id="BQAGREofk3ZTG26poVFini">不清空</option>
+          <option value="10" data-page-node-id="OH83PQmVFfA1fExW8ya7dq">10 秒</option>
+          <option value="20" data-page-node-id="2AnyIEopUhQvoUzW2dB9SF">20 秒</option>
+          <option value="30" data-page-node-id="0Cef4ItRls3rk6ueSjXlmJ">30 秒</option>
+          <option value="60" data-page-node-id="3HKdNRn5OWRtOlaPrrRHkx">60 秒</option>
         </select>
       </div>
-      <label class="row-set"><span>切换到其它窗口时立即锁定</span>
-        <input type="checkbox" id="set-blur">
+      <label class="row-set" data-page-node-id="5WkadtebBn4hXrlP3JtXZf"><span data-page-node-id="FJ7Wp8hQvj9FKWHOE71N54">切换到其它窗口时立即锁定</span>
+        <input type="checkbox" id="set-blur" data-page-node-id="a052FAOZbb66ycz0wl2uBS">
       </label>
-      <div class="row-set">
-        <span>修改开门密码</span>
-        <button id="btn-change-pw" class="ghost-btn">修改…</button>
+      <div class="row-set" data-page-node-id="Dx87jWWqNpYjWXernH5u9L">
+        <span data-page-node-id="fgelgMqwQtnIoBcXlhpfDl">修改开门密码</span>
+        <button id="btn-change-pw" class="ghost-btn" data-page-node-id="K4YSGMRljMRBKICjJ2jJp0">修改…</button>
       </div>
 
-      <h3>开始使用前的提醒</h3>
-      <ul class="tips">
-        <li>密码提示：<span id="set-hint">（未设置）</span></li>
-        <li>建立时间：<span id="set-created">—</span>，共 <span id="set-count">0</span> 条帐号</li>
-        <li>本插件不联网（未申请 net 权限），全部数据只在本机。</li>
+      <h3 data-page-node-id="eGgjtAvystzNEvrr9cNGUM">开始使用前的提醒</h3>
+      <ul class="tips" data-page-node-id="Z7oIZDbHI40i6qS1PBrqfp">
+        <li data-page-node-id="CCEwoE4UeDzF1x2nsdJH3L">密码提示：<span id="set-hint" data-page-node-id="371eGHcrw7S866AqzCr497">（未设置）</span></li>
+        <li data-page-node-id="QD8YncvGFjxAyTwINPxWQx">建立时间：<span id="set-created" data-page-node-id="Kmx6hUAfOmZxEGJGjyHjoz">—</span>，共 <span id="set-count" data-page-node-id="vtlyYQc0Po6HuG1tuHddXx">0</span> 条帐号</li>
+        <li data-page-node-id="AaNfY3VrPGxxVZGpnbkCgh">本插件不联网（未申请 net 权限），全部数据只在本机。</li>
       </ul>
 
-      <h3>危险操作</h3>
-      <div class="danger-row">
-        <button id="btn-wipe" class="ghost-btn danger">清空全部帐号</button>
-        <button id="btn-destroy" class="ghost-btn danger">销毁保险库（含开门密码）</button>
+      <h3 data-page-node-id="w86jMXkQGmfGDCnNKieCxA">危险操作</h3>
+      <div class="danger-row" data-page-node-id="uzVrDQpBzTQFmM1C1vV0FR">
+        <button id="btn-wipe" class="ghost-btn danger" data-page-node-id="QXGjewDEu8ZtvIGxfjQYgT">清空全部帐号</button>
+        <button id="btn-destroy" class="ghost-btn danger" data-page-node-id="hAqGZWBpEJQgEmfuF1NqTf">销毁保险库（含开门密码）</button>
       </div>
-      <p class="note">「销毁」会删除开门密码与全部密文，等同恢复出厂设置，不可撤销。</p>
+      <p class="note" data-page-node-id="ZCZpdVeYX1XfZYBU4d94XH">「销毁」会删除开门密码与全部密文，等同恢复出厂设置，不可撤销。</p>
     </div>
   </aside>
 
-  <aside id="panel-io" class="panel" hidden>
-    <div class="panel-head"><h2>导入 / 导出</h2><button class="ghost-btn panel-close" data-close-panel>关闭</button></div>
-    <div class="panel-body">
-      <h3>导出</h3>
-      <p class="note">导出内容会通过剪贴板交付（本插件无文件读写权限）。请自行粘贴到文本文件保存。</p>
-      <div class="btn-row">
-        <button id="btn-export-enc" class="ghost-btn">导出加密包（安全）</button>
-        <button id="btn-export-plain" class="ghost-btn">导出明文 JSON</button>
-        <button id="btn-export-csv" class="ghost-btn">导出 CSV</button>
+  <aside id="panel-io" class="panel" hidden data-page-node-id="1jxbR9WeGe5sKNuc5QCEe5">
+    <div class="panel-head" data-page-node-id="9GsTQyFlTa8foTdixthvsU"><h2 data-page-node-id="EDkiCFObwXRom66TyP3MdZ">导入 / 导出</h2><button class="ghost-btn panel-close" data-close-panel data-page-node-id="nmyFCFXY1LpvmLCYzP8DiO">关闭</button></div>
+    <div class="panel-body" data-page-node-id="fftMDO7hsVdq4QSxaE5IS4">
+      <h3 data-page-node-id="oMOdMA5fwJmkOxD2GAv8Xt">导出</h3>
+      <p class="note" data-page-node-id="7Y0OWcBUwik7zbVgqzfYct">导出内容会通过剪贴板交付（本插件无文件读写权限）。请自行粘贴到文本文件保存。</p>
+      <div class="btn-row" data-page-node-id="jH5yjfrgqdDjJ6gP4pkDuF">
+        <button id="btn-export-enc" class="ghost-btn" data-page-node-id="tBupfz6C77NAVRb05AQdOo">导出加密包（安全）</button>
+        <button id="btn-export-plain" class="ghost-btn" data-page-node-id="GHlXsGIoYnd7kqOhv8mqld">导出明文 JSON</button>
+        <button id="btn-export-csv" class="ghost-btn" data-page-node-id="yHM7oYK4YQW2xaLC2y2TIz">导出 CSV</button>
       </div>
-      <p class="note">加密包仍是密文，换机器后需要<b>导出时那个开门密码</b>才能导入；明文 JSON / CSV 可直接被任何程序读取，请勿留存于公共位置。</p>
+      <p class="note" data-page-node-id="bsiM8yECcLabOUhKZcYEAO">加密包仍是密文，换机器后需要<b data-page-node-id="FZVXgC1VKmeaS7gqaxXt5B">导出时那个开门密码</b>才能导入；明文 JSON / CSV 可直接被任何程序读取，请勿留存于公共位置。</p>
 
-      <h3>导入</h3>
-      <p class="note">支持：本插件加密包、明文 JSON、CSV（表头可用中文：名称/用户名/密码/网址/备注）。重复的「标题 + 用户名」默认跳过。</p>
+      <h3 data-page-node-id="F4eQbO9kiklRjfJGgBr4FA">导入</h3>
+      <p class="note" data-page-node-id="HyQSrErGG5sJyjEjh3bSBK">支持：本插件加密包、明文 JSON、CSV（表头可用中文：名称/用户名/密码/网址/备注）。重复的「标题 + 用户名」默认跳过。</p>
       <textarea id="io-text" class="io-text" spellcheck="false" placeholder="把要导入的 JSON / CSV 内容粘贴到这里…"></textarea>
-      <label class="field compact">
-        <span class="field-label">如果是加密包，填入它的开门密码</span>
-        <input id="io-pw" type="password" spellcheck="false" autocomplete="off" placeholder="仅导入加密包时需要">
+      <label class="field compact" data-page-node-id="M9d3G0jwF0YX31x6TBRCA8">
+        <span class="field-label" data-page-node-id="wnlAIZBDp0G9TvYkhRotli">如果是加密包，填入它的开门密码</span>
+        <input id="io-pw" type="password" spellcheck="false" autocomplete="off" placeholder="仅导入加密包时需要" data-page-node-id="MMk5V17uG5YYoqSLsBZh1x">
       </label>
-      <div class="btn-row">
-        <button id="btn-import-merge" class="primary">合并导入</button>
-        <button id="btn-import-replace" class="ghost-btn danger">清空后导入</button>
+      <div class="btn-row" data-page-node-id="i2Jx90ebcaV90BUeYrSbf4">
+        <button id="btn-import-merge" class="primary" data-page-node-id="gAnDpas7pxBEeBxzALAvHE">合并导入</button>
+        <button id="btn-import-replace" class="ghost-btn danger" data-page-node-id="ZgRimd6IAzraFETzSsAnVR">清空后导入</button>
       </div>
-      <div class="errbox" id="io-err" hidden></div>
-      <div class="io-result" id="io-result" hidden></div>
+      <div class="errbox" id="io-err" hidden data-page-node-id="jKsPiSoELTHSDiH7NkiTLP"></div>
+      <div class="io-result" id="io-result" hidden data-page-node-id="PIaL8yqBbyvMY4mfHNV1Bd"></div>
     </div>
   </aside>
 
-  <aside id="panel-help" class="panel" hidden>
-    <div class="panel-head"><h2>帮助 · 数据安全</h2><button class="ghost-btn panel-close" data-close-panel>关闭</button></div>
-    <div class="panel-body">
-      <h3>加密方案</h3>
-      <table class="help-table">
-        <tbody>
-          <tr><td class="tok">开门密码</td><td>BCrypt（bcryptjs，cost=10，自动加盐）哈希后存盘，只用于校验；磁盘上不存在任何可逆的密码材料。</td></tr>
-          <tr><td class="tok">AES 密钥</td><td>取上述 BCrypt 密文再做一次 SHA-256，得到 32 字节，即 aes-256-cbc 的密钥（"开门密码经过哈希处理的值"）。</td></tr>
-          <tr><td class="tok">帐号数据</td><td>整条帐号（标题/用户名/密码/网址/备注/标签）序列化为 JSON 后用 AES-256-CBC + PKCS7 加密，每条独立随机 16 字节 IV。</td></tr>
-          <tr><td class="tok">存储位置</td><td>Spark 插件私有存储 <code>plugin-data/com.spark.password-manager/db</code>，只有明文骨架 + BCrypt 密文 + 密文块。</td></tr>
-          <tr><td class="tok">完整性</td><td>解锁时先解校验块，再逐条解 PKCS7；任一环节失败即报「数据损坏」，不会把乱码当密码展示。</td></tr>
+  <aside id="panel-help" class="panel" hidden data-page-node-id="nlr2OUfK5DkbMPIO7JKOtt">
+    <div class="panel-head" data-page-node-id="iUzM86ySdFo54wbPxuiax4"><h2 data-page-node-id="M7g4fPG5yrDsnvEvTI6vMw">帮助 · 数据安全</h2><button class="ghost-btn panel-close" data-close-panel data-page-node-id="9xrC6JzxQmC5ORHlVLYJvQ">关闭</button></div>
+    <div class="panel-body" data-page-node-id="a259R31lyxfpKnvUyk9i5J">
+      <h3 data-page-node-id="6eStd2lc1aN3NAJhtcD7VM">加密方案</h3>
+      <table class="help-table" data-page-node-id="2R0yB9zdWKGeFava1YpLiV">
+        <tbody data-page-node-id="RENmDWOQG9NS9KTZOecTTg">
+          <tr data-page-node-id="CX3Oz364jGgP43mdWhB2g5"><td class="tok" data-page-node-id="4DKP7Rw0VeMiXBWwogQ3WI">开门密码</td><td data-page-node-id="T5D7mq84dP05YHF8GMfXDJ">BCrypt（bcryptjs，cost=10，自动加盐）哈希后存盘，只用于校验；磁盘上不存在任何可逆的密码材料。</td></tr>
+          <tr data-page-node-id="mT3dlTgHixWZHK87to9YPX"><td class="tok" data-page-node-id="PVgUhi9JlIvIcxUGzKEGs7">AES 密钥</td><td data-page-node-id="t2nwgC3KbVOyfDEspWRyAd">取上述 BCrypt 密文再做一次 SHA-256，得到 32 字节，即 aes-256-cbc 的密钥（"开门密码经过哈希处理的值"）。</td></tr>
+          <tr data-page-node-id="UdrubhgEa9R01dLebZypXh"><td class="tok" data-page-node-id="iOXZ9DUyzamlVkzfFqIPGf">帐号数据</td><td data-page-node-id="kJsUccSHiHiaXAVo9VSlGi">整条帐号（标题/用户名/密码/网址/备注/标签）序列化为 JSON 后用 AES-256-CBC + PKCS7 加密，每条独立随机 16 字节 IV。</td></tr>
+          <tr data-page-node-id="QUBDAF7HQqERGqMWc7yGAB"><td class="tok" data-page-node-id="RULfaAI4AhNgeL5YClygsi">存储位置</td><td data-page-node-id="3CqL1Xevh8fhPK9H9J5ZAN">Spark 插件私有存储 <code data-page-node-id="Mq4SxlRKK03t1TJlNPd0NY">plugin-data/com.spark.password-manager/db</code>，只有明文骨架 + BCrypt 密文 + 密文块。</td></tr>
+          <tr data-page-node-id="it5OrD9TuallsxQ07sxnqo"><td class="tok" data-page-node-id="TBLwKD5Cxi4mi3RXnBosz9">完整性</td><td data-page-node-id="sXC7sCqy3ILr5S1JaHIOEE">解锁时先解校验块，再逐条解 PKCS7；任一环节失败即报「数据损坏」，不会把乱码当密码展示。</td></tr>
         </tbody>
       </table>
 
-      <h3>无法破解的含义</h3>
-      <div class="note">
-        没有开门密码时，攻击者拿到整份数据也只能看到 BCrypt 哈希与密文。要恢复明文必须<b>先求出开门密码</b>——
+      <h3 data-page-node-id="AAlOEb97huoWN9shZPVyg5">无法破解的含义</h3>
+      <div class="note" data-page-node-id="j2JguKpEDvpefE2Qlt047E">
+        没有开门密码时，攻击者拿到整份数据也只能看到 BCrypt 哈希与密文。要恢复明文必须<b data-page-node-id="Rb7e4tR2DgnbXhc0LsFBeR">先求出开门密码</b>——
         每次尝试都要跑一遍 BCrypt（故意设计得慢），无法用字典批量穷举；而 AES-256 密钥并不落盘，内存中也只在解锁期间存在。
-        代价是：<b>忘记开门密码无法找回</b>，也没有恢复码。
+        代价是：<b data-page-node-id="QXC2W4eAybtLAv1rpwp9kk">忘记开门密码无法找回</b>，也没有恢复码。
       </div>
 
-      <h3>快捷键</h3>
-      <table class="help-table">
-        <tbody>
-          <tr><td class="tok">Ctrl + U</td><td>复制当前帐号用户名</td></tr>
-          <tr><td class="tok">Ctrl + P</td><td>复制当前帐号密码</td></tr>
-          <tr><td class="tok">Ctrl + N</td><td>新增帐号</td></tr>
-          <tr><td class="tok">Ctrl + K</td><td>聚焦搜索框</td></tr>
-          <tr><td class="tok">Ctrl + L</td><td>立即锁定</td></tr>
-          <tr><td class="tok">↑ / ↓</td><td>在列表中上下选择</td></tr>
-          <tr><td class="tok">Esc</td><td>关闭面板 / 取消编辑</td></tr>
+      <h3 data-page-node-id="S3M0UXGqzmHX6pjklWUN2Z">快捷键</h3>
+      <table class="help-table" data-page-node-id="pCCdH76yJPJsJslCWlDbPS">
+        <tbody data-page-node-id="CYl3PZ223RPfcD0jw7j9Rp">
+          <tr data-page-node-id="UgHidorZuu2f7KaTWhe9d7"><td class="tok" data-page-node-id="M75Kyqu8zAtzPMFpHx3jQt">Ctrl + U</td><td data-page-node-id="Pqf8G9UGlPztAWCtTFE6n4">复制当前帐号用户名</td></tr>
+          <tr data-page-node-id="osVuznArP3YG3ivufzKnoj"><td class="tok" data-page-node-id="jVpTU2DfFtbs6cKmLqakhq">Ctrl + P</td><td data-page-node-id="v6FpTaCVhCa4T8kXHpeZbx">复制当前帐号密码</td></tr>
+          <tr data-page-node-id="gwDrhda47LBwbDO35v0GsL"><td class="tok" data-page-node-id="sS1949s17hNPGTVFusN9kd">Ctrl + N</td><td data-page-node-id="6toeXRo82piFySDdjSwkqf">新增帐号</td></tr>
+          <tr data-page-node-id="yLD5gP0NOA9cJ7dTMBUUar"><td class="tok" data-page-node-id="QPJUEWr9vHfJAEGnMXfnU7">Ctrl + K</td><td data-page-node-id="csoOQ6PwJh5RExDPqs4k2Z">聚焦搜索框</td></tr>
+          <tr data-page-node-id="E0GFr5LdBt2m8Bb16Cilca"><td class="tok" data-page-node-id="mqb5o55y9es5WqMRUi74my">Ctrl + L</td><td data-page-node-id="MsdduZC5cjHLB58aW7LLhp">立即锁定</td></tr>
+          <tr data-page-node-id="lPnhpR318VetsPj1BIBgKe"><td class="tok" data-page-node-id="9IqCsY7drqwjhwVZfBF5p8">↑ / ↓</td><td data-page-node-id="q6sYhKcgEIinKE874nH2PV">在列表中上下选择</td></tr>
+          <tr data-page-node-id="GkmEec5wnF4tGAunFBbdTT"><td class="tok" data-page-node-id="Fv0xb3Yhi5HgNG5DO3H2IX">Esc</td><td data-page-node-id="r4RYZyr915NM5OxbptsTPv">关闭面板 / 取消编辑</td></tr>
         </tbody>
       </table>
 
-      <h3>日常建议</h3>
-      <ul class="tips">
-        <li>不同站点用不同密码——用「生成」按钮，16 位以上、含符号。</li>
-        <li>复制密码后 20 秒自动清空剪贴板（可在设置里调整）。</li>
-        <li>离开电脑前按 Ctrl+L 锁定；也可开启「切换到其它窗口时立即锁定」。</li>
-        <li>注意大写锁定：密码框旁边会提示 Caps Lock。</li>
+      <h3 data-page-node-id="wCHv1D7QYgYsYY9T1QanfN">日常建议</h3>
+      <ul class="tips" data-page-node-id="JjyMSMY2HTLLdl72hBLpwL">
+        <li data-page-node-id="9o9K5yHeua54m7EQujpOCV">不同站点用不同密码——用「生成」按钮，16 位以上、含符号。</li>
+        <li data-page-node-id="KK0sN0Pn25qv3oZA50keKr">复制密码后 20 秒自动清空剪贴板（可在设置里调整）。</li>
+        <li data-page-node-id="vVAVqlwBQP0cVg760PQEQN">离开电脑前按 Ctrl+L 锁定；也可开启「切换到其它窗口时立即锁定」。</li>
+        <li data-page-node-id="viXJOU0vCXD2N7IPcRCoE8">注意大写锁定：密码框旁边会提示 Caps Lock。</li>
       </ul>
-      <p class="note">本插件为本地工具，不提供云同步。换机迁移请用「导出加密包」。</p>
+      <p class="note" data-page-node-id="ldM7Jv1ufhk18G0H1oqMIl">本插件为本地工具，不提供云同步。换机迁移请用「导出加密包」。</p>
     </div>
   </aside>
 
   <!-- ══════════ 通用对话框 / 提示 ══════════ -->
-  <div id="dialog" class="dialog-wrap" hidden>
-    <div class="dialog" role="dialog" aria-modal="true">
-      <h3 id="dialog-title"></h3>
-      <p id="dialog-text"></p>
-      <div class="field" id="dialog-field" hidden>
-        <span class="field-label" id="dialog-field-label"></span>
-        <span class="field-input">
-          <input id="dialog-input" type="password" spellcheck="false" autocomplete="off">
-          <button type="button" class="reveal" data-reveal="dialog-input" title="显示/隐藏">👁</button>
+  <div id="dialog" class="dialog-wrap" hidden data-page-node-id="4i66X9nooC3hbBosI1vWK1">
+    <div class="dialog" role="dialog" aria-modal="true" data-page-node-id="lJIt6Lgh9yLjsMRFXIwiKh">
+      <h3 id="dialog-title" data-page-node-id="psntwKfp8sgWYUFHubyErD"></h3>
+      <p id="dialog-text" data-page-node-id="bquF3DQQN0FstwPOFlHnGT"></p>
+      <div class="field" id="dialog-field" hidden data-page-node-id="TWjTFcSOAhnPkTTRLggEyU">
+        <span class="field-label" id="dialog-field-label" data-page-node-id="eGAWCZvtMqKSK8hGeyjWfc"></span>
+        <span class="field-input" data-page-node-id="YrKoqgQfAn1WYewNp63h1e">
+          <input id="dialog-input" type="password" spellcheck="false" autocomplete="off" data-page-node-id="F2fRjWHTzGmaumbQL3DwhE">
+          <button type="button" class="reveal" data-reveal="dialog-input" title="显示/隐藏" data-page-node-id="DzGoZS4elnNdpxbmF9inM5">👁</button>
         </span>
-        <span class="field-hint" id="dialog-field-hint"></span>
+        <span class="field-hint" id="dialog-field-hint" data-page-node-id="ehXmi4F1zAr6jD9G9tgFk7"></span>
       </div>
-      <div class="dialog-acts">
-        <button id="dialog-cancel" class="ghost-btn">取消</button>
-        <button id="dialog-ok" class="primary">确定</button>
+      <div class="dialog-acts" data-page-node-id="TSzbo4R3Ovu28CrJETiBTs">
+        <button id="dialog-cancel" class="ghost-btn" data-page-node-id="kGMiYzI8I12y65SgXi4MSh">取消</button>
+        <button id="dialog-ok" class="primary" data-page-node-id="pLVSkj4NRsFBfsOGU4MXGt">确定</button>
       </div>
-      <div class="errbox" id="dialog-err" hidden></div>
+      <div class="errbox" id="dialog-err" hidden data-page-node-id="D2ahsmNRBPyPRwBRC5NS6n"></div>
     </div>
   </div>
 
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="toast" class="toast" role="status" aria-live="polite" data-page-node-id="N2UlJfKySHuhJhG8DLVpDC"></div>
 
   <script src="bcrypt.js"></script>
   <script src="crypto.js"></script>
