@@ -237,13 +237,50 @@ await click('#search-clear');
 await waitFor('document.querySelectorAll("#list .item").length === 2', '清空搜索');
 
 /* ══════════ 4. 详情 / 复制 ══════════ */
-await click('#list .item');
+ok('切换帐号时抽屉内容播入场动画（.enter）', await evaluate(`(function(){
+  document.querySelector('#list .item').click();
+  return document.querySelector('#detail .detail-inner').classList.contains('enter');})()`));
 await waitFor('!!document.getElementById("btn-edit")', '详情出现');
 ok('点击列表打开详情', (await text('.detail-title h2')).includes('GitHub'));
-ok('详情默认隐藏密码', (await text('.drow-value')).indexOf('gh-P@ss-2026') < 0);
+ok('详情默认隐藏密码', (await text('#v-password')) === '••••••••••••', await text('#v-password'));
+
+/* 显隐密码必须原地改文本：整块重渲染会让抽屉每次点击都从 opacity:0 淡入 = 点一下闪一下 */
+await evaluate(`(function(){
+  window.__eyeEv = [];
+  window.__eyeOn = function(e){ window.__eyeEv.push(e.animationName); };
+  document.getElementById('detail').addEventListener('animationstart', window.__eyeOn, true);
+  document.getElementById('list').addEventListener('animationstart', window.__eyeOn, true);
+  return true;})()`);
+/* animationstart 在下一帧才派发：先把「切记录」那次的残余事件排空、清零，再去点眼睛 */
+await new Promise((r) => setTimeout(r, 350));
+await evaluate('window.__eyeEv = []');
 await click('#toggle-pw');
-await waitFor('document.querySelector("#detail").textContent.includes("gh-P@ss-2026")', '显示密码');
-ok('可切换显示密码', true);
+await waitFor('document.getElementById("v-password").textContent === "gh-P@ss-2026"', '显示密码');
+ok('点眼睛后显示密码明文', true);
+await click('#toggle-pw');
+await waitFor('document.getElementById("v-password").textContent === "••••••••••••"', '再点隐藏');
+await new Promise((r) => setTimeout(r, 450));
+ok('显隐密码不再触发任何动画（此前抽屉会整块淡入，看起来在闪）',
+  (await evaluate('window.__eyeEv.length')) === 0, await evaluate('window.__eyeEv.join(",")'));
+await evaluate(`(function(){
+  document.getElementById('detail').removeEventListener('animationstart', window.__eyeOn, true);
+  document.getElementById('list').removeEventListener('animationstart', window.__eyeOn, true);
+  return true;})()`);
+
+/* 收藏同理：不该让整个列表重新入场 */
+await evaluate(`(function(){
+  window.__favEv = [];
+  window.__favOn = function(e){ window.__favEv.push(e.animationName); };
+  document.getElementById('list').addEventListener('animationstart', window.__favOn, true);
+  return true;})()`);
+await click('#btn-fav');
+await waitFor('document.querySelector("#btn-fav").textContent === "取消收藏"', '切换收藏');
+await new Promise((r) => setTimeout(r, 300));
+ok('点收藏不会让整个列表重新入场', (await evaluate('window.__favEv.length')) === 0, await evaluate('window.__favEv.join(",")'));
+await click('#btn-fav');
+await waitFor('document.querySelector("#btn-fav").textContent === "收藏"', '恢复未收藏');
+await evaluate('(function(){document.getElementById("list").removeEventListener("animationstart", window.__favOn, true);return true;})()');
+
 await click('[data-copy="password"]');
 await new Promise((r) => setTimeout(r, 200));
 ok('复制密码写入剪贴板', (await evaluate('spark.clipboard._v')) === 'gh-P@ss-2026', await evaluate('spark.clipboard._v'));
@@ -466,6 +503,11 @@ const gen = await send('Page.captureScreenshot', { format: 'png' });
 fs.writeFileSync(path.join(shotDir, 'ui-gen.png'), Buffer.from(gen.data, 'base64'));
 
 /* ══════════ 11. 错误收集 ══════════ */
+/* 兜底哨兵：IDE 可视化页面编辑器会往 index.html 注 data-page-node-id，既污染 review 又会打挂签名，
+   这里当场报警，免得等到签名/上架环节才发现 */
+ok('页面没被编辑器注入 data-page-node-id 之类的属性（防止签名被悄悄打挂）',
+  (await evaluate('document.querySelectorAll("[data-page-node-id]").length')) === 0,
+  await evaluate('document.querySelectorAll("[data-page-node-id]").length + " 个"'));
 const pageErrors = await evaluate('JSON.stringify(window.__errors || [])');
 ok('页面无未捕获异常', JSON.parse(pageErrors).length === 0, pageErrors);
 const realErrors = consoleErrors.filter((e) => !/favicon|net::ERR_FILE_NOT_FOUND/i.test(e));

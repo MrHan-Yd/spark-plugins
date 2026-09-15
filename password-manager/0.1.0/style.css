@@ -624,6 +624,7 @@ body.has-detail .detail { flex-basis: var(--w-detail); width: var(--w-detail); }
   overflow-wrap: anywhere;
 }
 .drow-value.plain { font-family: var(--font-sans); color: var(--fg); white-space: pre-wrap; }
+.drow-value > span { min-width: 0; overflow-wrap: anywhere; }
 .drow-value .copy {
   margin-left: auto;
   flex: 0 0 auto;
@@ -794,10 +795,10 @@ body.has-detail .detail { flex-basis: var(--w-detail); width: var(--w-detail); }
 /* 空态 */
 .list-empty, .boot { animation: fadein 260ms var(--ease-out); }
 
-/* 详情面板内容（每次重渲染都会重播，读起来像「换了一页」而不是硬切） */
+/* 详情面板内容：只在「换了一条帐号 / 进出编辑态」时播，内部小改动（显隐密码、收藏、清历史）
+   走原地更新不重渲染，否则每点一下就整块从 opacity:0 淡入——看起来就是抽屉在闪 */
 @keyframes detailIn { from { opacity: 0; transform: translateX(8px); } to { opacity: 1; transform: none; } }
-.detail-inner { animation: detailIn 200ms var(--ease-out); }
-.detail-inner.editing { animation: detailIn 220ms var(--ease-out); }
+.detail-inner.enter { animation: detailIn 200ms var(--ease-out); }
 
 /* 侧滑面板 / 对话框 / 遮罩：补上退场（原来是一刀切没了） */
 @keyframes slideOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateX(14px); } }

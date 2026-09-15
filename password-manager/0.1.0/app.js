@@ -403,14 +403,24 @@ document.addEventListener('keydown', function (e) {
     $('status-right').textContent = right.join(' · ');
   }
 
+  var detailKey = null;       /* 已渲染的抽屉「身份」：只有换帐号或进出编辑态才播内容入场动画 */
+
   function openDetail() { document.body.classList.add('has-detail'); }
   function closeDetail() {
     document.body.classList.remove('has-detail');
     activeId = null;
     isEditing = false;
     editingId = null;
+    detailKey = null;
     $('detail').innerHTML = '';   /* 清掉残留的表单/详情，避免下次打开读到旧节点 */
     renderList(false);
+  }
+  /* 内容入场动画只在身份变化时挂 class；收藏、清历史、显隐密码这类原地更新不播 */
+  function markDetailEnter(key) {
+    if (detailKey === key) return;
+    detailKey = key;
+    var inner = $('detail').querySelector('.detail-inner');
+    if (inner) inner.classList.add('enter');
   }
 
   function renderDetail() {
@@ -441,7 +451,7 @@ document.addEventListener('keydown', function (e) {
       '<div class="drow"><div class="drow-label">密码' +
       '<button class="copy" id="toggle-pw" title="显示/隐藏" style="margin-left:auto">' + (pwShown ? '🙈' : '👁') + '</button></div>' +
       '<div class="drow-value">' + (r.password
-        ? (pwShown ? esc(r.password) : '••••••••••••')
+        ? '<span id="v-password">' + (pwShown ? esc(r.password) : '••••••••••••') + '</span>'
         : '<span style="color:var(--fg-faint)">（空）</span>') +
       (r.password ? '<button class="copy" data-copy="password" title="复制">⧉</button>' : '') + '</div>' +
       (r.password ? '<div class="drow-label" style="margin-top:6px">强度：' + esc(Vault.strength(r.password).label) +
@@ -474,11 +484,18 @@ document.addEventListener('keydown', function (e) {
       '<button class="ghost-btn danger" id="btn-del">删除</button>' +
       '</div></div>';
 
+    markDetailEnter('view:' + r.id);
     $('detail-close').addEventListener('click', closeDetail);
-    $('toggle-pw').addEventListener('click', function () { revealed.pw = !revealed.pw; renderDetail(); });
+    /* 显隐密码只原地改文本，不重渲染抽屉（重渲染会让整块内容重新淡入 = 看起来在闪） */
+    $('toggle-pw').addEventListener('click', function () {
+      revealed.pw = !revealed.pw;
+      var node = $('v-password');
+      if (node) node.textContent = revealed.pw ? r.password : '••••••••••••';
+      this.textContent = revealed.pw ? '🙈' : '👁';
+    });
     $('btn-edit').addEventListener('click', function () { startEdit(activeId); });
     $('btn-fav').addEventListener('click', function () {
-      Vault.upsert({ id: r.id, fav: !r.fav }).then(function () { renderAll(true); renderDetail(); });
+      Vault.upsert({ id: r.id, fav: !r.fav }).then(function () { renderAll(false); renderDetail(); });
     });
     $('btn-del').addEventListener('click', function () {
       ask({ title: '删除帐号', text: '确定删除「' + r.title + '」？该操作不可撤销。', ok: '删除', danger: true })
@@ -487,7 +504,7 @@ document.addEventListener('keydown', function (e) {
           Vault.remove(activeId).then(function () {
             toast('已删除');
             closeDetail();
-            renderAll(true);
+            renderAll(false);      /* 删一条没必要让整个列表重新入场 */
           });
         });
     });
@@ -580,6 +597,7 @@ document.addEventListener('keydown', function (e) {
 
     /* 分组下拉是每次渲染新建的，这里单独增强成自绘样式 */
     if (window.AppSelect) AppSelect.enhance($('f-group'), { block: true });
+    markDetailEnter('edit:' + (editingId || 'new'));
 
     $('edit-cancel').addEventListener('click', cancelEdit);
     $('edit-cancel2').addEventListener('click', cancelEdit);
