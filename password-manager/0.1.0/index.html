@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="zh-Hans" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>密码管家</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ══════════ 启动中 ══════════ -->
+  <div id="boot" class="boot">
+    <div class="boot-spinner" aria-hidden="true"></div>
+    <p>正在读取保险库…</p>
+  </div>
+
+  <!-- ══════════ 首次建库 ══════════ -->
+  <section id="screen-setup" class="screen gate" hidden>
+    <div class="gate-card">
+      <div class="gate-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 1 4 4.5v7.2c0 5 3.4 9.6 8 10.8 4.6-1.2 8-5.8 8-10.8V4.5L12 1Zm0 5.2a2.6 2.6 0 0 1 1.3 4.85V14h-2.6v-2.95A2.6 2.6 0 0 1 12 6.2Z"/></svg>
+      </div>
+      <h1>设置开门密码</h1>
+      <p class="gate-sub">开门密码只在本机使用，<b>不会被保存，也无法找回</b>。请务必自行记牢。</p>
+
+      <label class="field">
+        <span class="field-label">开门密码</span>
+        <span class="field-input">
+          <input id="setup-pw" type="password" autocomplete="new-password" spellcheck="false" placeholder="至少 6 位，建议 12 位以上混合字符">
+          <button type="button" class="reveal" data-reveal="setup-pw" title="显示/隐藏">👁</button>
+        </span>
+      </label>
+      <div class="strength" id="setup-strength" hidden>
+        <div class="strength-bar"><i id="setup-strength-bar"></i></div>
+        <div class="strength-text"><span id="setup-strength-label"></span><span id="setup-strength-bits"></span></div>
+        <ul class="strength-issues" id="setup-strength-issues"></ul>
+      </div>
+
+      <label class="field">
+        <span class="field-label">再输一次</span>
+        <span class="field-input">
+          <input id="setup-pw2" type="password" autocomplete="new-password" spellcheck="false" placeholder="再次输入以确认">
+          <button type="button" class="reveal" data-reveal="setup-pw2" title="显示/隐藏">👁</button>
+        </span>
+      </label>
+
+      <label class="field">
+        <span class="field-label">密码提示<span class="field-hint">（可选，明文保存，别写密码本身）</span></span>
+        <input id="setup-hint" type="text" spellcheck="false" placeholder="例如：老家的门牌号 + 常用符号">
+      </label>
+
+      <div class="errbox" id="setup-err" hidden></div>
+      <button id="btn-setup" class="primary big">建立保险库</button>
+      <p class="gate-foot">落盘前会先做 BCrypt 加盐哈希，再用它派生的 AES-256 密钥加密全部帐号。</p>
+    </div>
+  </section>
+
+  <!-- ══════════ 解锁 ══════════ -->
+  <section id="screen-lock" class="screen gate" hidden>
+    <div class="gate-card">
+      <div class="gate-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M17 9V7a5 5 0 0 0-10 0v2H5.8A1.8 1.8 0 0 0 4 10.8v9.4A1.8 1.8 0 0 0 5.8 22h12.4a1.8 1.8 0 0 0 1.8-1.8v-9.4A1.8 1.8 0 0 0 18.2 9H17Zm-8-2a3 3 0 0 1 6 0v2H9V7Zm4.9 9.6V19h-3.8v-2.4a2.2 2.2 0 1 1 3.8 0Z"/></svg>
+      </div>
+      <h1>保险库已锁定</h1>
+      <p class="gate-sub" id="lock-sub">输入开门密码后解密全部帐号。</p>
+
+      <label class="field">
+        <span class="field-label">开门密码</span>
+        <span class="field-input">
+          <input id="lock-pw" type="password" autocomplete="current-password" spellcheck="false" placeholder="输入开门密码">
+          <button type="button" class="reveal" data-reveal="lock-pw" title="显示/隐藏">👁</button>
+        </span>
+      </label>
+      <div class="caps" id="lock-caps" hidden>⚠ 大写锁定已开启（Caps Lock）</div>
+      <div class="errbox" id="lock-err" hidden></div>
+      <button id="btn-unlock" class="primary big">开门</button>
+      <p class="gate-foot" id="lock-hint" hidden></p>
+      <p class="gate-foot">忘记开门密码 = 数据无法恢复（本地无任何后门与恢复码）。<a href="#" id="link-reset">格式化并重建？</a></p>
+    </div>
+  </section>
+
+  <!-- ══════════ 主界面 ══════════ -->
+  <section id="screen-main" class="screen main" hidden>
+    <header class="top">
+      <div class="brand">
+        <svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1 4 4.5v7.2c0 5 3.4 9.6 8 10.8 4.6-1.2 8-5.8 8-10.8V4.5L12 1Zm0 5.2a2.6 2.6 0 0 1 1.3 4.85V14h-2.6v-2.95A2.6 2.6 0 0 1 12 6.2Z"/></svg>
+        <span>密码管家</span>
+      </div>
+      <div class="search">
+        <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2a8 8 0 1 0 4.9 14.3l5 5 1.4-1.4-5-5A8 8 0 0 0 10 2Zm0 2a6 6 0 1 1 0 12 6 6 0 0 1 0-12Z"/></svg>
+        <input id="search" type="text" spellcheck="false" autocomplete="off" placeholder="搜索标题 / 用户名 / 网址 / 备注 / 标签…   Ctrl+K">
+        <button id="search-clear" class="search-clear" title="清空" hidden>×</button>
+      </div>
+      <div class="tools">
+        <button id="btn-new" class="ghost-btn accent" title="新增帐号（Ctrl+N）">＋ 新增</button>
+        <button id="btn-gen" class="ghost-btn" title="生成随机密码">生成</button>
+        <span class="tool-sep"></span>
+        <button id="btn-io" class="ghost-btn" title="导入 / 导出">导入导出</button>
+        <button id="btn-help" class="ghost-btn" title="帮助与安全说明">帮助</button>
+        <button id="btn-settings" class="ghost-btn" title="设置">设置</button>
+        <button id="btn-theme" class="ghost-btn icon" title="切换明暗主题">🌙</button>
+        <button id="btn-lock" class="ghost-btn icon" title="立即锁定">🔒</button>
+      </div>
+    </header>
+
+    <div class="body">
+      <aside class="sidebar">
+        <nav class="grouplist" id="group-list"></nav>
+        <div class="sidebar-foot">
+          <button id="btn-add-group" class="ghost-btn wide">＋ 新建分组</button>
+          <div class="sidebar-tip">把帐号拖到分组上即可移动；拖动分组可排序。</div>
+        </div>
+      </aside>
+
+      <main class="listwrap">
+        <div class="listhead">
+          <span id="list-title">全部帐号</span>
+          <span class="list-count" id="list-count"></span>
+          <div class="listhead-right">
+            <select id="sort" class="mini-select" title="排序方式">
+              <option value="order">手动排序</option>
+              <option value="title">按标题</option>
+              <option value="updated">按修改时间</option>
+              <option value="created">按创建时间</option>
+            </select>
+          </div>
+        </div>
+        <div class="list" id="list"></div>
+        <div class="list-empty" id="list-empty" hidden></div>
+      </main>
+
+      <aside class="detail" id="detail"></aside>
+    </div>
+
+    <footer class="status">
+      <span id="status-text">就绪</span>
+      <span class="status-right" id="status-right"></span>
+    </footer>
+  </section>
+
+  <!-- ══════════ 侧滑面板 ══════════ -->
+  <div id="scrim" class="scrim" hidden></div>
+
+  <aside id="panel-gen" class="panel" hidden>
+    <div class="panel-head"><h2>生成密码</h2><button class="ghost-btn panel-close" data-close-panel>关闭</button></div>
+    <div class="panel-body">
+      <h3>结果</h3>
+      <div class="gen-out">
+        <span id="gen-out" class="mono"></span>
+        <button id="gen-copy" class="ghost-btn">复制</button>
+      </div>
+      <div class="strength" id="gen-strength">
+        <div class="strength-bar"><i id="gen-sbar"></i></div>
+        <div class="strength-text"><span id="gen-slabel"></span><span id="gen-sbits"></span></div>
+      </div>
+      <div class="btn-row">
+        <button id="gen-again" class="primary">换一个</button>
+        <button id="gen-save" class="ghost-btn">设为默认</button>
+      </div>
+
+      <h3>规则</h3>
+      <div class="row-set"><span>长度</span>
+        <input id="gen-len" class="range" type="range" min="8" max="64" value="16">
+        <b class="mono" id="gen-len-v">16</b>
+      </div>
+      <label class="row-set"><span>大写字母 A-Z</span><input type="checkbox" id="gen-upper" checked></label>
+      <label class="row-set"><span>小写字母 a-z</span><input type="checkbox" id="gen-lower" checked></label>
+      <label class="row-set"><span>数字 0-9</span><input type="checkbox" id="gen-digit" checked></label>
+      <label class="row-set"><span>符号 !@#$%^&amp;*</span><input type="checkbox" id="gen-symbol" checked></label>
+      <label class="row-set"><span>排除易混淆字符 Il1O0o</span><input type="checkbox" id="gen-noamb"></label>
+      <p class="note">用「换一个」可连续生成；记不住的密码不是好密码——建议直接复制到目标站点，不要手抄。</p>
+    </div>
+  </aside>
+
+  <aside id="panel-settings" class="panel" hidden>
+    <div class="panel-head"><h2>设置</h2><button class="ghost-btn panel-close" data-close-panel>关闭</button></div>
+    <div class="panel-body">
+      <h3>安全</h3>
+      <label class="row-set"><span>自动锁定</span>
+        <select id="set-autolock" class="mini-select">
+          <option value="0">不自动锁定</option>
+          <option value="60">1 分钟</option>
+          <option value="300">5 分钟</option>
+          <option value="600">10 分钟</option>
+          <option value="1800">30 分钟</option>
+          <option value="3600">1 小时</option>
+        </select>
+      </label>
+      <label class="row-set"><span>复制后自动清空剪贴板</span>
+        <select id="set-clip" class="mini-select">
+          <option value="0">不清空</option>
+          <option value="10">10 秒</option>
+          <option value="20">20 秒</option>
+          <option value="30">30 秒</option>
+          <option value="60">60 秒</option>
+        </select>
+      </label>
+      <label class="row-set"><span>切换到其它窗口时立即锁定</span>
+        <input type="checkbox" id="set-blur">
+      </label>
+      <div class="row-set">
+        <span>修改开门密码</span>
+        <button id="btn-change-pw" class="ghost-btn">修改…</button>
+      </div>
+
+      <h3>开始使用前的提醒</h3>
+      <ul class="tips">
+        <li>密码提示：<span id="set-hint">（未设置）</span></li>
+        <li>建立时间：<span id="set-created">—</span>，共 <span id="set-count">0</span> 条帐号</li>
+        <li>本插件不联网（未申请 net 权限），全部数据只在本机。</li>
+      </ul>
+
+      <h3>危险操作</h3>
+      <div class="danger-row">
+        <button id="btn-wipe" class="ghost-btn danger">清空全部帐号</button>
+        <button id="btn-destroy" class="ghost-btn danger">销毁保险库（含开门密码）</button>
+      </div>
+      <p class="note">「销毁」会删除开门密码与全部密文，等同恢复出厂设置，不可撤销。</p>
+    </div>
+  </aside>
+
+  <aside id="panel-io" class="panel" hidden>
+    <div class="panel-head"><h2>导入 / 导出</h2><button class="ghost-btn panel-close" data-close-panel>关闭</button></div>
+    <div class="panel-body">
+      <h3>导出</h3>
+      <p class="note">导出内容会通过剪贴板交付（本插件无文件读写权限）。请自行粘贴到文本文件保存。</p>
+      <div class="btn-row">
+        <button id="btn-export-enc" class="ghost-btn">导出加密包（安全）</button>
+        <button id="btn-export-plain" class="ghost-btn">导出明文 JSON</button>
+        <button id="btn-export-csv" class="ghost-btn">导出 CSV</button>
+      </div>
+      <p class="note">加密包仍是密文，换机器后需要<b>导出时那个开门密码</b>才能导入；明文 JSON / CSV 可直接被任何程序读取，请勿留存于公共位置。</p>
+
+      <h3>导入</h3>
+      <p class="note">支持：本插件加密包、明文 JSON、CSV（表头可用中文：名称/用户名/密码/网址/备注）。重复的「标题 + 用户名」默认跳过。</p>
+      <textarea id="io-text" class="io-text" spellcheck="false" placeholder="把要导入的 JSON / CSV 内容粘贴到这里…"></textarea>
+      <label class="field compact">
+        <span class="field-label">如果是加密包，填入它的开门密码</span>
+        <input id="io-pw" type="password" spellcheck="false" autocomplete="off" placeholder="仅导入加密包时需要">
+      </label>
+      <div class="btn-row">
+        <button id="btn-import-merge" class="primary">合并导入</button>
+        <button id="btn-import-replace" class="ghost-btn danger">清空后导入</button>
+      </div>
+      <div class="errbox" id="io-err" hidden></div>
+      <div class="io-result" id="io-result" hidden></div>
+    </div>
+  </aside>
+
+  <aside id="panel-help" class="panel" hidden>
+    <div class="panel-head"><h2>帮助 · 数据安全</h2><button class="ghost-btn panel-close" data-close-panel>关闭</button></div>
+    <div class="panel-body">
+      <h3>加密方案</h3>
+      <table class="help-table">
+        <tbody>
+          <tr><td class="tok">开门密码</td><td>BCrypt（bcryptjs，cost=10，自动加盐）哈希后存盘，只用于校验；磁盘上不存在任何可逆的密码材料。</td></tr>
+          <tr><td class="tok">AES 密钥</td><td>取上述 BCrypt 密文再做一次 SHA-256，得到 32 字节，即 aes-256-cbc 的密钥（"开门密码经过哈希处理的值"）。</td></tr>
+          <tr><td class="tok">帐号数据</td><td>整条帐号（标题/用户名/密码/网址/备注/标签）序列化为 JSON 后用 AES-256-CBC + PKCS7 加密，每条独立随机 16 字节 IV。</td></tr>
+          <tr><td class="tok">存储位置</td><td>Spark 插件私有存储 <code>plugin-data/com.spark.password-manager/db</code>，只有明文骨架 + BCrypt 密文 + 密文块。</td></tr>
+          <tr><td class="tok">完整性</td><td>解锁时先解校验块，再逐条解 PKCS7；任一环节失败即报「数据损坏」，不会把乱码当密码展示。</td></tr>
+        </tbody>
+      </table>
+
+      <h3>无法破解的含义</h3>
+      <div class="note">
+        没有开门密码时，攻击者拿到整份数据也只能看到 BCrypt 哈希与密文。要恢复明文必须<b>先求出开门密码</b>——
+        每次尝试都要跑一遍 BCrypt（故意设计得慢），无法用字典批量穷举；而 AES-256 密钥并不落盘，内存中也只在解锁期间存在。
+        代价是：<b>忘记开门密码无法找回</b>，也没有恢复码。
+      </div>
+
+      <h3>快捷键</h3>
+      <table class="help-table">
+        <tbody>
+          <tr><td class="tok">Ctrl + U</td><td>复制当前帐号用户名</td></tr>
+          <tr><td class="tok">Ctrl + P</td><td>复制当前帐号密码</td></tr>
+          <tr><td class="tok">Ctrl + N</td><td>新增帐号</td></tr>
+          <tr><td class="tok">Ctrl + K</td><td>聚焦搜索框</td></tr>
+          <tr><td class="tok">Ctrl + L</td><td>立即锁定</td></tr>
+          <tr><td class="tok">↑ / ↓</td><td>在列表中上下选择</td></tr>
+          <tr><td class="tok">Esc</td><td>关闭面板 / 取消编辑</td></tr>
+        </tbody>
+      </table>
+
+      <h3>日常建议</h3>
+      <ul class="tips">
+        <li>不同站点用不同密码——用「生成」按钮，16 位以上、含符号。</li>
+        <li>复制密码后 20 秒自动清空剪贴板（可在设置里调整）。</li>
+        <li>离开电脑前按 Ctrl+L 锁定；也可开启「切换到其它窗口时立即锁定」。</li>
+        <li>注意大写锁定：密码框旁边会提示 Caps Lock。</li>
+      </ul>
+      <p class="note">本插件为本地工具，不提供云同步。换机迁移请用「导出加密包」。</p>
+    </div>
+  </aside>
+
+  <!-- ══════════ 通用对话框 / 提示 ══════════ -->
+  <div id="dialog" class="dialog-wrap" hidden>
+    <div class="dialog" role="dialog" aria-modal="true">
+      <h3 id="dialog-title"></h3>
+      <p id="dialog-text"></p>
+      <div class="field" id="dialog-field" hidden>
+        <span class="field-label" id="dialog-field-label"></span>
+        <span class="field-input">
+          <input id="dialog-input" type="password" spellcheck="false" autocomplete="off">
+          <button type="button" class="reveal" data-reveal="dialog-input" title="显示/隐藏">👁</button>
+        </span>
+        <span class="field-hint" id="dialog-field-hint"></span>
+      </div>
+      <div class="dialog-acts">
+        <button id="dialog-cancel" class="ghost-btn">取消</button>
+        <button id="dialog-ok" class="primary">确定</button>
+      </div>
+      <div class="errbox" id="dialog-err" hidden></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="bcrypt.js"></script>
+  <script src="crypto.js"></script>
+  <script src="vault.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

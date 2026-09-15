@@ -2,7 +2,7 @@
   "schema": 1,
   "name": "Spark 官方插件仓库",
   "zipball_url": "https://github.com/MrHan-Yd/spark-plugins/archive/refs/heads/master.zip",
-  "updated": "2026-09-15T02:00:00Z",
+  "updated": "2026-09-15T06:15:00Z",
   "plugins": [
     {
       "id": "com.spark.json-formatter",
@@ -361,6 +361,39 @@
           }
         }
       ]
-    }
+    },
+  {
+    "id": "com.spark.password-manager",
+    "name": "密码管家",
+    "description": "本地密码保险库:开门密码 BCrypt 加密存储,帐号信息 AES-256-CBC 加密落盘;分组、搜索、生成器、拖拽排序、复制后自动清空剪贴板,全程离线,没有开门密码无法破解",
+    "author": "Spark",
+    "homepage": "https://github.com/MrHan-Yd/spark-plugins/tree/master/password-manager",
+    "icon": "https://raw.githubusercontent.com/MrHan-Yd/spark-plugins/master/password-manager/0.1.0/icon.svg",
+    "runtime": "webview",
+    "latest": "0.1.0",
+    "permissions": [
+      "clipboard"
+    ],
+    "tags": [
+      "安全",
+      "实用工具"
+    ],
+    "versions": [
+      {
+        "version": "0.1.0",
+        "path": "password-manager/0.1.0",
+        "url": null,
+        "sha256": null,
+        "size": null,
+        "released": "2026-09-15",
+        "signature": {
+          "schema": 1,
+          "key_id": "spark-official-v1",
+          "algorithm": "ed25519",
+          "signature": "NniL2faBlJhcS8wvqy5oJUeha47aRhwmvWiUW0Qjy7K2qkNkFJUtmOtvLqJPF2tbCYpsKetEKKYv77c+8F1YCQ=="
+        }
+      }
+    ]
+  }
   ]
 }

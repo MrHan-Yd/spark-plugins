@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "plugin_id": "com.spark.password-manager",
+  "version": "0.1.0",
+  "algorithm": "ed25519",
+  "key_id": "spark-official-v1",
+  "signed_at": "2026-09-15T06:25:19Z",
+  "files": [
+    {
+      "path": "VENDORS.md",
+      "sha256": "7455c63ad9f0a00b39b66c8a813c0d4e70e61edf9d7d7f24a81fb6c11629f828"
+    },
+    {
+      "path": "app.js",
+      "sha256": "15d4b11ab2ae6c5999e2acd374891535125bdc679173e9d604ffe02c0cf4f0c8"
+    },
+    {
+      "path": "bcrypt.js",
+      "sha256": "afd4bd299bcde6710dd6fa029156e3e1174c48bc006b8a9eba32f964e5923783"
+    },
+    {
+      "path": "crypto.js",
+      "sha256": "311b7a5a27887728e818f2ef0b820cfe82aed95756e103416ed3fd2de2fe4794"
+    },
+    {
+      "path": "icon.svg",
+      "sha256": "86d22210a66dd3226635a4d9b8fff95ca5a81a96a28c21af6464d625b1c12805"
+    },
+    {
+      "path": "index.html",
+      "sha256": "ce825867d2e90e2011b1cf87e6297c7059d3b7beb9a254d69db8311e2b803778"
+    },
+    {
+      "path": "plugin.json",
+      "sha256": "e18e11f58b797961fede2c88db5a7cae375a5fc159926255771a612d53eb60cd"
+    },
+    {
+      "path": "style.css",
+      "sha256": "b77d79535bc42a2f4d7c59004b5ddb08f189444dabe72e94fe8cef993fed5993"
+    },
+    {
+      "path": "vault.js",
+      "sha256": "42cbd35eeffd00ffbc82f22bbfa198089ef2f82e8d79ec3b27fbbed266ebb0ce"
+    }
+  ],
+  "signature": "NniL2faBlJhcS8wvqy5oJUeha47aRhwmvWiUW0Qjy7K2qkNkFJUtmOtvLqJPF2tbCYpsKetEKKYv77c+8F1YCQ=="
+}

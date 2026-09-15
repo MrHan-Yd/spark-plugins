@@ -1,0 +1,45 @@
+{
+  "id": "com.spark.password-manager",
+  "name": "密码管家",
+  "version": "0.1.0",
+  "api_version": 2,
+  "runtime": "webview",
+  "main": "index.html",
+  "icon": "icon.svg",
+  "author": "Spark",
+  "description": "本地密码保险库:开门密码 BCrypt 加密存储,帐号信息 AES-256-CBC 加密落盘;分组、搜索、生成器、拖拽排序、复制后自动清空剪贴板,全程离线,没有开门密码无法破解",
+  "permissions": ["clipboard"],
+  "features": [
+    {
+      "type": "keyword",
+      "keyword": "pwd",
+      "title": "密码管家",
+      "subtitle": "本地加密保险库 · BCrypt + AES-256-CBC",
+      "mode": "page",
+      "placeholder": "输入关键字可先按标题/用户名筛选…"
+    },
+    {
+      "type": "keyword",
+      "keyword": "密码管家",
+      "title": "密码管家",
+      "subtitle": "本地加密保险库 · BCrypt + AES-256-CBC",
+      "mode": "page",
+      "placeholder": "输入关键字可先按标题/用户名筛选…"
+    },
+    {
+      "type": "keyword",
+      "keyword": "password",
+      "title": "密码管家",
+      "subtitle": "本地加密保险库 · BCrypt + AES-256-CBC",
+      "mode": "page",
+      "placeholder": "输入关键字可先按标题/用户名筛选…"
+    }
+  ],
+  "window": {
+    "width": 1180,
+    "height": 720,
+    "min_width": 720,
+    "min_height": 480,
+    "resizable": true
+  }
+}
