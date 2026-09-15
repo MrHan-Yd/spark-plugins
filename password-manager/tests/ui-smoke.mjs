@@ -270,6 +270,86 @@ ok('按分组筛选生效', true);
 await click('#group-list [data-group="__all"]');
 await waitFor('document.querySelectorAll("#list .item").length === 2', '回到全部');
 
+/* ══════════ 5.5 自绘下拉框（替掉系统原生 select） ══════════ */
+ok('原生 select 已隐藏，改由自绘组件呈现',
+  (await evaluate('!!document.querySelector(".listhead-right .sel-btn")')) &&
+  (await evaluate('getComputedStyle(document.getElementById("sort")).display')) === 'none');
+ok('下拉按钮显示当前选中项', (await text('.listhead-right .sel-label')) === '手动排序', await text('.listhead-right .sel-label'));
+
+await click('.listhead-right .sel-btn');
+await waitFor('!document.querySelector(".listhead-right .sel-pop").hidden', '下拉弹层展开');
+ok('弹层列出全部选项', (await evaluate('document.querySelectorAll(".listhead-right .sel-opt").length')) === 4);
+ok('展开时 aria-expanded=true（无障碍状态正确）',
+  (await evaluate('document.querySelector(".listhead-right .sel-btn").getAttribute("aria-expanded")')) === 'true');
+
+await evaluate('(function(){document.querySelectorAll(".listhead-right .sel-opt")[1].click();return true;})()');
+await waitFor('document.getElementById("sort").value === "title"', '取值写回原生 select');
+ok('选中项写回原生 select 且按钮文案同步', (await text('.listhead-right .sel-label')) === '按标题');
+await waitFor('document.querySelector(".listhead-right .sel-pop").hidden === true', '弹层收起');
+
+/* 键盘操作：↓ 展开、再 ↓ 移动、Enter 选定 */
+await evaluate(`(function(){
+  var b = document.querySelector('.listhead-right .sel-btn');
+  b.focus();
+  b.dispatchEvent(new KeyboardEvent('keydown', {key:'ArrowDown', bubbles:true}));
+  b.dispatchEvent(new KeyboardEvent('keydown', {key:'ArrowDown', bubbles:true}));
+  b.dispatchEvent(new KeyboardEvent('keydown', {key:'Enter', bubbles:true}));
+  return true;})()`);
+await waitFor('document.getElementById("sort").value === "updated"', '键盘选择生效');
+ok('键盘 ↓↓ + Enter 可选择（键盘可达）', true);
+
+await evaluate('(function(){var b=document.querySelector(".listhead-right .sel-btn");b.dispatchEvent(new KeyboardEvent("keydown",{key:"ArrowDown",bubbles:true}));return true;})()');
+await waitFor('!document.querySelector(".listhead-right .sel-pop").hidden', '再次展开');
+await evaluate('(function(){document.querySelector(".listhead-right .sel-btn").dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}));return true;})()');
+await waitFor('document.querySelector(".listhead-right .sel-pop").hidden === true', 'Esc 收起弹层');
+ok('Esc 只收下拉，不影响其它状态', await evaluate('document.getElementById("screen-main").hidden === false'));
+
+await evaluate('(function(){var s=document.getElementById("sort");s.value="order";s.dispatchEvent(new Event("change",{bubbles:true}));return true;})()');
+await waitFor('document.getElementById("sort").value === "order"', '恢复手动排序');
+ok('程序改 value 时外观自动同步（value 访问器已被接管）',
+  (await text('.listhead-right .sel-label')) === '手动排序', await text('.listhead-right .sel-label'));
+
+/* 设置面板里的下拉同样是自绘的，并且改值仍走既有 change 逻辑 */
+await click('#btn-settings');
+await waitFor('!document.getElementById("panel-settings").hidden', '设置面板');
+ok('设置里的下拉也是自绘组件', await evaluate('!!document.querySelector("#panel-settings .sel-btn")'));
+await click('#panel-settings .sel-btn');
+await waitFor('!document.querySelector("#panel-settings .sel-pop").hidden', '设置下拉展开');
+await evaluate('(function(){document.querySelectorAll("#panel-settings .sel-opt")[1].click();return true;})()');
+await waitFor('document.getElementById("set-autolock").value === "60"', '自动锁定改为 1 分钟');
+ok('自绘下拉改值触发了原有业务逻辑（状态栏已更新）',
+  (await text('#status-right')).includes('自动锁定 1 分钟'), await text('#status-right'));
+await click('#panel-settings [data-close-panel]');
+await waitFor('document.getElementById("panel-settings").hidden === true', '设置面板关闭');
+
+/* ══════════ 5.6 入场 / 退场动效 ══════════ */
+await click('#group-list [data-group="__all"]');
+await waitFor('document.querySelectorAll("#list .item").length === 2', '回到全部（触发整批重渲染）');
+ok('整批换列表时挂上 stagger，列表项真的在播入场动画',
+  (await evaluate('document.getElementById("list").classList.contains("stagger")')) &&
+  (await evaluate('getComputedStyle(document.querySelector("#list .item")).animationName')) === 'itemIn');
+ok('列表项带阶梯延迟变量 --i', (await evaluate('document.querySelector("#list .item").style.getPropertyValue("--i")')) === '0');
+
+await setVal('search', 'g');
+await new Promise((r) => setTimeout(r, 80));
+ok('逐字搜索不播入场动效（否则每敲一下整列表都闪）',
+  (await evaluate('document.getElementById("list").classList.contains("stagger")')) === false);
+await click('#search-clear');
+await waitFor('document.querySelectorAll("#list .item").length === 2', '清空搜索');
+
+await click('#btn-help');
+await waitFor('!document.getElementById("panel-help").hidden', '帮助面板打开');
+ok('关闭时先加 .closing 再隐藏', await evaluate(`(function(){
+  document.querySelector('#panel-help [data-close-panel]').click();
+  return document.getElementById('panel-help').classList.contains('closing');})()`));
+await waitFor('document.getElementById("panel-help").hidden === true', '帮助面板真正隐藏');
+ok('主题切换后列表仍正常（颜色过渡不影响逻辑）', await evaluate(`(function(){
+  var before = document.querySelectorAll('#list .item').length;
+  document.getElementById('btn-theme').click();
+  var after = document.querySelectorAll('#list .item').length;
+  document.getElementById('btn-theme').click();
+  return before === after && after === 2;})()`));
+
 /* ══════════ 6. 密码生成器面板 ══════════ */
 await click('#btn-gen');
 await waitFor('!document.getElementById("panel-gen").hidden', '生成器面板');

@@ -177,7 +177,7 @@
     <div class="panel-head"><h2>设置</h2><button class="ghost-btn panel-close" data-close-panel>关闭</button></div>
     <div class="panel-body">
       <h3>安全</h3>
-      <label class="row-set"><span>自动锁定</span>
+      <div class="row-set"><span>自动锁定</span>
         <select id="set-autolock" class="mini-select">
           <option value="0">不自动锁定</option>
           <option value="60">1 分钟</option>
@@ -186,8 +186,8 @@
           <option value="1800">30 分钟</option>
           <option value="3600">1 小时</option>
         </select>
-      </label>
-      <label class="row-set"><span>复制后自动清空剪贴板</span>
+      </div>
+      <div class="row-set"><span>复制后自动清空剪贴板</span>
         <select id="set-clip" class="mini-select">
           <option value="0">不清空</option>
           <option value="10">10 秒</option>
@@ -195,7 +195,7 @@
           <option value="30">30 秒</option>
           <option value="60">60 秒</option>
         </select>
-      </label>
+      </div>
       <label class="row-set"><span>切换到其它窗口时立即锁定</span>
         <input type="checkbox" id="set-blur">
       </label>
@@ -319,6 +319,7 @@
   <script src="bcrypt.js"></script>
   <script src="crypto.js"></script>
   <script src="vault.js"></script>
+  <script src="ui.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

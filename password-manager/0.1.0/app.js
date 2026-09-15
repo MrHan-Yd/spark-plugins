@@ -90,6 +90,7 @@ document.addEventListener('keydown', function (e) {
   var lastClipValue = null;
   var revealed = {};          /* 详情里哪些字段被显式显示 */
   var selectedIdx = -1;
+  var staggerTimer = null;    /* 列表入场动效的收尾计时器 */
 
   /* ══════════ 主题 ══════════ */
   function applyTheme(t) {
@@ -98,13 +99,20 @@ document.addEventListener('keydown', function (e) {
   }
 
   /* ══════════ 屏幕切换 ══════════ */
+  var SCREENS = { boot: 'boot', setup: 'screen-setup', lock: 'screen-lock', main: 'screen-main' };
   function showScreen(name) {
-    $('boot').hidden = name !== 'boot';
-    $('screen-setup').hidden = name !== 'setup';
-    $('screen-lock').hidden = name !== 'lock';
-    $('screen-main').hidden = name !== 'main';
-    if (name === 'setup') { setTimeout(function () { $('setup-pw').focus(); }, 30); }
-    if (name === 'lock') { setTimeout(function () { $('lock-pw').focus(); }, 30); }
+    Object.keys(SCREENS).forEach(function (k) { $(SCREENS[k]).hidden = k !== name; });
+    /* 重播入场动画（元素本来就在 DOM 里，只切 hidden 不会重新触发 CSS animation） */
+    var el = $(SCREENS[name]);
+    if (el) {
+      el.classList.remove('enter');
+      void el.offsetWidth;            /* 强制重排，让动画能重新开始 */
+      el.classList.add('enter');
+      var card = el.querySelector ? el.querySelector('.gate-card') : null;
+      if (card) { card.classList.remove('enter'); void card.offsetWidth; card.classList.add('enter'); }
+    }
+    if (name === 'setup') { setTimeout(function () { $('setup-pw').focus(); }, 60); }
+    if (name === 'lock') { setTimeout(function () { $('lock-pw').focus(); }, 60); }
   }
 
   /* ══════════ 剪贴板 ══════════ */
@@ -267,7 +275,7 @@ document.addEventListener('keydown', function (e) {
       view.keyword = String(spark.input.text).trim();
       $('search').value = view.keyword;
     }
-    renderAll();
+    renderAll(true);
     setStatus('已解锁 · ' + Vault.counts().total + ' 条帐号');
     armIdleTimer();
   }
@@ -313,7 +321,7 @@ document.addEventListener('keydown', function (e) {
     if (view.group === '__fav') { opts.group = ''; opts.fav = true; }
     return Vault.query(opts);
   }
-  function renderList() {
+  function renderList(animate) {
     var list = currentList();
     var box = $('list');
     var head = view.group === '__all' ? '全部帐号'
@@ -324,6 +332,16 @@ document.addEventListener('keydown', function (e) {
     $('list-count').textContent = view.keyword ? '筛选出 ' + list.length + ' 条 / 共 ' + Vault.counts().total + ' 条'
       : '共 ' + list.length + ' 条';
     $('search-clear').hidden = !view.keyword;
+
+    /* 入场动效只给「整批换掉」的场景（切分组/筛选/保存后），逐字搜索不播，否则每敲一下都闪 */
+    if (animate) {
+      box.classList.add('stagger');
+      clearTimeout(staggerTimer);
+      staggerTimer = setTimeout(function () { box.classList.remove('stagger'); }, 480);
+    } else {
+      box.classList.remove('stagger');
+      clearTimeout(staggerTimer);
+    }
 
     if (!list.length) {
       box.innerHTML = '';
@@ -344,7 +362,8 @@ document.addEventListener('keydown', function (e) {
     $('list-empty').hidden = true;
     box.innerHTML = list.map(function (r, i) {
       return '<div class="item' + (r.id === activeId ? ' active' : '') + '" data-id="' + esc(r.id) + '"' +
-        ' draggable="' + (view.sort === 'order' ? 'true' : 'false') + '" data-idx="' + i + '">' +
+        ' draggable="' + (view.sort === 'order' ? 'true' : 'false') + '" data-idx="' + i + '"' +
+        ' style="--i:' + Math.min(i, 8) + '">' +
         '<span class="avatar" style="background:' + avatarBg(r) + '">' + esc(initial(r.title, r.username, r.url)) + '</span>' +
         '<span class="item-mid">' +
         '<span class="item-title">' + (r.fav ? '<span class="fav">★</span>' : '') + esc(r.title) +
@@ -368,9 +387,9 @@ document.addEventListener('keydown', function (e) {
   }
 
   /* ══════════ 渲染：详情 / 编辑 ══════════ */
-  function renderAll() {
+  function renderAll(animate) {
     renderGroups();
-    renderList();
+    renderList(animate);
     renderDetail();
     renderStatus();
   }
@@ -391,7 +410,7 @@ document.addEventListener('keydown', function (e) {
     isEditing = false;
     editingId = null;
     $('detail').innerHTML = '';   /* 清掉残留的表单/详情，避免下次打开读到旧节点 */
-    renderList();
+    renderList(false);
   }
 
   function renderDetail() {
@@ -459,7 +478,7 @@ document.addEventListener('keydown', function (e) {
     $('toggle-pw').addEventListener('click', function () { revealed.pw = !revealed.pw; renderDetail(); });
     $('btn-edit').addEventListener('click', function () { startEdit(activeId); });
     $('btn-fav').addEventListener('click', function () {
-      Vault.upsert({ id: r.id, fav: !r.fav }).then(function () { renderAll(); renderDetail(); });
+      Vault.upsert({ id: r.id, fav: !r.fav }).then(function () { renderAll(true); renderDetail(); });
     });
     $('btn-del').addEventListener('click', function () {
       ask({ title: '删除帐号', text: '确定删除「' + r.title + '」？该操作不可撤销。', ok: '删除', danger: true })
@@ -468,7 +487,7 @@ document.addEventListener('keydown', function (e) {
           Vault.remove(activeId).then(function () {
             toast('已删除');
             closeDetail();
-            renderAll();
+            renderAll(true);
           });
         });
     });
@@ -494,7 +513,7 @@ document.addEventListener('keydown', function (e) {
     isEditing = true;
     editingId = '';
     activeId = null;
-    renderList();
+    renderList(false);
     renderEdit();
   }
   function startEdit(id) {
@@ -541,12 +560,12 @@ document.addEventListener('keydown', function (e) {
       '<label class="field compact"><span class="field-label">网址</span>' +
       '<input id="f-url" type="text" spellcheck="false" placeholder="https://…" value="' + esc(r.url) + '"></label>' +
 
-      '<label class="field compact"><span class="field-label">分组</span>' +
-      '<select id="f-group" class="mini-select" style="width:100%;height:38px">' +
+      '<div class="field compact"><div class="field-label">分组</div>' +
+      '<select id="f-group" class="mini-select">' +
       '<option value="">未分组</option>' +
       groups.map(function (x) {
         return '<option value="' + esc(x.id) + '"' + (x.id === r.group ? ' selected' : '') + '>' + esc(x.name) + '</option>';
-      }).join('') + '</select></label>' +
+      }).join('') + '</select></div>' +
 
       '<label class="field compact"><span class="field-label">标签<span class="field-hint">（逗号分隔）</span></span>' +
       '<input id="f-tags" type="text" spellcheck="false" placeholder="开发, 工作" value="' + esc((r.tags || []).join(', ')) + '"></label>' +
@@ -558,6 +577,9 @@ document.addEventListener('keydown', function (e) {
       '<div class="errbox" id="edit-err" hidden></div>' +
       '<div class="drow-acts"><button class="primary" id="edit-save">保存</button>' +
       '<button class="ghost-btn" id="edit-cancel2">取消</button></div></div>';
+
+    /* 分组下拉是每次渲染新建的，这里单独增强成自绘样式 */
+    if (window.AppSelect) AppSelect.enhance($('f-group'), { block: true });
 
     $('edit-cancel').addEventListener('click', cancelEdit);
     $('edit-cancel2').addEventListener('click', cancelEdit);
@@ -628,7 +650,7 @@ document.addEventListener('keydown', function (e) {
     isEditing = false;
     editingId = null;
     if (activeId) renderDetail(); else { closeDetail(); }
-    renderList();
+    renderList(false);
   }
 
   function saveEdit() {
@@ -655,7 +677,7 @@ document.addEventListener('keydown', function (e) {
       editingId = null;
       activeId = res.record.id;
       revealed = {};
-      renderAll();
+      renderAll(true);
       toast(res.isNew ? '已新增并加密保存' : '已保存并加密');
     }).catch(function (e) {
       showErr('edit-err', '保存失败：' + (e && e.message ? e.message : e));
@@ -687,6 +709,11 @@ document.addEventListener('keydown', function (e) {
       f.hidden = true;
     }
     $('dialog').hidden = false;
+    $('dialog').classList.remove('closing');
+    var dlg = $('dialog').querySelector('.dialog');
+    dlg.classList.remove('closing', 'swap');
+    void dlg.offsetWidth;
+    dlg.classList.add('swap');            /* 多步对话框内容切换时给一次轻淡入，避免硬跳 */
     setTimeout(function () {
       var node = f.hidden ? $('dialog-ok') : $('dialog-input');
       if (node) node.focus();
@@ -694,7 +721,16 @@ document.addEventListener('keydown', function (e) {
     return new Promise(function (resolve) { dialogResolver = resolve; });
   }
   function closeDialog(value) {
-    $('dialog').hidden = true;
+    var wrap = $('dialog');
+    wrap.classList.add('closing');
+    wrap.querySelector('.dialog').classList.add('closing');
+    setTimeout(function () {
+      if (wrap.classList.contains('closing')) {
+        wrap.hidden = true;
+        wrap.classList.remove('closing');
+        wrap.querySelector('.dialog').classList.remove('closing');
+      }
+    }, 140);
     var r = dialogResolver;
     dialogResolver = null;
     if (r) r(value === undefined ? null : value);
@@ -713,17 +749,39 @@ document.addEventListener('keydown', function (e) {
   });
 
   /* ══════════ 面板 ══════════ */
+  var PANELS = ['panel-gen', 'panel-settings', 'panel-io', 'panel-help'];
   function openPanel(id) {
     closePanels(true);
+    var el = $(id);
+    el.classList.remove('closing');
+    $('scrim').classList.remove('closing');
     $('scrim').hidden = false;
-    $(id).hidden = false;
+    el.hidden = false;
+  }
+  /* 关闭时先播退场动画再隐藏；计时器里再判一次 class，避免 150ms 内重新打开被误关 */
+  function hideAfter(el, cls) {
+    el.classList.add(cls || 'closing');
+    setTimeout(function () {
+      if (el.classList.contains(cls || 'closing')) {
+        el.hidden = true;
+        el.classList.remove(cls || 'closing');
+      }
+    }, 150);
   }
   function closePanels(keepScrim) {
-    ['panel-gen', 'panel-settings', 'panel-io', 'panel-help'].forEach(function (p) { $(p).hidden = true; });
-    if (!keepScrim) $('scrim').hidden = true;
+    var any = false;
+    PANELS.forEach(function (p) {
+      var el = $(p);
+      if (!el.hidden) { any = true; hideAfter(el); }
+    });
+    if (!keepScrim) {
+      var sc = $('scrim');
+      if (!sc.hidden) hideAfter(sc);
+    }
+    return any;
   }
   function anyPanelOpen() {
-    return ['panel-gen', 'panel-settings', 'panel-io', 'panel-help'].some(function (p) { return !$(p).hidden; });
+    return PANELS.some(function (p) { return !$(p).hidden; });
   }
   $('scrim').addEventListener('click', function () { closePanels(); });
   document.querySelectorAll('[data-close-panel]').forEach(function (b) {
@@ -782,7 +840,7 @@ document.addEventListener('keydown', function (e) {
         if (v !== '删除') { if (v !== null) toast('确认文字不匹配，已取消', 'warn'); return; }
         return Vault.wipeRecords().then(function () {
           closeDetail();
-          renderAll();
+          renderAll(true);
           toast('已清空全部帐号');
         });
       });
@@ -877,7 +935,7 @@ document.addEventListener('keydown', function (e) {
   function runImport(text, pw, mode) {
     Vault.importData(text, { mode: mode, password: pw || undefined }).then(function (r) {
       $('io-pw').value = '';
-      renderAll();
+      renderAll(true);
       syncPrefsToUI();
       var box = $('io-result');
       box.hidden = false;
@@ -900,7 +958,7 @@ document.addEventListener('keydown', function (e) {
     applyTheme(next);
     prefs.theme = next;
     Vault.savePrefs(prefs);
-    renderList();
+    renderList(false);
   });
   $('btn-lock').addEventListener('click', function () { lockVault('已手动锁定'); });
   $('btn-new').addEventListener('click', function () { startNew(); });
@@ -929,7 +987,7 @@ document.addEventListener('keydown', function (e) {
       excludeAmbiguous: $('gen-noamb').checked
     };
   }
-  function renderGen() {
+  function renderGen(flash) {
     var pw = Vault.generate(genOptions());
     var s = Vault.strength(pw);
     $('gen-out').textContent = pw;
@@ -937,12 +995,18 @@ document.addEventListener('keydown', function (e) {
     $('gen-sbar').style.width = Math.max(6, Math.min(100, (s.bits / 128) * 100)) + '%';
     $('gen-slabel').textContent = s.label;
     $('gen-sbits').textContent = '约 ' + s.bits + ' bit · ' + pw.length + ' 位';
+    if (flash) {
+      var box = document.querySelector('.gen-out');
+      box.classList.remove('flash');
+      void box.offsetWidth;              /* 重排以重启动画 */
+      box.classList.add('flash');
+    }
   }
-  $('gen-len').addEventListener('input', function () { $('gen-len-v').textContent = this.value; renderGen(); });
+  $('gen-len').addEventListener('input', function () { $('gen-len-v').textContent = this.value; renderGen(true); });
   ['gen-upper', 'gen-lower', 'gen-digit', 'gen-symbol', 'gen-noamb'].forEach(function (id) {
-    $(id).addEventListener('change', renderGen);
+    $(id).addEventListener('change', function () { renderGen(true); });
   });
-  $('gen-again').addEventListener('click', renderGen);
+  $('gen-again').addEventListener('click', function () { renderGen(true); });
   $('gen-copy').addEventListener('click', function () {
     copyText($('gen-out').textContent, '生成的密码');
   });
@@ -954,24 +1018,24 @@ document.addEventListener('keydown', function (e) {
   $('search').addEventListener('input', function () {
     view.keyword = this.value;
     selectedIdx = -1;
-    renderList();
+    renderList(false);          /* 逐字搜索不播入场，否则每敲一下整列表都闪 */
   });
   $('search-clear').addEventListener('click', function () {
     view.keyword = '';
     $('search').value = '';
-    renderList();
+    renderList(true);
   });
   $('sort').addEventListener('change', function () {
     view.sort = this.value;
     prefs.sort = view.sort;
     Vault.savePrefs(prefs);
-    renderList();
+    renderList(true);
   });
   $('btn-add-group').addEventListener('click', function () {
     ask({ title: '新建分组', input: true, inputLabel: '分组名', ok: '创建' }).then(function (name) {
       if (!name) return;
       Vault.addGroup(name).then(function () {
-        renderAll();
+        renderAll(true);
         toast('分组「' + name + '」已创建');
       }).catch(function (e) { toast(e.message, 'err'); });
     });
@@ -984,7 +1048,7 @@ document.addEventListener('keydown', function (e) {
       var gid = rn.getAttribute('data-grp-rename');
       ask({ title: '重命名分组', input: true, inputLabel: '新名称', ok: '保存' }).then(function (name) {
         if (!name) return;
-        Vault.renameGroup(gid, name).then(function () { renderAll(); toast('已重命名'); })
+        Vault.renameGroup(gid, name).then(function () { renderAll(true); toast('已重命名'); })
           .catch(function (err) { toast(err.message, 'err'); });
       });
       return;
@@ -997,7 +1061,7 @@ document.addEventListener('keydown', function (e) {
           if (!yes) return;
           Vault.removeGroup(id2).then(function () {
             if (view.group === id2) view.group = '__all';
-            renderAll();
+            renderAll(true);
             toast('分组已删除');
           });
         });
@@ -1009,7 +1073,7 @@ document.addEventListener('keydown', function (e) {
     view.keyword = '';
     $('search').value = '';
     selectedIdx = -1;
-    renderAll();
+    renderAll(true);
   });
 
   /* 分组排序：拖动分组 */
@@ -1046,7 +1110,7 @@ document.addEventListener('keydown', function (e) {
       var from = ids.indexOf(DRAG_GROUP), to = ids.indexOf(gid);
       if (from < 0 || to < 0) return;
       ids.splice(to, 0, ids.splice(from, 1)[0]);
-      Vault.reorderGroups(ids).then(function () { renderAll(); });
+      Vault.reorderGroups(ids).then(function () { renderAll(true); });
       DRAG_GROUP = null;
       return;
     }
@@ -1055,16 +1119,16 @@ document.addEventListener('keydown', function (e) {
     if (!rid) return;
     var target = gid === '__fav' ? null : gid;
     if (gid === '__fav') {
-      Vault.upsert({ id: rid, fav: true }).then(function () { renderAll(); toast('已加入收藏'); });
+      Vault.upsert({ id: rid, fav: true }).then(function () { renderAll(true); toast('已加入收藏'); });
       return;
     }
-    if (gid === '__all') { renderAll(); return; }
+    if (gid === '__all') { renderAll(true); return; }
     var group = gid === '__nogroup' ? '' : gid;
     var rec = Vault.getRecord(rid);
     if (!rec) return;
     if (rec.group === group) return;
     Vault.upsert({ id: rid, group: group }).then(function () {
-      renderAll();
+      renderAll(true);
       toast(group ? '已移动到「' + Vault.groupName(group) + '」' : '已移出分组');
     });
   });
@@ -1097,7 +1161,7 @@ document.addEventListener('keydown', function (e) {
     revealed = {};
     isEditing = false;
     editingId = null;
-    renderList();
+    renderList(false);
     renderDetail();
   }
   $('list').addEventListener('dblclick', function (e) {
@@ -1147,20 +1211,21 @@ document.addEventListener('keydown', function (e) {
     }
     $('list').querySelectorAll('.item').forEach(function (n) { n.classList.remove('dropbefore', 'dropafter', 'dragging'); });
     dragId = null;
-    Vault.reorder(ids).then(function () { renderList(); });
+    Vault.reorder(ids).then(function () { renderList(false); });
   });
 
   /* ══════════ 快捷键 ══════════ */
   document.addEventListener('keydown', function (e) {
     var k = (e.key || '').toLowerCase();
     var mod = e.ctrlKey || e.metaKey;
-    var inField = e.target && e.target.closest && e.target.closest('input, textarea, select');
+    var inField = e.target && e.target.closest && e.target.closest('input, textarea, select, .sel-btn');
 
     if (e.key === 'Escape') {
+      if (window.AppSelect && AppSelect.closeAny()) return;   /* 展开中的下拉优先收下拉 */
       if (!$('dialog').hidden) { closeDialog(null); return; }
       if (anyPanelOpen()) { closePanels(); return; }
       if (isEditing) { cancelEdit(); return; }
-      if (activeId) { closeDetail(); renderList(); return; }
+      if (activeId) { closeDetail(); renderList(false); return; }
       return;
     }
     if ($('screen-main').hidden) return;
@@ -1245,6 +1310,9 @@ document.addEventListener('keydown', function (e) {
   });
 
   /* ══════════ 启动 ══════════ */
+  /* 先把静态下拉框换成自绘组件，后面任何 value= 赋值都会自动同步外观 */
+  if (window.AppSelect) AppSelect.enhanceAll(document);
+
   Vault.loadPrefs().then(function (p) {
     prefs = p;
     applyTheme(prefs.theme || 'dark');

@@ -150,6 +150,16 @@ code { font-family: var(--font-mono); font-size: .92em; background: var(--bg-wel
 
 :focus-visible { outline: 2px solid var(--accent-ring); outline-offset: 1px; }
 
+/* 主题切换：给主要表面挂默认的颜色过渡（不写 *{}，避免全量重绘）。
+   放在组件规则之前，凡是自带 transition 的组件（.item/.grp/.ghost-btn…）会整条覆盖它，
+   所以既补上了「切主题硬闪」的地方，也不会打乱已调好的 hover 动效。 */
+.top, .sidebar, .listwrap, .listhead, .status, .detail, .panel, .dialog, .scrim,
+.gate-card, .drow-value, .card, .io-text, .gen-out, .tag, body {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: var(--dur-3), var(--dur-3), var(--dur-2), var(--dur-3);
+  transition-timing-function: var(--ease-io);
+}
+
 /* ══════════ 启动态 ══════════ */
 .boot {
   position: fixed; inset: 0;
@@ -282,17 +292,79 @@ html[data-theme='dark'] .primary.danger-btn { color: #2a0f0d; }
 }
 .reveal:hover { background: var(--bg-hover); color: var(--fg); }
 
-.mini-select {
-  height: 28px; padding: 0 8px;
+/* ══════════ 自绘下拉框（原生 select 被隐藏，只作取值真源） ══════════ */
+select.sel-native { display: none; }
+
+.sel { position: relative; display: inline-block; flex: 0 0 auto; }
+.sel-block { display: block; width: 100%; }
+.sel-btn {
+  display: flex; align-items: center; gap: var(--sp-2);
+  width: 100%; min-width: 92px; height: 30px;
+  padding: 0 10px;
   background: var(--bg-well);
   border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--fg-muted);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color var(--dur-2) var(--ease-out), background-color var(--dur-2),
+              color var(--dur-2), box-shadow var(--dur-2) var(--ease-out);
+}
+.sel-block .sel-btn { height: var(--h-field); border-radius: var(--r-sm); min-width: 0; }
+.sel-btn:hover { border-color: var(--border-strong); color: var(--fg); }
+.sel-btn:active { transform: scale(.985); }
+.sel-btn[aria-expanded='true'] {
+  border-color: var(--accent);
+  color: var(--fg);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+  background: var(--bg-hover);
+}
+.sel-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sel-caret { flex: 0 0 auto; width: 14px; height: 14px; display: block; color: var(--fg-faint); }
+.sel-caret svg {
+  width: 100%; height: 100%;
+  fill: none; stroke: currentColor; stroke-width: 2.4;
+  stroke-linecap: round; stroke-linejoin: round;
+  transition: transform var(--dur-3) var(--ease-pop);
+}
+.sel.open .sel-caret svg { transform: rotate(180deg); }
+.sel.open .sel-caret { color: var(--accent-text); }
+
+.sel-pop {
+  position: absolute; top: calc(100% + 5px); right: 0;
+  min-width: 100%; max-height: 264px; overflow-y: auto;
+  padding: 4px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-pop);
+  z-index: 30;
+  transform-origin: top right;
+  animation: selIn 160ms var(--ease-out);
+  scrollbar-gutter: stable;
+}
+.sel-block .sel-pop { left: 0; right: 0; transform-origin: top center; }
+.sel-pop.closing { animation: selOut 130ms var(--ease-io) forwards; }
+@keyframes selIn { from { opacity: 0; transform: translateY(-5px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes selOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-4px) scale(.98); } }
+
+.sel-opt {
+  display: flex; align-items: center; gap: var(--sp-2);
+  height: 30px; padding: 0 8px;
   border-radius: var(--r-xs);
   color: var(--fg-muted);
   font-size: var(--fs-sm);
   cursor: pointer;
-  outline: none;
+  white-space: nowrap;
+  transition: background-color var(--dur-1), color var(--dur-1), padding-left var(--dur-2) var(--ease-out);
 }
-.mini-select:hover { border-color: var(--border-strong); color: var(--fg); }
+.sel-opt-text { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+.sel-opt.hi { background: var(--bg-hover); color: var(--fg); padding-left: 11px; }
+.sel-opt.on { color: var(--accent-text); font-weight: 600; }
+.sel-opt.on.hi { background: var(--accent-wash); }
+.sel-tick { flex: 0 0 auto; width: 12px; color: var(--accent-text); opacity: 0; transform: scale(.6); transition: opacity var(--dur-1), transform var(--dur-2) var(--ease-pop); }
+.sel-opt.on .sel-tick { opacity: 1; transform: none; }
 
 /* ══════════ 强度条 ══════════ */
 .strength { margin: calc(-1 * var(--sp-2)) 0 var(--sp-4); }
@@ -341,7 +413,6 @@ html[data-theme='dark'] .primary.danger-btn { color: #2a0f0d; }
   border: 1px solid var(--border-subtle);
   border-radius: var(--r-xl);
   box-shadow: var(--shadow-pop) , var(--hairline-top);
-  animation: rise var(--dur-4) var(--ease-out);
 }
 @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 .gate-mark { width: 44px; height: 44px; margin-bottom: var(--sp-4); color: var(--accent); }
@@ -668,6 +739,8 @@ body.has-detail .detail { flex-basis: var(--w-detail); width: var(--w-detail); }
   animation: pop var(--dur-3) var(--ease-pop);
 }
 @keyframes pop { from { opacity: 0; transform: scale(.97); } to { opacity: 1; transform: none; } }
+.dialog.swap { animation: dialogSwap 200ms var(--ease-out); }
+@keyframes dialogSwap { from { opacity: .35; transform: translateY(3px); } to { opacity: 1; transform: none; } }
 .dialog h3 { margin: 0 0 var(--sp-3); font-size: var(--fs-md); font-weight: 700; }
 .dialog p { margin: 0 0 var(--sp-4); font-size: var(--fs-base); color: var(--fg-muted); line-height: 20px; white-space: pre-wrap; }
 .dialog .field { margin-bottom: var(--sp-4); }
@@ -709,6 +782,62 @@ body.has-detail .detail { flex-basis: var(--w-detail); width: var(--w-detail); }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 .toast.err { border-left-color: var(--danger); color: var(--danger); }
 .toast.warn { border-left-color: var(--warn); }
+
+/* ══════════ 入场 / 退场 / 反馈动效 ══════════ */
+
+/* 列表项：分组切换、筛选、保存后成批入场（阶梯延迟由 JS 给的 --i 决定，最多 8 级）
+   注意用 backwards 而不是 both：both 会把最终 transform 锁死，之后 item 的 hover 位移就失效了 */
+@keyframes itemIn { from { opacity: 0; transform: translateY(7px) scale(.995); } to { opacity: 1; transform: none; } }
+.list.stagger .item { animation: itemIn 240ms var(--ease-out) backwards; animation-delay: calc(var(--i, 0) * 17ms); }
+.list.stagger .item:nth-child(n+9) { animation-delay: 136ms; }
+
+/* 空态 */
+.list-empty, .boot { animation: fadein 260ms var(--ease-out); }
+
+/* 详情面板内容（每次重渲染都会重播，读起来像「换了一页」而不是硬切） */
+@keyframes detailIn { from { opacity: 0; transform: translateX(8px); } to { opacity: 1; transform: none; } }
+.detail-inner { animation: detailIn 200ms var(--ease-out); }
+.detail-inner.editing { animation: detailIn 220ms var(--ease-out); }
+
+/* 侧滑面板 / 对话框 / 遮罩：补上退场（原来是一刀切没了） */
+@keyframes slideOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateX(14px); } }
+@keyframes popOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: scale(.975); } }
+@keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+.panel.closing { animation: slideOut 150ms var(--ease-io) forwards; }
+.dialog.closing { animation: popOut 130ms var(--ease-io) forwards; }
+.dialog-wrap.closing, .scrim.closing, .toast.closing { animation: fadeOut 140ms var(--ease-io) forwards; }
+
+/* 屏幕切换：建库页 / 解锁页 / 主界面 */
+.screen.enter { animation: screenIn 260ms var(--ease-out); }
+@keyframes screenIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.gate-card.enter { animation: rise 320ms var(--ease-out); }
+
+/* 复制成功 / 收藏等小反馈 */
+@keyframes pop { 0% { transform: scale(1); } 45% { transform: scale(1.25); } 100% { transform: scale(1); } }
+.copy.done, .item-acts button.done { animation: pop 240ms var(--ease-pop); }
+.item-acts button.done { color: var(--ok); }
+
+/* 生成器换一个：结果的洗底一闪，提示「内容变了」 */
+@keyframes flashBox { from { box-shadow: inset 0 0 0 999px var(--accent-wash); } to { box-shadow: inset 0 0 0 999px transparent; } }
+.gen-out.flash, .flash { animation: flashBox 320ms var(--ease-out); }
+
+/* 卡片 / 行 hover 之外，值变化时的轻提示 */
+@keyframes valueFlash { from { background-color: var(--accent-wash); } to { background-color: var(--bg-well); } }
+.drow-value.flash { animation: valueFlash 380ms var(--ease-out); }
+
+/* 分组列表：选中项左侧指示条滑入 */
+.grp { position: relative; }
+.grp::before {
+  content: '';
+  position: absolute; left: 2px; top: 50%;
+  width: 2px; height: 0;
+  border-radius: 2px;
+  background: var(--accent);
+  transform: translateY(-50%);
+  transition: height var(--dur-3) var(--ease-pop), opacity var(--dur-2);
+  opacity: 0;
+}
+.grp.active::before { height: 15px; opacity: 1; }
 
 /* ══════════ 响应式 ══════════ */
 @media (max-width: 980px) {
