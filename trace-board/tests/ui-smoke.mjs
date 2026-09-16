@@ -101,6 +101,7 @@ if (!fs.existsSync(path.join(TRACE_DIR, 'index.json'))) {
 const CHROME = [
   'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
   'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
 ].find((p) => fs.existsSync(p));
 if (!CHROME) { console.log('未找到 Chrome/Edge'); server.close(); process.exit(1); }
 

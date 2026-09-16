@@ -399,9 +399,17 @@ var TraceSource = (function () {
 
   /* ── 会话级读取 ─────────────────────────────────────────────── */
 
+  /* 不变量：session.events 非空 ⇔ 事件内联在会话条目里（bundle/粘贴源）。
+     文件源不把解析结果写回 session —— 一旦写回，轮询就分不清「内联死数据」和「上一轮的缓存快照」，
+     app.js 的 startPolling 靠这个不变量判断要不要轮询。 */
+
   async function loadEvents(reader, session) {
     if (!session) return [];
-    if (Array.isArray(session.events)) return session.events;
+    if (Array.isArray(session.events)) return session.events;   // 内联：数据是死的，直接给
+    return await readEventsFile(reader, session);
+  }
+
+  async function readEventsFile(reader, session) {
     var text = await reader.readText(session.files.events);
     var out = [];
     var badLines = 0;
@@ -412,8 +420,17 @@ var TraceSource = (function () {
     }
     // 坏行跳过可以，静默跳过不行：尾部半行是宿主异常退出的常见产物，计数要随状态栏披露
     session.corrupt_lines = badLines;
-    session.events = out;
     return out;
+  }
+
+  /** 字节长度探针：判断「events.jsonl 有没有长」不必整页解析。
+   * spark.fs 只有 read/write（没有 stat/watch，source.js 头注），拿不到便宜的字节数，
+   * 只能 readText 硬读全文取长度 —— 省掉的是 JSON.parse 与重建渲染，IO 省不掉，轮询时要有数。 */
+  async function probeEventsLength(reader, session) {
+    if (!session) return -1;
+    try {
+      return String(await reader.readText(session.files.events)).length;
+    } catch (e) { return -1; }
   }
 
   async function loadDiff(reader, session, name) {
@@ -692,6 +709,7 @@ var TraceSource = (function () {
     fromDesc: fromDesc,
     load: load,
     loadEvents: loadEvents,
+    probeEventsLength: probeEventsLength,
     loadDiff: loadDiff,
     loadSnapshot: loadSnapshot,
     deriveIndexFromListing: deriveIndexFromListing,

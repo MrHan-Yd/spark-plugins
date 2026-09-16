@@ -18,6 +18,9 @@
     loadToken: 0,        // 会话异步载入的时序闸：响应回来时序号对不上就丢弃，防连点两个会话后 model 与 session 错配
     loadingSession: false,
     loadingSource: false,
+    pollTimer: null,     // 会话详情自动刷新的 interval 句柄（null = 没在轮询）
+    pollBusy: false,     // 上一次探针/重读还没回来就先跳过本轮，防慢 IO 时轮询自己叠自己
+    pollLastLen: -1,     // 探针基线：上次读到的 events.jsonl 文本长度（-1 = 尚无基线，下一个 tick 必重读）
     scope: new Set(),
     evo: { month: '全部', kind: '全部' },
     pit: { status: '全部', category: '全部', sort: 'newest' },
@@ -78,6 +81,8 @@
 
   function setModule(mod) {
     S.module = mod;
+    // 离开详情就收轮询：探针每 3s 一次全文读，用户在聚合模块里看板时是纯空转
+    if (mod !== 'session') stopPolling();
     // 左轨（统计范围勾选）只服务「会话详情」；其余模块收起左轨让内容满幅，统计范围默认全选不变
     // @see [Agent Note: 左轨只留在会话详情](../../.agents/notes/implemented/simplification/2026-09-16-左轨只留在会话详情.md)
     document.body.classList.toggle('rail-off', mod !== 'session');
@@ -149,6 +154,8 @@
 
   /* ── 会话详情 ───────────────────────────────────────────────── */
 
+  const POLL_MS = 3000;
+
   async function loadSession(session, wantModule) {
     var token = ++S.loadToken;
     S.session = session;
@@ -161,23 +168,13 @@
       if (token !== S.loadToken) return;   // await 期间用户已打开别的会话：本次结果整体丢弃，不与新的竞争赋值
       S.loadingSession = false;
       S.events = events;
-      S.model = {
-        summary: TraceAnalyze.summarize(events, session),
-        turns: TraceAnalyze.groupTurns(events),
-        methods: TraceAnalyze.methodInventory(events),
-        compliance: TraceAnalyze.complianceItems(events),
-        rules: null,
-        writes: TraceAnalyze.appliedWrites(events),
-        commands: TraceAnalyze.executedCommands(events),
-        denied: TraceAnalyze.deniedItems(events),
-        protocolErrors: TraceAnalyze.protocolErrors(events),
-      };
-      S.model.rules = TraceAnalyze.rulesUsed(S.model.compliance);
+      buildModel(session, events);
       if (S.module === 'session') TraceRender.renderSessionShell($('pane-session'));
       var corrupt = session.corrupt_lines || 0;
       setStatus(session.session_id + ' · ' + events.length + ' 事件' +
         (corrupt ? ' · 跳过 ' + corrupt + ' 条损坏行' : '') +
         ' · ' + TraceAnalyze.fmtDuration(S.model.summary.span), 'ready');
+      startPolling(session);
     } catch (e) {
       if (token !== S.loadToken) return;
       S.loadingSession = false;
@@ -186,6 +183,71 @@
       toast(why, true);
     }
   }
+
+  function buildModel(session, events) {
+    S.events = events;
+    S.model = {
+      summary: TraceAnalyze.summarize(events, session),
+      turns: TraceAnalyze.groupTurns(events),
+      methods: TraceAnalyze.methodInventory(events),
+      compliance: TraceAnalyze.complianceItems(events),
+      rules: null,
+      writes: TraceAnalyze.appliedWrites(events),
+      commands: TraceAnalyze.executedCommands(events),
+      denied: TraceAnalyze.deniedItems(events),
+      protocolErrors: TraceAnalyze.protocolErrors(events),
+    };
+    S.model.rules = TraceAnalyze.rulesUsed(S.model.compliance);
+  }
+
+  /* ── 会话详情自动刷新：agent 干活时 events.jsonl 在增长，看板跟着长 ──
+   * 探针 = 全文文本长度（spark.fs 没有 stat/watch，见 source.js 头注），长度没变就跳过本轮，
+   * 变了才整页重读重算。内联源（bundle/粘贴）事件是死的，不轮询。
+   * @see [Agent Note: 会话详情自动刷新](../../.agents/notes/implemented/feature/2026-09-16-会话详情自动刷新.md)
+   */
+  function startPolling(session) {
+    stopPolling();
+    if (Array.isArray(session.events)) { S.pollLastLen = -1; return; }   // 内联数据不会变，轮询是纯空转
+    S.pollLastLen = -1;
+    S.pollTimer = setInterval(function () { pollSessionTick(session); }, POLL_MS);
+  }
+
+  function stopPolling() {
+    if (S.pollTimer) { clearInterval(S.pollTimer); S.pollTimer = null; }
+    S.pollLastLen = -1;
+  }
+
+  async function pollSessionTick(session) {
+    if (S.pollBusy || S.loadingSession || document.hidden) return;   // 非可见期宿主多半也在挂起，回来后 visibilitychange 补一枪
+    S.pollBusy = true;
+    try {
+      var len = await TraceSource.probeEventsLength(S.reader, session);
+      if (len >= 0 && S.pollLastLen === len) return;   // 没长：省掉重读与重渲染
+      S.pollLastLen = len;
+      if (len < 0) return;
+      var token = ++S.loadToken;
+      var events = await TraceSource.loadEvents(S.reader, session);   // 文件源必走重读（缓存不变量：文件源不回写 session.events）
+      if (token !== S.loadToken || S.session !== session) return;   // 重读期间用户切了会话：丢弃
+      buildModel(session, events);
+      if (S.module === 'session') TraceRender.renderSessionShell($('pane-session'));
+      var corrupt = session.corrupt_lines || 0;
+      setStatus(session.session_id + ' · ' + events.length + ' 事件' +
+        (corrupt ? ' · 跳过 ' + corrupt + ' 条损坏行' : '') +
+        ' · ' + TraceAnalyze.fmtDuration(S.model.summary.span) + ' · 自动刷新 ' + nowClock(), 'ready');
+    } catch (e) { /* 一轮探针失败不打断轮询，下一 tick 重试 */ }
+    finally {
+      S.pollBusy = false;
+    }
+  }
+
+  function nowClock() {
+    var d = new Date();
+    return (d.getHours() < 10 ? '0' : '') + d.getHours() + ':' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes();
+  }
+
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden && S.session && S.module === 'session') pollSessionTick(S.session);
+  });
 
   function openSession(session) { return loadSession(session, true); }
 
@@ -198,6 +260,7 @@
   /* ── 载入数据源 ─────────────────────────────────────────────── */
 
   async function loadFrom(desc, options) {
+    stopPolling();
     S.loadingSource = true;
     if (!S.index) renderActivePane();   // 首次载入先给骨架；换源失败时旧数据原地保留（骨架只在无数据的窗口期出现）
     setStatus('正在载入 …', 'busy');
