@@ -311,6 +311,64 @@ var TraceAggregate = (function () {
     };
   }
 
+  /* ── 文件档案 ─────────────────────────────────────────────────
+   * 回答「这个文件为什么变成现在这样」：按文件聚合所有会话的写盘、被拦与合规结果。
+   * 数据全部来自 digest（heavy_files / denied / compliance_failed），不拉 events.jsonl ——
+   * HTTP 远程模式不会退化成 N+1。会话条目的 files.diffs 只装内联 diff 的名字，展开行按需 loadDiff。 */
+
+  function fileArchive(sessions) {
+    var files = new Map();   // rel -> 档案
+    function slot(rel, path) {
+      if (!files.has(rel)) files.set(rel, { rel: rel, path: path, writes: [], denied: [], compliance: [] });
+      return files.get(rel);
+    }
+    sessions.forEach(function (s) {
+      var d = digestOf(s);
+      if (!d) return;
+      (d.heavy_files || []).forEach(function (f) {
+        slot(f.rel || f.path, f.path).writes.push({ session: s, writes: f.writes });
+      });
+      (d.denied || []).forEach(function (x) {
+        if (!x.target) return;
+        var rel = targetLabel(x.target);
+        if (!rel) return;
+        slot(rel, x.target).denied.push({
+          session: s, seq: x.seq, kind: x.kind, method: x.method,
+          decidedBy: x.decided_by, ts: x.ts, target: x.target,
+        });
+      });
+      (d.compliance_failed || []).forEach(function (x) {
+        if (!x.target) return;
+        var rel = targetLabel(x.target);
+        slot(rel, x.target).compliance.push({
+          session: s, seq: x.seq, ruleId: x.rule_id, status: x.status,
+          message: x.message, ts: x.ts,
+        });
+      });
+    });
+    var list = [...files.values()].map(function (f) {
+      var writeSessions = {};
+      f.writes.forEach(function (w) { writeSessions[w.session.dir] = 1; });
+      var deniedSessions = {};
+      f.denied.forEach(function (x) { deniedSessions[x.session.dir] = 1; });
+      var compSessions = {};
+      f.compliance.forEach(function (x) { compSessions[x.session.dir] = 1; });
+      return {
+        rel: f.rel, path: f.path,
+        writeCount: f.writes.reduce(function (n, w) { return n + w.writes; }, 0),
+        writeSessions: Object.keys(writeSessions).length,
+        deniedCount: f.denied.length,
+        compFailed: f.compliance.length,
+        writes: f.writes, denied: f.denied, compliance: f.compliance,
+        dir: f.rel.replace(/\/[^/]*$/, '') || '(根)',
+      };
+    });
+    list.sort(function (a, b) {
+      return (b.deniedCount + b.compFailed) - (a.deniedCount + a.compFailed) || b.writeCount - a.writeCount || a.rel.localeCompare(b.rel);
+    });
+    return list;
+  }
+
   /* ── 决策清单 ───────────────────────────────────────────────── */
 
   function ledger(sessions) {
@@ -411,6 +469,7 @@ var TraceAggregate = (function () {
     baseline: baseline,
     evolutionScope: evolutionScope,
     evolution: evolution,
+    fileArchive: fileArchive,
     pitfalls: pitfalls,
     ledger: ledger,
     targetLabel: targetLabel,

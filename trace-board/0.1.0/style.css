@@ -1479,6 +1479,43 @@ body[data-state='error'] .status::before { background: var(--danger); opacity: 1
 #note-view .note-link.up::before { content: '↖ '; color: var(--accent-text); }
 #note-view .note-link.down::before { content: '↘ '; color: var(--fg-faint); }
 
+/* @trace 深链 chip（笔记正文内）：内联小按钮，点击跳对应会话时间线 */
+.trace-chip {
+  display: inline;
+  padding: 0 5px;
+  margin: 0 2px;
+  border: 1px solid var(--accent-line);
+  border-radius: var(--r-sm);
+  background: var(--accent-soft);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--accent-text);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.trace-chip:hover { border-color: var(--accent-text); text-decoration: underline; }
+
+/* 锚点深链的命中事件行：高亮描边，把视线引到目标 */
+.ev-anchored {
+  background: var(--accent-soft) !important;
+  outline: 2px solid var(--accent-line);
+  border-radius: var(--r-sm);
+}
+
+/* 文件档案的展开详情行 */
+.arch-detail { margin-top: var(--sp-2); border-top: 1px dashed var(--border); padding-top: var(--sp-2); }
+.arch-sec { font-weight: 700; color: var(--fg-muted); }
+.arch-line {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  padding: 3px 0;
+  color: var(--fg-muted);
+  font-size: var(--fs-xs);
+  cursor: pointer;
+}
+.arch-line:hover { color: var(--accent-text); }
+
 /* ── 帮助抽屉与遮罩 ───────────────────────────────────────────── */
 
 .overlay {

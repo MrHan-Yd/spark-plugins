@@ -32,7 +32,7 @@
     theme: 'light',
   };
 
-  var MODULES = ['baseline', 'evolution', 'pitfalls', 'ledger', 'session'];
+  var MODULES = ['baseline', 'archive', 'evolution', 'pitfalls', 'ledger', 'session'];
   var $ = TraceRender.$;
   var h = TraceRender.h;
   var toast = TraceRender.toast;
@@ -147,6 +147,7 @@
       return;
     }
     if (mod === 'baseline') TraceModules.renderBaseline(pane, sessions);
+    else if (mod === 'archive') TraceModules.renderArchive(pane, sessions);
     else if (mod === 'evolution') TraceModules.renderEvolution(pane, sessions);
     else if (mod === 'pitfalls') TraceModules.renderPitfalls(pane, sessions);
     else TraceModules.renderLedger(pane, sessions);
@@ -391,28 +392,8 @@
       box.appendChild(meta);
     }
 
-    // 正文按 ## 小节拆块渲染：编号 + 标签 + 右侧细线；保持纯文本注入，markdown 不解析（与参考站一致）
-    var lines = String(n.body || '').split('\n');
-    var secName = null;
-    var buf = [];
-    var secNo = 0;
-    function flush() {
-      if (!secName) return;
-      secNo++;
-      box.appendChild(h('div', { cls: 'note-section' }, [
-        h('div', { cls: 'note-sec-head' }, [
-          h('span', { cls: 'note-sec-no', text: (secNo < 10 ? '0' : '') + secNo }),
-          h('b', { text: secName }),
-        ]),
-        h('div', { cls: 'note-sec-body', text: buf.join('\n').trim() || '—' }),
-      ]));
-    }
-    for (var i = 0; i < lines.length; i++) {
-      var l = lines[i];
-      if (/^##\s/.test(l)) { flush(); secName = l.replace(/^##\s*/, '').trim(); buf = []; }
-      else if (secName) buf.push(l);
-    }
-    flush();
+    /* 正文按 ## 小节拆块渲染；行内 @trace 锚点换成可点 chip，深链进对应会话时间线 */
+    renderNoteBody(box, n);
 
     var allNotes = TraceAggregate.noteList(S.index);
     function linkRow(label, ids, dir) {
@@ -440,6 +421,90 @@
     S.activeNote = note;
     openDrawer('note');
     renderNoteView();
+  }
+
+  /* ── @trace 锚点深链 ──────────────────────────────────────────
+   * 笔记正文里的 `@trace s_xxx#12` 变成可点 chip，点了直接跳那个会话的时间线。
+   * 先查已载入索引，miss 再按锚点 id 探 <trace根>/<sid>/events.jsonl（dir/fs 源可行，
+   * http/inline 探不了）；找不到弹 toast 说明原因，不做死链假按钮。 */
+
+  var TRACE_RE = /@trace\s+(s_[A-Za-z0-9_-]+)(?:#(\d+))?/g;
+
+  async function findSessionAnchored(sid) {
+    var idx = S.index;
+    if (idx && Array.isArray(idx.sessions)) {
+      var hit = idx.sessions.filter(function (s) { return s.session_id === sid || s.dir === sid; })[0];
+      if (hit) return hit;
+    }
+    if (!(S.reader && (S.reader.kind === 'dir' || S.reader.kind === 'fs'))) return null;
+    var root = ((idx && idx.trace_root) || '.agents/trace').replace(/\/+$/, '');
+    try { await S.reader.readText(root + '/' + sid + '/events.jsonl'); } catch (e) { return null; }
+    return {
+      session_id: sid, dir: sid, started_at: null,
+      files: { events: sid + '/events.jsonl' }, derived: true,
+    };
+  }
+
+  function jumpToTraceAnchor(sid, seq) {
+    findSessionAnchored(sid).then(function (hit) {
+      if (!hit) { toast('本机没有这个会话的 trace（' + sid + '），可能是别的机器上的会话', true); return; }
+      S.pendingAnchorSeq = seq || null;
+      loadSession(hit, true);
+    });
+  }
+
+  /** 笔记正文按 ## 小节拆块渲染；行内 @trace 锚点换成可点 chip（安全底线不变：纯文本节点 + 按钮注入） */
+  function renderNoteBody(box, note) {
+    var lines = String(note.body || '').split('\n');
+    var secName = null;
+    var buf = [];
+    var secNo = 0;
+    function flush() {
+      if (!secName) return;
+      secNo++;
+      var bodyEl = h('div', { cls: 'note-sec-body' });
+      var text = buf.join('\n').trim();
+      if (text) renderAnchoredLines(bodyEl, text);
+      else bodyEl.appendChild(document.createTextNode('—'));
+      box.appendChild(h('div', { cls: 'note-section' }, [
+        h('div', { cls: 'note-sec-head' }, [
+          h('span', { cls: 'note-sec-no', text: (secNo < 10 ? '0' : '') + secNo }),
+          h('b', { text: secName }),
+        ]),
+        bodyEl,
+      ]));
+    }
+    for (var i = 0; i < lines.length; i++) {
+      var l = lines[i];
+      if (/^##\s/.test(l)) { flush(); secName = l.replace(/^##\s*/, '').trim(); buf = []; }
+      else if (secName) buf.push(l);
+    }
+    flush();
+  }
+
+  function renderAnchoredLines(box, text) {
+    String(text).split('\n').forEach(function (line, i) {
+      if (i) box.appendChild(h('div'));
+      renderAnchoredText(box, line);
+    });
+  }
+
+  function renderAnchoredText(box, text) {
+    TRACE_RE.lastIndex = 0;
+    var m, last = 0;
+    while ((m = TRACE_RE.exec(text))) {
+      if (m.index > last) box.appendChild(document.createTextNode(text.slice(last, m.index)));
+      var sid = m[1], seq = m[2] ? Number(m[2]) : null;
+      var chip = h('button', {
+        cls: 'trace-chip',
+        text: '@' + sid + (seq ? '#' + seq : ''),
+        title: '跳到该会话时间线' + (seq ? '第 ' + seq + ' 号事件' : ''),
+      });
+      chip.addEventListener('click', function () { jumpToTraceAnchor(sid, seq); });
+      box.appendChild(chip);
+      last = m.index + m[0].length;
+    }
+    if (last < text.length) box.appendChild(document.createTextNode(text.slice(last)));
   }
 
   /* ── 数据源库 ───────────────────────────────────────────────── */

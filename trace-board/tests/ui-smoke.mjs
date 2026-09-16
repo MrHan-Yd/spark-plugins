@@ -241,7 +241,7 @@ ok('页面加固：输入框内右键放行', await ev(`(function(){ var e=new M
 ok('页面加固：F12 被拦', await ev(`(function(){ var k=new KeyboardEvent('keydown',{key:'F12',bubbles:true,cancelable:true}); document.body.dispatchEvent(k); return k.defaultPrevented; })()`));
 ok('页面加固：Ctrl+Shift+I 被拦', await ev(`(function(){ var k=new KeyboardEvent('keydown',{key:'I',ctrlKey:true,shiftKey:true,bubbles:true,cancelable:true}); document.body.dispatchEvent(k); return k.defaultPrevented; })()`));
 ok('未误伤普通按键（Enter 不被拦）', await ev(`(function(){ var k=new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}); document.body.dispatchEvent(k); return !k.defaultPrevented; })()`));
-ok('五个模块都在导航里', (await ev("document.querySelectorAll('#mods .mod').length")) === 5);
+ok('六个模块都在导航里', (await ev("document.querySelectorAll('#mods .mod').length")) === 6);
 ok('默认落在架构基线', await ev("document.querySelector('#mods .mod.active').dataset.mod === 'baseline'"));
 ok('库为空时不自动弹抽屉', await ev("document.getElementById('library').hidden === true && document.getElementById('overlay').hidden === true"));
 ok('空态给了引导按钮', /还没有载入数据源/.test(await ev("document.getElementById('pane-baseline').textContent")) && (await ev("document.querySelectorAll('#pane-baseline .primary-btn').length")) === 1);

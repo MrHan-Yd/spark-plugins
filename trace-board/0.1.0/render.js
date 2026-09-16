@@ -276,7 +276,14 @@ var TraceRender = (function () {
 
   function eventRow(item) {
     var e = item.e;
+    var S = ctx.getState();
     var row = h('div', { cls: evClass(e), style: { '--d': String(item.depth) } });
+    // 锚点深链的目标行：@trace chip 点进来时带 pendingAnchorSeq，命中行加高亮类并展开原始报文
+    var anchored = S.pendingAnchorSeq != null && e.seq === S.pendingAnchorSeq;
+    if (anchored) {
+      row.classList.add('ev-anchored');
+      S.pendingAnchorSeq = null;
+    }
     row.appendChild(h('span', { cls: 'ev-seq', text: '#' + e.seq }));
     var method = h('span', { cls: 'ev-method', text: TraceAnalyze.eventLabel(e), title: '点开看原始 JSON-RPC', tabindex: '0', role: 'button' });
     var json = null;
@@ -292,6 +299,7 @@ var TraceRender = (function () {
     }
     method.addEventListener('click', toggle);
     onActivate(method, toggle);
+    if (anchored) setTimeout(toggle, 0);   // 锚点行自动展开原始报文——深链进来就该看到证据本体
     row.appendChild(method);
     if (e.rpc_id != null) row.appendChild(h('span', { cls: 'chip chip-skip', text: 'id ' + e.rpc_id }));
     if (e.dir === 'internal') row.appendChild(h('span', { cls: 'chip chip-dir', text: '内部' }));
@@ -354,6 +362,10 @@ var TraceRender = (function () {
       box.appendChild(body);
       pane.appendChild(box);
     });
+
+    // 锚点深链收尾：目标行滚进视野（此时 DOM 已挂好，requestAnimationFrame 后量位置才准）
+    var anchored = pane.querySelector('.ev-anchored');
+    if (anchored) requestAnimationFrame(function () { anchored.scrollIntoView({ block: 'center' }); });
   }
 
   /* ── 改动 ───────────────────────────────────────────────────── */

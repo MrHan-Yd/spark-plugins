@@ -403,6 +403,90 @@ var TraceModules = (function () {
     pane.appendChild(tl);
   }
 
+  /* ── 文件档案 ─────────────────────────────────────────────────
+   * 回答「这个文件为什么变成现在这样」：一个文件一行档案——谁改过、被拦过、合规挂没挂过。
+   * 点击展开该文件的全部运行事实（写盘 / 被拦 / 合规未过），行内点会话号跳会话详情。 */
+
+  function renderArchive(pane, sessions) {
+    var S = ctx.getState();
+    var files = TraceAggregate.fileArchive(sessions);
+    var flagged = files.filter(function (f) { return f.deniedCount + f.compFailed > 0; }).length;
+
+    pane.appendChild(criteria([
+      h('span', { cls: 'crit-label', text: '涉及文件 ' + files.length + ' 个' }),
+      h('span', { cls: 'crit-tail' }, [
+        h('span', { cls: 'src-or', text: flagged ? flagged + ' 个文件有被拦或合规未过的记录' : '没有被拦或合规未过的文件' }),
+      ]),
+    ]));
+
+    if (!files.length) {
+      pane.appendChild(emptyState([
+        '这段范围里没有落盘的改动。',
+        '文件档案按 digest 聚合：宿主跑的会话里有写盘 / 被拦 / 合规结果，这里就会有。',
+      ]));
+      return;
+    }
+
+    var wrap = h('div', { cls: 'rows' });
+    files.slice(0, 60).forEach(function (f) {
+      var row = h('div', { cls: 'row' + (f.deniedCount + f.compFailed ? ' warn' : '') });
+      row.appendChild(h('div', { cls: 'row-top' }, [
+        h('span', { cls: 'row-path', text: f.rel }),
+        h('span', { cls: 'row-stat', text: f.writeSessions + ' 会话 · ' + f.writeCount + ' 次落盘' }),
+      ]));
+      var acts = h('div', { cls: 'row-acts' });
+      if (f.deniedCount) acts.appendChild(h('span', { cls: 'chip chip-warn', text: '被拦 ' + f.deniedCount }));
+      if (f.compFailed) acts.appendChild(h('span', { cls: 'chip chip-bad', text: '合规 ' + f.compFailed }));
+      if (!acts.childNodes.length) acts.appendChild(h('span', { cls: 'chip chip-ok', text: '干净' }));
+
+      var open = function () {
+        var expanded = row.dataset.open === '1';
+        row.dataset.open = expanded ? '' : '1';
+        detail.hidden = expanded;
+        btnDetail.textContent = expanded ? '展开档案' : '收起档案';
+      };
+      var btnDetail = h('button', { cls: 'mini-btn', text: '展开档案' });
+      btnDetail.addEventListener('click', open);
+      acts.appendChild(btnDetail);
+      row.appendChild(acts);
+
+      var detail = h('div', { cls: 'arch-detail', hidden: true });
+      function detailRows(title, items, render) {
+        if (!items.length) return;
+        detail.appendChild(h('div', { cls: 'row-src arch-sec', text: title + ' ' + items.length + ' 条' }));
+        items.forEach(function (x) { detail.appendChild(render(x)); });
+      }
+      detailRows('落盘', f.writes, function (w) {
+        var s = w.session;
+        return mount(h('div', { cls: 'arch-line', tabindex: '0', role: 'button', title: '点开会话详情' }, [
+          h('span', { cls: 'chip chip-dir', text: TraceAggregate.short(s.session_id) }),
+          h('span', { text: TraceAggregate.dayOf(s.started_at).slice(5) + ' · ' + w.writes + ' 次落盘' }),
+        ]), function () { ctx.openSession(s); });
+      });
+      detailRows('被拦 / 被拒', f.denied, function (x) {
+        return mount(h('div', { cls: 'arch-line', tabindex: '0', role: 'button', title: '点开会话详情' }, [
+          h('span', { cls: 'chip chip-warn', text: x.kind === 'permission' ? '审批被拒' : '执行被拦' }),
+          h('span', { cls: 'chip chip-dir', text: TraceAggregate.short(x.session.session_id) + '#' + x.seq }),
+          h('span', { text: (x.method || '未知方法') + (x.decidedBy ? ' · 由 ' + x.decidedBy + ' 决定' : '') }),
+        ]), function () { ctx.openSession(x.session); });
+      });
+      detailRows('合规未过', f.compliance, function (x) {
+        return mount(h('div', { cls: 'arch-line', tabindex: '0', role: 'button', title: '点开会话详情' }, [
+          h('span', { cls: 'chip chip-bad', text: x.ruleId }),
+          h('span', { cls: 'chip chip-dir', text: TraceAggregate.short(x.session.session_id) + '#' + x.seq }),
+          h('span', { text: x.message }),
+        ]), function () { ctx.openSession(x.session); });
+      });
+      row.appendChild(detail);
+      wrap.appendChild(row);
+    });
+    pane.appendChild(wrap);
+    if (files.length > 60) {
+      pane.appendChild(h('div', { cls: 'src-hint', text: '只显示前 60 个（共 ' + files.length + ' 个）。' }));
+    }
+    pane.appendChild(h('div', { cls: 'src-hint', text: '排序：有被拦/合规未过的在前，再按落盘次数。展开后每条都能点回所在会话。' }));
+  }
+
   /* ── 避坑智库 ───────────────────────────────────────────────── */
 
   var SORTS = [{ id: 'newest', label: '最新优先' }, { id: 'oldest', label: '最早优先' }, { id: 'refs', label: '引用最多' }];
@@ -625,6 +709,7 @@ var TraceModules = (function () {
     configure: configure,
     renderBaseline: renderBaseline,
     renderEvolution: renderEvolution,
+    renderArchive: renderArchive,
     renderPitfalls: renderPitfalls,
     renderLedger: renderLedger,
   };
