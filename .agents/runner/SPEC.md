@@ -52,6 +52,15 @@
 | 5 | mock agent 只写沙箱坏文件 | 决策笔记链路（审批 → 格式校验 → 索引 → 看板）没有离线样本 | mock 写入 implemented / rejected 样例笔记各一篇（互链），附录 C 数字随之更新 |
 | 6 | 看板测试基线 53 → 74 项 | 信息架构重制后断言面变了 | **83 项**（KPI / note-card / chamber / 笔记详情抽屉 / 全局搜索）+ 枚举契约测试 13 项（§8、附录 A2） |
 
+### 0.3 v3 → v3.1（放大消费侧：文件档案 / 锚点深链 / recall，2026-09-16）
+
+| # | v3 的状态 | 事实 / 动机 | v3.1 的处理 |
+|---|---|---|---|
+| 1 | 会话详情是一次性快照 | agent 干活时 trace 边跑边追加，看板停在打开那一刻 | 会话详情 3s 轮询探针自动刷新（§7.3），不变量「`session.events` 非空 ⇔ 内联死数据」 |
+| 2 | 看板全是「会话维度」，没有按文件看 | 用户第一个问题往往是"这个文件为什么变成这样" | 新增**文件档案**模块：digest 三路按文件聚合，点开单文件档案（§7.3） |
+| 3 | 笔记的 `@trace` 锚点只是死文本 | 决策笔记 → 具体事件 → diff 的链路没焊死 | **锚点深链**：`@trace s_xxx#N` 可点跳时间线，目标行高亮并展开原始报文（§7.3） |
+| 4 | 追溯库只有「给人看」的消费面 | agent 自己查不了历史，同一个坑反复踩 | 新增 **§5.9 agent 回查通道（recall）**：`--path`/`--rule`/`--denied`，永远 exit 0；提示词条款 AGENTS.md §5 |
+
 ---
 
 ## 1. 系统总体架构
@@ -747,7 +756,10 @@ v3 把**决策知识**提为第一公民——四个聚合模块优先展示 `in
 | 15 | 锚点口径一致 | 代码里的 `@trace` 指向的 seq，必须真能在对应会话的 `events.jsonl` 里找到（不是"记忆里的那一次"） |
 | 16 | 决策笔记格式闸（v3） | 写一篇缺节/Status 与目录不符的笔记 → `AGENT_NOTE_FORMAT` FAILED 且列出缺失项；合格骨架 → PASSED |
 | 17 | 笔记进索引与血缘（v3） | 重建索引后 `index.notes` 收到该篇；另一篇正文提到它的 stem → `refd_by` 计到；看板承重墙出现「被引用 ×N」，点卡开详情抽屉 |
-| 18 | 看板健康度（v3） | `node trace-board/tests/ui-smoke.mjs` 83 项全绿；`node trace-board/tests/contract-test.mjs` 13 项全绿（SPEC §6.2 ↔ 看板表 ↔ runner 字面量三方对拍） |
+| 18 | 看板健康度（v3） | `node trace-board/tests/ui-smoke.mjs` 全绿（当前 107 项）；`node trace-board/tests/contract-test.mjs` 13 项全绿（SPEC §6.2 ↔ 看板表 ↔ runner 字面量三方对拍） |
+| 19 | recall 回查可用（v3.1） | `node .agents/runner/recall.mjs --path <文件>` 命中历史与相关笔记；`--rule` 台账五桶计数正确；`node .agents/runner/tests/recall-test.mjs` 10 项全绿；未知参数/空库 exit 0 |
+| 20 | 锚点深链可达（v3.1） | 笔记详情里 `@trace s_xxx#N` 是可点 chip；点击跳到该会话时间线，目标事件行高亮并自动展开原始报文；会话不在本机时 toast 说明而非假按钮 |
+| 21 | 文件档案聚合正确（v3.1） | 同一文件跨会话的写盘合并为一条档案；被拦/合规未过的文件排前；展开行内点会话号能跳详情；纯 digest 消费、无 N+1 |
 
 ---
 
@@ -782,6 +794,8 @@ v3 把**决策知识**提为第一公民——四个聚合模块优先展示 `in
 | `approver.mjs` | 看板侧审批客户端（测试替身） |
 | `trace-report.mjs` | 归档读取端：人读时间线 + 血缘树；有未通过则非零退出 |
 | `trace-index.mjs` | 生成看板入口索引 `index.json`，并支持 `--bundle` 导出自包含单文件 |
+| `recall.mjs` | agent 回查通道（§5.9）：`--path`/`--rule`/`--denied`/`--notes`，纯读盘、永远 exit 0 |
+| `check-trace-anchors.mjs` | 反向锚点机械校验（§5.6）：`@see` 路径存在性 + `@trace` 坐标存在性 + `@anchors-skip` |
 | `SPEC.md` | 本文 |
 
 ### 附录 A2 · 看板的参考实现
@@ -795,7 +809,7 @@ v3 把**决策知识**提为第一公民——四个聚合模块优先展示 `in
   1. 插件页**不能直接出网**（引擎拦掉页面内一切 http/https），唯一出网通道是 `spark.net.fetch`；
   2. `spark.fs` **只有 read/write，没有目录列举** —— 所以「按路径读」必须有入口索引文件，
      这也是 `trace-index.mjs` 存在的理由。
-- 页面健康度：CDP 冒烟 83 项（`trace-board/tests/ui-smoke.mjs`）、枚举契约测试 13 项
+- 页面健康度：CDP 冒烟（`trace-board/tests/ui-smoke.mjs`，v3 基线 83 项，v3.1 起随断言面增长、以全绿为准）、枚举契约测试 13 项
   （`trace-board/tests/contract-test.mjs`）、图标几何自检 13 项（`trace-board/tests/icon-test.mjs`）。
   入口索引（含决策笔记）的 schema 契约见 §5.8；视觉基线见 §7.6。
 
@@ -845,5 +859,13 @@ $NODE .agents/runner/check-trace-anchors.mjs
 $NODE .agents/runner/trace-index.mjs
 #    期望：汇总行带「决策笔记 N 篇」；index.json 顶层有 notes[]（含 refd_by 血缘）
 #    另写一篇缺节/Status 与目录不符的笔记过闸 → 合规里 AGENT_NOTE_FORMAT 必须红
-#    看板侧：node trace-board/tests/ui-smoke.mjs（83 项）+ node trace-board/tests/contract-test.mjs（13 项）
+#    看板侧：node trace-board/tests/ui-smoke.mjs + node trace-board/tests/contract-test.mjs（13 项）
+
+# 8) agent 回查通道（v3.1，可作 agent 提示词的常备命令）
+$NODE .agents/runner/recall.mjs --path trace-board/0.1.0/app.js
+$NODE .agents/runner/recall.mjs --rule TRACE_WHY_ANCHORED
+$NODE .agents/runner/recall.mjs --denied
+$NODE .agents/runner/recall.mjs --notes
+#    期望：三类查询口径见 §5.9；永远 exit 0；空结果如实说明；契约测试 10 项：
+#    node .agents/runner/tests/recall-test.mjs
 ```
