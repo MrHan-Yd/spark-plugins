@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>Markdown 查看器</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app" id="app">
+  <header class="top">
+    <div class="brand">
+      <button id="btnToc" class="tb icon" title="大纲（Ctrl+B）" aria-label="开关大纲">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16M4 12h10M4 18h13"/></svg>
+      </button>
+      <div class="bt" id="btFile" title="">
+        <b id="btName">Markdown 查看器</b>
+        <span id="btPath">查看 .md 文件 · 输入 md <路径> 直开</span>
+      </div>
+    </div>
+    <div class="tools">
+      <button id="btnFontMinus" class="tb icon" title="正文字号：15px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg>
+      </button>
+      <button id="btnFontPlus" class="tb icon" title="正文字号：15px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+      <span class="tsep"></span>
+      <button id="btnCopyAll" class="tb" title="复制全文（Ctrl+Alt+C）">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>复制全文
+      </button>
+      <button id="btnReload" class="tb icon" title="重新加载">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 3.5V8h-4.5"/></svg>
+      </button>
+      <button id="btnOpen" class="tb" title="打开文件或目录">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M3.5 7.5v10a1.5 1.5 0 0 0 1.5 1.5h14a1.5 1.5 0 0 0 1.5-1.5V9a1.5 1.5 0 0 0-1.5-1.5H12L9.8 4.9a1.5 1.5 0 0 0-1.2-.6H5A1.5 1.5 0 0 0 3.5 5.8z"/></svg>打开
+      </button>
+      <span class="tsep"></span>
+      <button id="btnTheme" class="tb icon" title="切换明暗主题">
+        <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M20 14.5A8.8 8.8 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
+        <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7"/></svg>
+      </button>
+    </div>
+    <div class="loadbar" id="loadbar" aria-hidden="true"></div>
+  </header>
+
+  <main class="stage">
+    <aside class="toc" id="toc" aria-label="大纲">
+      <div class="toc-head"><span class="vt">大纲</span><span id="tocCount" class="vc">0</span></div>
+      <nav class="toc-list" id="tocList" tabindex="0" aria-label="大纲导航"></nav>
+      <div class="toc-handle" id="tocHandle" title="拖拽调宽，双击复位"></div>
+    </aside>
+    <div class="toc-mask" id="tocMask" hidden></div>
+
+    <section class="pane" id="viewHome">
+      <div class="empty">
+        <svg class="empty-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2.8h7.5L19 8.3v11a1.7 1.7 0 0 1-1.7 1.7H6a1.7 1.7 0 0 1-1.7-1.7V4.5A1.7 1.7 0 0 1 6 2.8z"/><path d="M13.2 3v5.4H19"/><path d="M8.3 13.4h7.4M8.3 16.8h4.9"/></svg>
+        <b>还没有打开任何 Markdown</b>
+        <span class="empty-sub">打开本地 .md 文件，享受清爽阅读</span>
+        <button id="btnPickFile" class="mb primary">打开文件…</button>
+        <div class="recent" id="recentBox">
+          <div class="recent-head"><span class="vt">最近打开</span><button id="btnRecentClear" class="linkbtn" title="清空最近列表">全部 ×</button></div>
+          <div class="recent-list" id="recentList"></div>
+        </div>
+        <div class="empty-hint">在 Spark 输入框输入 <code>md &lt;文件路径&gt;</code> 直开<br>也可以把文件直接拖进本窗口</div>
+      </div>
+    </section>
+
+    <section class="pane" id="viewDoc" hidden>
+      <div class="banner" id="banner" hidden>
+        <span id="bannerText"></span>
+        <span class="banner-btns">
+          <button id="bannerKeep" class="linkbtn">仍要打开</button>
+          <button id="bannerCancel" class="linkbtn">取消</button>
+        </span>
+      </div>
+      <div class="scroller" id="scroller">
+        <article class="md" id="article" tabindex="0"></article>
+      </div>
+      <button id="btnTop" class="fab" title="回到顶部" aria-label="回到顶部" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/></svg>
+      </button>
+    </section>
+
+    <section class="pane" id="viewErr" hidden>
+      <div class="errbox">
+        <svg class="err-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.6v5"/><circle cx="12" cy="16.2" r="0.6" fill="currentColor"/></svg>
+        <b id="errTitle">无法读取文件</b>
+        <span class="err-body" id="errBody"></span>
+        <code class="err-path" id="errPath" hidden></code>
+        <div class="err-btns">
+          <button id="btnErrRetry" class="mb">重新加载</button>
+          <button id="btnErrCopy" class="mb">复制路径</button>
+          <button id="btnErrPick" class="mb primary">手选文件…</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="status">
+    <span id="stL">就绪</span>
+    <span id="stR"></span>
+  </footer>
+</div>
+
+<div id="dropzone" hidden><b>松开以打开</b><span>.md 文件或包含 md 的目录</span></div>
+<div id="toast" class="toast" role="status"></div>
+<input type="file" id="fileInput" accept=".md,.markdown,.mdx,.txt" hidden>
+<input type="file" id="dirInput" webkitdirectory hidden>
+
+<script src="assets/vendor/marked.min.js"></script>
+<script src="assets/vendor/purify.min.js"></script>
+<script src="assets/vendor/highlight.min.js"></script>
+<script src="source.js"></script>
+<script src="engine.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

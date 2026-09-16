@@ -1,0 +1,53 @@
+{
+  "id": "com.spark.markdown-viewer",
+  "name": "Markdown 查看器",
+  "version": "0.1.0",
+  "api_version": 2,
+  "runtime": "webview",
+  "main": "index.html",
+  "icon": "icon.svg",
+  "author": "Spark",
+  "description": "打开渲染 Markdown 文件：GFM 表格/任务列表、代码高亮、大纲导航、阅读位置记忆；输入路径直开，或手动选择文件/目录",
+  "permissions": ["fs.read", "shell.open", "clipboard"],
+  "features": [
+    {
+      "type": "keyword",
+      "keyword": "md",
+      "title": "Markdown 查看器",
+      "subtitle": "md <文件路径> 直开 · 留空回车手动选择",
+      "mode": "page",
+      "placeholder": "输入 .md 文件路径，留空则手动选择…"
+    },
+    {
+      "type": "keyword",
+      "keyword": "markdown",
+      "title": "Markdown 查看器",
+      "subtitle": "md <文件路径> 直开 · 留空回车手动选择",
+      "mode": "page",
+      "placeholder": "输入 .md 文件路径，留空则手动选择…"
+    },
+    {
+      "type": "keyword",
+      "keyword": "查看文档",
+      "title": "Markdown 查看器",
+      "subtitle": "输入 .md 文件路径 · 留空回车手动选择",
+      "mode": "page",
+      "placeholder": "输入 .md 文件路径…"
+    },
+    {
+      "type": "regex",
+      "pattern": "(?i)\\.(md|markdown)$",
+      "title": "Markdown 查看器",
+      "subtitle": "渲染此 Markdown 文件",
+      "mode": "page"
+    }
+  ],
+  "window": {
+    "width": 1080,
+    "height": 720,
+    "min_width": 640,
+    "min_height": 420,
+    "resizable": true,
+    "multi_instance": true
+  }
+}
