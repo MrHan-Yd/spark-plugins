@@ -99,3 +99,9 @@ password-manager/tests/screenshots/
 # ----- Agent 宿主运行产物(追溯事件流、快照、diff,不进仓库) -----
 # 源码在 .agents/runner/,产物在 .agents/trace/
 .agents/trace/
+# trace-board 冒烟测试产出的截图(运行时产物,不进仓库)
+trace-board/tests/screenshots/
+
+# ----- 决策笔记 -----
+# 真实决策笔记是仓库知识（AGENTS.md §4，与代码同批提交）；mock agent 写入的两篇样例内容
+# 确定性，重跑不会弄脏 git。追溯事件流 .agents/trace/ 是运行时产物，仍保持忽略。

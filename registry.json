@@ -428,6 +428,41 @@
           }
         }
       ]
+    },
+    {
+      "id": "com.spark.trace-board",
+      "name": "追溯看板",
+      "description": "Agent 执行追溯看板:读本地项目的 .agents/trace 或 HTTP 远程库,看 ACP 通信时间线、调用血缘、写盘 Diff、合规自检与被否决清单",
+      "author": "Spark",
+      "homepage": "https://github.com/MrHan-Yd/spark-plugins/tree/master/trace-board",
+      "icon": "https://raw.githubusercontent.com/MrHan-Yd/spark-plugins/master/trace-board/0.1.0/icon.svg",
+      "runtime": "webview",
+      "latest": "0.1.0",
+      "permissions": [
+        "fs.read",
+        "net",
+        "clipboard"
+      ],
+      "tags": [
+        "开发工具",
+        "Agent 追溯"
+      ],
+      "versions": [
+        {
+          "version": "0.1.0",
+          "path": "trace-board/0.1.0",
+          "url": null,
+          "sha256": null,
+          "size": null,
+          "released": "2026-09-15",
+          "signature": {
+            "schema": 1,
+            "key_id": "spark-official-v1",
+            "algorithm": "ed25519",
+            "signature": "llcWAmpE/DAKSQluYTaRpcOQUG0Vdp5UExOykUo3eCdkSAZtJiA50rXg+6d8OvwAtLBtKs3YMIG5D2B2B2NtBw=="
+          }
+        }
+      ]
     }
   ]
 }

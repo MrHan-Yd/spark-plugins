@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "plugin_id": "com.spark.trace-board",
+  "version": "0.1.0",
+  "algorithm": "ed25519",
+  "key_id": "spark-official-v1",
+  "signed_at": "2026-09-16T09:45:51Z",
+  "files": [
+    {
+      "path": "aggregate.js",
+      "sha256": "62e0ef50412269a95cd7c9a484acce9734085a51647da682103c3120e62647c2"
+    },
+    {
+      "path": "analyze.js",
+      "sha256": "24c6b67d1ef5d1e781fdd2629b1d91f82e7d3adb7d0a51152e3d416366aa23cc"
+    },
+    {
+      "path": "app.js",
+      "sha256": "f2dc31f36cf4a2f7647793d8ca9e9225ab290d2a7314333c3425ce38ef11c4be"
+    },
+    {
+      "path": "icon.svg",
+      "sha256": "0bd2ee2c1171e75335fafc4ab7a57be34987198ac903634fd735b16c48d70f1b"
+    },
+    {
+      "path": "index.html",
+      "sha256": "6e01a41ae56e5a564cd71ba38520ba293c7801b3d3603ab58ff175217a492913"
+    },
+    {
+      "path": "modules.js",
+      "sha256": "1c37804ef27042b07613db8dede5bd4bea7b20cf6a7727634076d38144a1fc31"
+    },
+    {
+      "path": "plugin.json",
+      "sha256": "b21b78d4b5ae176f196e7bc9d7a638cf0bf72688505a79bd86a3546e9597571c"
+    },
+    {
+      "path": "render.js",
+      "sha256": "d7c99f06e1ccc1fae2afc446fb37cf1c21f73a3882a4dfe881bf5f163e8b3b06"
+    },
+    {
+      "path": "source.js",
+      "sha256": "63efe6f59694cf7a6af84e45f504a5328bca07e0af48d5b382fc43e4d2c22e29"
+    },
+    {
+      "path": "style.css",
+      "sha256": "0b571f232a3620dd608bc1113a99ceda2990e19ec92c84e48fe5e34a8afead5f"
+    }
+  ],
+  "signature": "llcWAmpE/DAKSQluYTaRpcOQUG0Vdp5UExOykUo3eCdkSAZtJiA50rXg+6d8OvwAtLBtKs3YMIG5D2B2B2NtBw=="
+}

@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="zh-Hans" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>追溯看板</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="rail-off">
+  <header class="top">
+    <div class="brand">
+      <span class="brand-logo" aria-hidden="true"><img src="icon.svg" alt=""></span>
+      <span>追溯看板</span>
+      <span class="brand-n" id="brand-n"></span>
+    </div>
+
+    <nav class="mods" id="mods" role="tablist">
+      <button class="mod active" data-mod="baseline" role="tab">架构基线</button>
+      <button class="mod" data-mod="evolution" role="tab">演进时间线</button>
+      <button class="mod" data-mod="pitfalls" role="tab">避坑智库 <span class="mod-n" id="n-pit"></span></button>
+      <button class="mod" data-mod="ledger" role="tab">决策清单</button>
+      <button class="mod" data-mod="session" role="tab">会话详情</button>
+    </nav>
+
+    <div class="tools">
+      <span class="search-wrap">
+        <input id="in-search" type="text" spellcheck="false" autocomplete="off" placeholder="快速搜索笔记与决策…">
+        <span class="search-kbd" aria-hidden="true">/</span>
+      </span>
+      <button id="btn-lib" class="srcbtn" title="切换数据源（本地目录 / 远程库 / 粘贴的数据都在同一个库里）">
+        <span class="srcbtn-kind" id="src-kind">未选择</span>
+        <span class="srcbtn-label" id="src-label">点这里选一个数据源</span>
+        <span class="srcbtn-caret" aria-hidden="true"></span>
+      </button>
+      <button id="btn-reload" class="ghost-btn">重新载入</button>
+      <button id="btn-help" class="ghost-btn">帮助</button>
+      <button id="btn-theme" class="ghost-btn" title="切换明暗主题"><span class="ic ic-sun" aria-hidden="true"></span><span class="ic ic-moon" aria-hidden="true"></span></button>
+    </div>
+  </header>
+
+  <main class="stage">
+    <aside class="rail">
+      <div class="rail-head">
+        <span class="rail-title" id="rail-title">统计范围</span>
+        <span class="rail-count" id="sess-count">0</span>
+      </div>
+      <div class="rail-acts">
+        <button class="mini-btn" id="btn-scope-all">全选</button>
+        <button class="mini-btn" id="btn-scope-none">全不选</button>
+        <button class="mini-btn" id="btn-scope-bad">仅有问题</button>
+      </div>
+      <div class="rail-list" id="sess-list"></div>
+    </aside>
+
+    <section class="work">
+      <div class="pane" id="pane-baseline" role="tabpanel"></div>
+      <div class="pane" id="pane-evolution" role="tabpanel" hidden></div>
+      <div class="pane" id="pane-pitfalls" role="tabpanel" hidden></div>
+      <div class="pane" id="pane-ledger" role="tabpanel" hidden></div>
+      <div class="pane" id="pane-session" role="tabpanel" hidden></div>
+    </section>
+  </main>
+
+  <footer class="status"><span id="status-text">就绪</span></footer>
+
+  <div id="overlay" class="overlay" hidden></div>
+
+  <aside id="library" class="drawer" role="dialog" aria-modal="true" aria-label="数据源库" hidden>
+    <div class="close-row"><button id="lib-close" class="ghost-btn">关闭</button></div>
+    <h2>数据源库</h2>
+    <p class="sub">本地目录、本地路径、远程库、粘贴的数据都在同一个库里，只是标签不同；点一下就切换，不用每次重新填。</p>
+
+    <h3>最近 <span class="sec-n" id="lib-count"></span></h3>
+    <div class="rows" id="lib-list"></div>
+
+    <h3>添加数据源</h3>
+    <div class="addrow">
+      <button id="btn-dir" class="primary-btn">选择项目目录…</button>
+      <span class="src-or">推荐 · 不需要授权</span>
+    </div>
+    <div class="addrow">
+      <input id="in-path" type="text" spellcheck="false" autocomplete="off" placeholder="项目根绝对路径，如 D:/demo/test01/spark-plugins">
+      <button id="btn-path" class="ghost-btn">入库并打开</button>
+    </div>
+    <div class="src-hint" id="hint-path">按路径读要用 <code>spark.fs</code>，需先在 设置 → 插件 里把该目录加进授权范围。</div>
+    <div class="addrow">
+      <input id="in-url" type="text" spellcheck="false" autocomplete="off" placeholder="http(s)://…/index.json 或 …/bundle.json">
+      <button id="btn-url" class="ghost-btn">入库并打开</button>
+    </div>
+    <div class="src-hint">远程库用 <code>spark.net.fetch</code> 出网（插件页本身不能直接联外网），响应体上限 10&nbsp;MB。</div>
+    <div class="addrow">
+      <textarea id="in-paste" spellcheck="false" placeholder="粘贴 index.json 或 bundle.json 的内容…"></textarea>
+      <button id="btn-paste" class="ghost-btn">入库并打开</button>
+    </div>
+    <div id="src-hint" class="src-hint"></div>
+  </aside>
+
+  <aside id="note-view" class="drawer wide" role="dialog" aria-modal="true" aria-label="决策笔记详情" hidden>
+    <div class="close-row"><button id="note-close" class="ghost-btn">关闭</button></div>
+    <div id="note-body"></div>
+  </aside>
+
+  <aside id="help" class="drawer" role="dialog" aria-modal="true" aria-label="帮助 · 追溯看板" hidden>
+    <div class="close-row"><button id="help-close" class="ghost-btn">关闭</button></div>
+    <h2>帮助 · 追溯看板</h2>
+    <p class="sub">看的是 agent 执行器写下的追溯数据（<code>.agents/trace/</code>）与决策笔记（<code>.agents/notes/</code>）。左轨的「统计范围」只在「会话详情」里显示；其余模块默认统计全部会话。</p>
+
+    <h3>数据源库</h3>
+    <p class="sub">点击顶部左侧的按钮打开<b>数据源库</b>：最近打开过的来源都在这里，本地与远程混在一起按标签区分，
+    置顶的排在前面。选过的会自动记住，下次开窗直接继续看。顶栏搜索框（按 <code>/</code> 聚焦）全局过滤笔记。</p>
+    <table class="help-table"><tbody>
+      <tr><td>本地目录</td><td>「选择项目目录…」选项目根即可，<b>不需要授权</b>。目录句柄会记住（IndexedDB），刷新后点一下直接重开；浏览器可能再弹一次授权，点允许即可。不支持句柄记忆的老内核才需要重选。</td></tr>
+      <tr><td>本地路径</td><td>填绝对路径给 <code>spark.fs</code> 读，能记住并一键重开；需要先在 <b>设置 → 插件</b> 里授权该目录范围，否则报 <code>PERMISSION_SCOPE</code>。</td></tr>
+      <tr><td>远程库</td><td>填 <code>index.json</code> 或 <code>bundle.json</code> 的完整 URL。</td></tr>
+      <tr><td>粘贴数据</td><td>把导出的 JSON 直接贴进来，适合离线传阅与归档。</td></tr>
+    </tbody></table>
+
+    <h3>五个模块在回答什么问题</h3>
+    <table class="help-table"><tbody>
+      <tr><td>架构基线</td><td>现在<b>正在生效</b>的东西：决策 KPI、承重墙（被引用最多的笔记）、领域架构分类阵列、生效的规则指纹、挂载的检查器与 agent 能力。有笔记时以笔记为主，没有时回落到文件改动视图。</td></tr>
+      <tr><td>演进时间线</td><td>按日期铺开决策笔记与会话执行，左轨道点连线，支持月份与分类切片。</td></tr>
+      <tr><td>避坑智库</td><td>被否决的笔记（❌放弃方案 / 💡权衡依据 / ✅采纳结果 三块）与运行时被拦的记录；「引用最多」= 同一目标被拦的次数。</td></tr>
+      <tr><td>决策清单</td><td>全库决策笔记总表：编号 / 分类 / 标题 / 状态 / 日期 / 引用。没有笔记时回落为会话全表。</td></tr>
+      <tr><td>会话详情</td><td>单会话深看：时间线（缩进即血缘，点方法名展开原始 JSON-RPC）、改动 Diff、合规自检、被否决。</td></tr>
+    </tbody></table>
+
+    <h3>术语</h3>
+    <div class="note">
+      · <b>决策笔记</b>：agent 按 AGENTS.md §4 写的决策知识（<code>.agents/notes/</code>），路径即状态即分类，文件名即锚点。<br>
+      · <b>反向 RPC</b>：agent 主动向宿主发起的请求（<code>fs.*</code>、<code>terminal.*</code>、<code>session/request_permission</code>）。拦截能力全发生在这一侧。<br>
+      · <b>回合（turn）</b>：一次 <code>session/prompt</code> 及其引发的全部事件。<br>
+      · <b>协议错误</b>：方法名未登记或方向不符。<br>
+      · <b>统计范围</b>：会话详情左轨勾选的会话；默认全选，四个聚合模块按勾上的部分统计（左轨只在会话详情显示）。
+    </div>
+  </aside>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="source.js"></script>
+  <script src="analyze.js"></script>
+  <script src="aggregate.js"></script>
+  <script src="render.js"></script>
+  <script src="modules.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

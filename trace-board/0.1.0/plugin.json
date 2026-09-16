@@ -1,0 +1,45 @@
+{
+  "id": "com.spark.trace-board",
+  "name": "追溯看板",
+  "version": "0.1.0",
+  "api_version": 2,
+  "runtime": "webview",
+  "main": "index.html",
+  "icon": "icon.svg",
+  "author": "Spark",
+  "description": "Agent 执行追溯看板:读本地项目的 .agents/trace 目录或 HTTP 远程库,查看 ACP 通信时间线、调用血缘、写盘 Diff、合规自检与被否决清单",
+  "permissions": ["fs.read", "net", "clipboard"],
+  "features": [
+    {
+      "type": "keyword",
+      "keyword": "trace",
+      "title": "追溯看板",
+      "subtitle": "Agent 执行追溯 · 时间线 / 血缘 / Diff / 合规",
+      "mode": "page",
+      "placeholder": "可选:直接填项目根目录或远程库 URL…"
+    },
+    {
+      "type": "keyword",
+      "keyword": "追溯",
+      "title": "追溯看板",
+      "subtitle": "Agent 执行追溯 · 时间线 / 血缘 / Diff / 合规",
+      "mode": "page",
+      "placeholder": "可选:直接填项目根目录或远程库 URL…"
+    },
+    {
+      "type": "keyword",
+      "keyword": "追溯看板",
+      "title": "追溯看板",
+      "subtitle": "Agent 执行追溯 · 时间线 / 血缘 / Diff / 合规",
+      "mode": "page",
+      "placeholder": "可选:直接填项目根目录或远程库 URL…"
+    }
+  ],
+  "window": {
+    "width": 1180,
+    "height": 760,
+    "min_width": 880,
+    "min_height": 560,
+    "resizable": true
+  }
+}

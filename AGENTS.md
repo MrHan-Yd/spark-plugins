@@ -9,6 +9,18 @@ Agent 在处理本仓库的任何任务时，必须遵循以下 Agent Client Pro
 - **上下文与能力**：Agent 须通过 initialize 握手识别客户端能力，优先依赖 ACP 动态推送的 Workspace Diff 和环境状态，不向开发者索要已有上下文。
 - **修改与工具调用**：修改代码优先输出结构化 Patch/Diff，执行终端命令或文件覆盖等副作用操作须过 ACP 权限中间件校验。
 - **异常处理**：发生错误必须按 JSON-RPC 2.0 返回标准 Error Code，禁止静默挂起。
+- **反向锚点（写码即留痕，条件式）**：修改 `.agents/runner`、`trace-board`、`.agents/skills` 内的代码时，凡注释里解释
+  「为什么这么写」的决策点（反直觉实现、被否决方案、实测结论），必须**在写代码的同一会话里**就近补挂锚点,
+  不留到事后考古。**先判宿主存在性**（完整判路与坐标获取流程见 `.agents/skills/trace-anchor/SKILL.md`）:
+  - **有宿主**（`SPARK_TRACE_SESSION` 非空——宿主拉起 agent 时注入）: `@trace s_<会话>#<事件序号> 实测：…`
+    —— 追溯坐标,指向当前会话 `.agents/trace` 里的对应事件
+    （会话进行中 session id 与事件序号就在手上,零成本;会话结束再补就要翻库）;
+  - **无宿主**（直开的客户端会话,`SPARK_TRACE_SESSION` 为空）: **禁止写 `@trace`**——校验器对不存在
+    会话只静默 SKIPPED,硬写就是假锚点;降级为决策笔记（§4,与代码同批提交）+ `@see` 文档锚点,
+    并在回复里如实声明「本轮未过宿主,无协议留痕」;
+  - `@see [SPEC §x.y](相对路径)` —— 文档锚点,决策已沉淀进 SPEC 小节时用。
+  格式与校验收口在 `.agents/runner/check-trace-anchors.mjs`,提交前跑一遍,失效即修;
+  宿主对「新增解释性注释但未挂锚」会按 WARN 提示（`TRACE_WHY_ANCHORED`,不拦盘,但要处理）。
 
 ## 2. 插件页面:样式与 JS 必须独立文件
 
@@ -74,3 +86,40 @@ Agent 在处理本仓库的任何任务时，必须遵循以下 Agent Client Pro
 - 发布物直接在 `<插件>/<版本>/` 目录内迭代;开发阶段**不新建版本目录、不改版本号**。
 - 涉及 exe 的改动:`cargo build --release` 后把产物复制进版本目录,文件名与 `plugin.json` 的 `main` 一致。
 - 改完页面文件后跑 `node --check` 校验 JS;改完协议/Rust 跑 `cargo run --example smoke` 冒烟。
+
+## 4. 决策笔记 (Agent Notes)
+
+§1 反向锚点管「代码内为什么这么写」;本节管**跨会话可检索的决策知识**——拍板、妥协、裁剪
+要落成结构化笔记,让追溯看板能按分类/状态/引用聚合。谱系:write-notes-like-deepseek
+(DeepSeek Harness 的 Agent Notes 实践)。宿主会把 `.agents/notes/` 解析进追溯索引,看板直接展示。
+
+### 4.1 什么时候写 (命中任一即"非平凡";判不准时从严)
+
+- **必写**:改动涉及行为/架构/跨文件契约/流程工具链/测试策略/落盘·网络·配置格式;推翻或取代旧决定;写复盘。
+- 三向自查:**立新规**(新契约/边界/运行时不变量)、**记妥协**(为看不见的约束放弃了主流或直觉解法)、**做减法**(破坏性重构/裁剪/API 收窄)。
+- **禁写**(直接改代码):纯格式化、错别字、无歧义重命名、不改行为的样式/依赖补丁、单模块内看 diff 即懂的修复。
+- 对话信号:拍板("就选 X")、比较中("X 和 Y 怎么选")、同一段理由被解释第二遍。
+
+### 4.2 路径即状态,路径即分类
+
+    .agents/notes/{proposed|implemented|rejected|archived}/{feature|bug-fix|simplification|architecture|process|testing}/yyyy-mm-dd-主题.md
+
+- 状态四个 lifecycle:`proposed` 方案稿 / `implemented` 已落地(与代码同批提交) / `rejected` 审慎否掉(防重犯才留) / `archived` 封存只读。
+- 分类六个枚举**不许自造**;转状态 = git mv 挪目录,不改文件名。
+- **文件名即锚点 id**(`yyyy-mm-dd-主题`),别的笔记用相对链接指它,代码用 `@see` 指文件(§1)。
+
+### 4.3 笔记骨架 (compliance 的 AGENT_NOTE_FORMAT 规则会机械校验)
+
+    # Agent Note: <一句话标题>
+    Status: implemented
+    Class: architecture
+
+    ## 背景
+    ## 决策           ← 现在时,写"是什么",不写"我们考虑过"
+    ## 放弃方案        ← 先写它最强的理由,再写为什么仍然不用
+    ## 代价与后果      ← 收益和代价都要写
+
+- `Status:`/`Class:` 行必须与所在目录一致;proposed 稿与 implemented 篇互链,施工完同批转正。
+- 笔记互链死链不过夜;可在正文写 `Trace: s_<会话>#<序号>` 关联当次追溯事件。
+- 笔记落盘后顺手重建看板索引:`node .agents/runner/trace-index.mjs`——看板读的是 index.json,
+  不重建就看不到新笔记(宿主会话收尾会自动重建,这条主要管直开的客户端会话)。

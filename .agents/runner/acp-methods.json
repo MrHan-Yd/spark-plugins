@@ -1,0 +1,125 @@
+{
+  "spec": "Agent Client Protocol (ACP)",
+  "source": "https://agentclientprotocol.com/protocol",
+  "protocolVersionsKnown": [1, 2],
+  "whyThisFileExists": [
+    "原设计文档里的方法名有 6 个在协议里不存在（见 rejected 段），宿主如果照抄就会 reject 掉真实报文或挂起。",
+    "这份清单是宿主校验入站消息的唯一依据：方向不符或方法未登记 -> 立即回 JSON-RPC 错误码，绝不静默挂起。"
+  ],
+  "conventions": {
+    "filePathRule": "协议里的 path 必须是绝对路径",
+    "lineNumberRule": "行号 1-based",
+    "propertyCase": "ACP 定义的属性名用 camelCase，判别式字段的字符串值用 snake_case",
+    "extensionRule": "自定义扩展用 _meta 字段，或把方法名以 _ 开头；未登记的非 _ 前缀方法一律视为非法",
+    "transport": "stdio，newline-delimited JSON-RPC 2.0（同一连接上双向）"
+  },
+  "methods": {
+    "initialize": {
+      "dir": "client->agent",
+      "kind": "request",
+      "required": ["protocolVersion"],
+      "optional": ["clientCapabilities", "clientInfo"],
+      "stability": "stable",
+      "note": "只协商版本与能力。params 里没有 systemPrompt / prompt 字段 —— AGENTS.md 不可能从这里注入。"
+    },
+    "authenticate": {
+      "dir": "client->agent",
+      "kind": "request",
+      "required": ["methodId"],
+      "optional": ["data"],
+      "stability": "stable",
+      "note": "仅当 initialize 返回的 authMethods 非空时才可以调用。"
+    },
+    "session/new": {
+      "dir": "client->agent",
+      "kind": "request",
+      "required": ["cwd", "mcpServers"],
+      "optional": ["_meta"],
+      "stability": "stable",
+      "note": "缺这步就没有 sessionId，session/prompt 无从下手 —— 原文档整个生命周期漏了它。"
+    },
+    "session/prompt": {
+      "dir": "client->agent",
+      "kind": "request",
+      "required": ["sessionId", "content"],
+      "stability": "stable",
+      "note": "content 是内容块数组。要把仓库规则喂进去，只能用 resource / resource_link 块（需 embeddedContext 能力）。"
+    },
+    "session/cancel": {
+      "dir": "client->agent",
+      "kind": "notification",
+      "required": ["sessionId"],
+      "stability": "stable",
+      "note": "通知，无响应。原文档也没有它 —— 没有取消语义的看板拦不住一次跑飞的 agent。"
+    },
+    "session/list": { "dir": "client->agent", "kind": "request", "required": [], "stability": "v2" },
+    "session/resume": { "dir": "client->agent", "kind": "request", "required": ["sessionId"], "stability": "v2" },
+    "session/close": { "dir": "client->agent", "kind": "request", "required": ["sessionId"], "stability": "v2" },
+    "session/load": {
+      "dir": "client->agent",
+      "kind": "request",
+      "required": ["sessionId", "cwd", "mcpServers"],
+      "stability": "v1",
+      "note": "v2 已由 session/resume 取代。不锁协议版本就会踩这个漂移。"
+    },
+    "session/set_mode": { "dir": "client->agent", "kind": "request", "required": ["sessionId", "modeId"], "stability": "stable" },
+    "session/set_model": { "dir": "client->agent", "kind": "request", "required": ["sessionId", "modelId"], "stability": "unstable" },
+
+    "session/request_permission": {
+      "dir": "agent->client",
+      "kind": "request",
+      "required": ["sessionId", "toolCall", "options"],
+      "stability": "stable",
+      "note": "方向是 agent 反向问 client。response 形如 {outcome:{outcome:'selected',optionId}} 或 {outcome:{outcome:'cancelled'}}。看板不该自造 Approve/Reject 按钮，应渲染 agent 给的 options。"
+    },
+    "fs/read_text_file": {
+      "dir": "agent->client",
+      "kind": "request",
+      "required": ["sessionId", "path"],
+      "optional": ["line", "limit"],
+      "stability": "stable",
+      "note": "需 clientCapabilities.fs.readTextFile。"
+    },
+    "fs/write_text_file": {
+      "dir": "agent->client",
+      "kind": "request",
+      "required": ["sessionId", "path", "content"],
+      "stability": "stable",
+      "note": "整文件写。协议没有 patch 方法 —— 看板的 Diff 必须宿主自己算。"
+    },
+    "terminal/create": {
+      "dir": "agent->client",
+      "kind": "request",
+      "required": ["sessionId", "command"],
+      "optional": ["args", "cwd", "env"],
+      "stability": "stable",
+      "note": "command 在官方 schema 里是 argv 数组（本宿主的 mock 也按数组发）。原文档的 terminal/exec 这个名字不存在。"
+    },
+    "terminal/output": { "dir": "agent->client", "kind": "request", "required": ["sessionId", "terminalId"], "stability": "stable" },
+    "terminal/wait_for_exit": { "dir": "agent->client", "kind": "request", "required": ["sessionId", "terminalId"], "stability": "stable" },
+    "terminal/kill": { "dir": "agent->client", "kind": "request", "required": ["sessionId", "terminalId"], "stability": "stable" },
+    "terminal/release": { "dir": "agent->client", "kind": "request", "required": ["sessionId", "terminalId"], "stability": "stable" },
+    "elicitation/create": { "dir": "agent->client", "kind": "request", "required": ["sessionId", "message"], "stability": "unstable" },
+
+    "session/update": {
+      "dir": "agent->client",
+      "kind": "notification",
+      "required": ["sessionId", "update"],
+      "stability": "stable",
+      "note": "「思考轨迹」的来源。update.kind 取值包括 agent_message_chunk / agent_thought_chunk / user_message_chunk / tool_call / tool_call_update / plan 等。agent 不发 thought chunk 时看板就是空的 —— 规格里要写成 when available。"
+    }
+  },
+  "capabilitiesGate": {
+    "note": "只有 client 在 initialize 里声明了对应能力，agent 才会把这些操作反向路由给 client。不声明 -> agent 自行写盘/执行，宿主收不到任何事件，整条合规链失效。这是「非侵入式」与「能拦截」互斥的根因。",
+    "fs": { "readTextFile": "fs/read_text_file", "writeTextFile": "fs/write_text_file" },
+    "terminal": ["terminal/create", "terminal/output", "terminal/wait_for_exit", "terminal/kill", "terminal/release"]
+  },
+  "rejected": {
+    "tools/call": "MCP 的命名。ACP 的工具调用以 session/update 通知形式下发（update.kind = tool_call）。",
+    "context/update": "ACP 没有这个方法。上下文同步只能用 session/prompt 的 resource 内容块或 session/new 的 _meta。",
+    "fs/write": "真名 fs/write_text_file。",
+    "terminal/exec": "真名 terminal/create，且执行结果要再调 terminal/wait_for_exit / terminal/output 取。",
+    "permission/request": "真名 session/request_permission，且方向是 agent->client 的反向 RPC，不是宿主主动推给看板。",
+    "fs_patch": "ACP 没有 patch 方法。写盘只有整文件的 fs/write_text_file，Diff 需要宿主自己算。"
+  }
+}
