@@ -129,6 +129,18 @@
       });
     }
 
+    /** 原页几何 ctx（scale=1，仅 /Rotate，不含 rotateDelta）——getTextContent
+     *  预填探针用：文本 item 坐标与原页几何同基准，与编辑视图 rotateDelta 解耦。 */
+    function srcCtxOf(orderIndex) {
+      var it = pageOrder[orderIndex];
+      var pp = it && pageParams[it.srcIndex];
+      if (!pp) return null;
+      return G.makePageCtx({
+        cropX: pp.cropX, cropY: pp.cropY, cropW: pp.cropW, cropH: pp.cropH,
+        scale: 1, rotation: pp.rotate0
+      });
+    }
+
     function pageIdToOrderIndex(pageId) {
       for (var i = 0; i < pageOrder.length; i++) if (pageOrder[i].id === pageId) return i;
       return -1;
@@ -338,6 +350,7 @@
       setOrder: setOrder,
       relayout: relayout,
       pageCtxOf: pageCtxOf,
+      srcCtxOf: srcCtxOf,
       pageIdToOrderIndex: pageIdToOrderIndex,
       orderIndexOf: function (pageId) { return pageIdToOrderIndex(pageId); },
       frameOf: function (pageId) {

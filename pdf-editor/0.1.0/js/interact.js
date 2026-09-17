@@ -53,6 +53,11 @@
     function onPointerDown(e) {
       if (renderer.isGesture() || !store.get().doc) return;
       if (e.button !== 0) return;
+      /* 就地编辑中：点编辑框内交给浏览器光标；点外部先提交再继续选择/拖拽 */
+      if (editing) {
+        if (editing.box.contains(e.target)) return;
+        exitTextEdit(true);
+      }
       var handle = e.target.closest && e.target.closest('.ov-handle');
       if (handle) {
         var id = handle.closest('.ov-handles').dataset.handleFor;
@@ -75,11 +80,10 @@
         var start = screenPointInPage(e, hit.o.pageId);
         drag = {
           kind: 'move', o: hit.o, el: hit.el, ctx: ctx,
+          startX: e.clientX, startY: e.clientY,          // 缺失则 dx=NaN：拖动即坐标污染
           startPagePt: G.pointCssToPage(start.px, start.py, ctx),
-          moved: false, dx: 0, dy: 0,
-          editing: hit.el.querySelector('.ov-text') && hit.el.querySelector('.ov-text').isContentEditable
+          moved: false, dx: 0, dy: 0
         };
-        if (drag.editing) { drag = null; return; }   // 就地编辑中的元素不拖动
         e.preventDefault();
         return;
       }
@@ -91,7 +95,7 @@
         var ctx2 = renderer.pageCtxOf(renderer.orderIndexOf(activePageId));
         var sp = screenPointInPage(e, activePageId);
         if (!sp) return;
-        drag = { kind: 'draw', mode: mode, ctx: ctx2, pageId: activePageId, startPagePt: G.pointCssToPage(sp.px, sp.py, ctx2), ghost: makeGhost(activePageId) };
+        drag = { kind: 'draw', mode: mode, ctx: ctx2, pageId: activePageId, startScreen: sp, startPagePt: G.pointCssToPage(sp.px, sp.py, ctx2), ghost: makeGhost(activePageId) };
         e.preventDefault();
       } else if (store.get().selection.length) {
         store.change('selection-set', { ids: [] });
@@ -201,6 +205,14 @@
         history.push(C.updateOverlay(store, d.o.id, b, a, '调整大小'));
       } else if (d.kind === 'draw') {
         if (d.ghost) d.ghost.remove();
+        var endSp = screenPointInPage(e, store.get().activePageId);
+        var dragPx = endSp && d.startScreen
+          ? Math.abs(endSp.px - d.startScreen.px) + Math.abs(endSp.py - d.startScreen.py) : 999;
+        /* 白盒工具单击（几乎无位移）：点击原文 → 自动白盒 + 预填文本改写 */
+        if (dragPx < 6 && d.mode === 'whiteout' && opts.probeTextAt) {
+          probeWhiteout(d.pageId, d.startPagePt);
+          return;
+        }
         var rect = d.curRect && d.curRect.w >= MIN_DRAW_PT && d.curRect.h >= MIN_DRAW_PT
           ? G.clampRectToPage(snapPage(d.curRect, d.ctx), d.ctx) : null;
         if (!rect) { if (overlayView) overlayView.syncPage(store.get().activePageId); return; }
@@ -223,6 +235,41 @@
     }
 
     /* ── 绘制创建 ── */
+
+    /** 白盒工具单击原文：自动白盒遮盖 + 预填文本框（架构 P0 功能 4）。
+     *  白盒与预填文本框是一个撤销单元（改写原文）；预填位置是建议值
+     *  （架构 R2：CJK 偏移风险，用户可拖正），进编辑态即改。 */
+    function probeWhiteout(pageId, localPt) {
+      opts.probeTextAt(pageId, localPt).then(function (hit) {
+        if (!store.get().doc) return;
+        if (!hit) { toast('此处未找到文字，可拖拽绘制白盒'); return; }
+        var z = store.topZ(pageId) + 1;
+        var wo = M.makeWhiteout(pageId, hit.rect, z);
+        wo.id = M.nextId(store.get(), 'ov');
+        var to = M.makeOverlay('text', {
+          pageId: pageId, x: hit.rect.x, y: hit.rect.y, w: hit.rect.w, h: hit.rect.h, z: z + 1,
+          text: { value: hit.text, fontSize: hit.fontSize, lines: null }
+        });
+        to.id = M.nextId(store.get(), 'ov');
+        var woSnap = M.clone(wo), toSnap = M.clone(to);
+        store.change('overlay-add', { overlay: wo, asset: null });
+        store.change('overlay-add', { overlay: to, asset: null });
+        history.push({
+          label: '改写原文',
+          do: function () {
+            store.change('overlay-add', { overlay: M.clone(woSnap), asset: null });
+            store.change('overlay-add', { overlay: M.clone(toSnap), asset: null });
+          },
+          undo: function () {
+            store.change('overlay-remove', { id: woSnap.id });
+            store.change('overlay-remove', { id: toSnap.id });
+          }
+        });
+        store.change('selection-set', { ids: [to.id] });
+        store.change('meta', { patch: { mode: 'view' } });
+        enterTextEdit(to);
+      }, function () { toast('原文定位失败，可拖拽绘制白盒'); });
+    }
 
     function createByMode(mode, rect, ctx) {
       var pageId = store.get().activePageId;
@@ -258,6 +305,9 @@
       box.contentEditable = 'plaintext-only';
       box.classList.add('editing');
       overlayView && overlayView.setEditing(o.id);
+      /* 失焦即提交（真机 P0 修复：没有 blur 提交，用户打字全部丢失——
+       * 「编辑不了」的主感受来源；once：exitTextEdit 内部触发 blur 时不再递归） */
+      box.addEventListener('blur', function () { exitTextEdit(true); }, { once: true });
       box.focus();
       doc.getSelection().selectAllChildren(box);
       onBeforeCommand && onBeforeCommand('edit-start');

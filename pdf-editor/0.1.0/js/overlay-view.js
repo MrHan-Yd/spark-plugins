@@ -81,6 +81,7 @@
       layer.textContent = '';
       for (var i = 0; i < items.length; i++) {
         var o = items[i];
+        if (o.id === editingId) continue;        // 就地编辑中：保持 DOM 不重建（重建丢光标与输入）
         var el = buildElement(o);
         placeElement(el, o, layer);
         if (o.type === 'text' && o.text && o.text.lines && !o.text.lines.length) {

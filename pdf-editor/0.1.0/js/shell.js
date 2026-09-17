@@ -140,7 +140,8 @@
       renderer: renderer, store: store, history: history,
       scrollEl: scrollEl, document: document, toast: toast,
       zoom: function (k) { renderer.zoomTo(renderer.getScale() * k); },
-      zoomFit: function () { renderer.zoomFitWidth(); }
+      zoomFit: function () { renderer.zoomFitWidth(); },
+      probeTextAt: probeTextAt
     });
     overlayView.unsubs && interact.bindOverlayView(overlayView);
     var pagesUi = PDFED.pages.createPages({
@@ -463,6 +464,43 @@
       return global.confirm ? global.confirm(msg) : true;
     }
 
+    /* 「点击原文 → 自动白盒+预填」探针（架构 P0 功能 4，R2 承认其建议值性质）：
+     * getTextContent item 在原页 viewport(scale=1, /Rotate) 空间做命中测试
+     * （容差半径取最近），bbox 两角经 srcCtx 反算局部矩形；坐标自洽依赖
+     * 存储空间的未旋转权威性（rotateDelta 只影响视图，不影响局部点）。 */
+    async function probeTextAt(pageId, localPt) {
+      if (!renderer.getDoc() || !current) return null;
+      var idx = renderer.orderIndexOf(pageId);
+      var srcCtx = renderer.srcCtxOf(idx);
+      if (!srcCtx) return null;
+      var pg = store.get().pages[idx];
+      if (!pg || pg.srcIndex == null) return null;
+      var pdfPage = await renderer.getDoc().getPage(pg.srcIndex + 1);
+      var vp1 = pdfPage.getViewport({ scale: 1 });
+      var tc = await pdfPage.getTextContent({ viewport: vp1 });
+      var css = G.pointPageToCss(localPt.x, localPt.y, srcCtx);
+      var best = null, bestD = 28;
+      for (var i = 0; i < tc.items.length; i++) {
+        var it = tc.items[i];
+        if (!it.str || !it.str.trim() || !it.width) continue;
+        var L = it.transform[4], B = it.transform[5];
+        var ih = Math.abs(it.height || 10);
+        var R = L + it.width, T = B - ih;
+        var inside = css.px >= L - 2 && css.px <= R + 2 && css.py >= T - 2 && css.py <= B + 2;
+        var dist = inside ? 0 : Math.hypot(css.px - (L + R) / 2, css.py - (T + B) / 2);
+        if (dist < bestD) { bestD = dist; best = it; }
+      }
+      if (!best) return null;
+      var p1 = G.pointCssToPage(best.transform[4] - 1, best.transform[5] - Math.abs(best.height || 10) - 1, srcCtx);
+      var p2 = G.pointCssToPage(best.transform[4] + best.width + 1, best.transform[5] + 1, srcCtx);
+      var rect = G.clampRectToPage(G.normalizeRect(p1.x, p1.y, p2.x, p2.y), srcCtx);
+      return {
+        rect: rect,
+        text: best.str,
+        fontSize: clamp(Math.abs(best.height || 10) * 0.85, 6, 48)
+      };
+    }
+
     /* ── 工具栏与状态栏 ── */
     var tabBtns = document.querySelectorAll('[data-mode]');
     Array.prototype.forEach.call(tabBtns, function (b) {
@@ -487,7 +525,11 @@
     });
     function setTool(mode) {
       store.change('meta', { patch: { mode: mode } });
-      toast({ text: '在页面上拖拽绘制文本框', whiteout: '在页面上拖拽覆盖白盒（遮盖原文）', highlight: '在页面上拖拽画高亮' }[mode] || '', 2200);
+      toast({
+        text: '在页面上拖拽绘制文本框',
+        whiteout: '点击原文自动遮盖改写；或拖拽画白盒',
+        highlight: '在页面上拖拽画高亮'
+      }[mode] || '', 2600);
     }
 
     /* 缩放：Ctrl+滚轮（两段式）+ 状态栏 */
