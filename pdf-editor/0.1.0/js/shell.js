@@ -197,7 +197,9 @@
     });
 
     /* ── 打开流程 ── */
+    var opening = false;
     async function openFile(file) {
+      if (opening || saving) return;
       try {
         toast('正在打开 ' + file.name + '…');
         var buf = new Uint8Array(await file.arrayBuffer());
@@ -208,33 +210,42 @@
     }
 
     async function openBytes(bytes, origName) {
-      if (saving) return;
-      /* 加密探测：pdf.js 可开但 pdf-lib 拒绝的文档，编辑受限（架构 §9.3） */
+      if (saving || opening) return;
+      opening = true;
       try {
-        await global.PDFLib.PDFDocument.load(bytes);
-      } catch (e) {
-        toast('该 PDF 已加密，无法编辑（可先用 PDF工具箱 压缩重存为无加密副本）', 5000);
-        return;
+        /* 加密探测：pdf.js 可开但 pdf-lib 拒绝的文档，编辑受限（架构 §9.3） */
+        try {
+          await global.PDFLib.PDFDocument.load(bytes);
+        } catch (e) {
+          toast('该 PDF 已加密，无法编辑（可先用 PDF工具箱 压缩重存为无加密副本）', 5000);
+          return;
+        }
+        var docId = await sha256Hex16(bytes);
+        /* openDocument 只解析+提取 pageParams；页模型在此构建，setOrder 由本函数显式调
+         * （buildFrame 唯一入口，真机 P0：漏调 = 画布静默空白） */
+        var doc = await renderer.openDocument(bytes, { docId: docId, origName: origName });
+        var count = renderer.pageCountSrc();
+        var pages = [];
+        for (var i = 0; i < count; i++) {
+          var pg = M.makePage({ srcIndex: i });
+          pg.id = M.nextId(withCounters(), 'pg');   // 计数器宿主唯一：store.state.counters（字面量新对象会让所有页都叫 pg_1）
+          pages.push(pg);
+        }
+        current = { docId: docId, origName: origName };
+        docBytes = bytes;
+        history.clear();                             // 撤销栈跨文档隔离（A 的快照灌进 B 必乱）
+        renderer.setOrder(pages);                    // 先建 frame：doc-open 的订阅方（syncAll/thumbs）依赖 overlayLayerOf 可解析
+        store.change('doc-open', { doc: { docId: docId, origName: origName, pageCount: count }, pages: pages });
+        document.getElementById('empty-state').classList.add('hidden');
+        document.getElementById('open-guide').classList.add('hidden');
+        document.getElementById('doc-header').classList.remove('hidden');
+        document.getElementById('doc-name').textContent = origName;
+        pushRecent({ name: origName, docId: docId, at: Date.now() });
+        tryRestoreDraft(docId);
+        toast('已打开：' + origName + '（' + count + ' 页）');
+      } finally {
+        opening = false;
       }
-      var docId = await sha256Hex16(bytes);
-      var doc = await renderer.openDocument(bytes, { docId: docId, origName: origName }, null);
-      var count = renderer.pageCountSrc();
-      var pages = [];
-      for (var i = 0; i < count; i++) {
-        var pg = M.makePage({ srcIndex: i });
-        pg.id = M.nextId({ counters: { ov: 0, pg: 0, as: 0 } }, 'pg');
-        pages.push(pg);
-      }
-      current = { docId: docId, origName: origName };
-      docBytes = bytes;
-      store.change('doc-open', { doc: { docId: docId, origName: origName, pageCount: count }, pages: pages });
-      document.getElementById('empty-state').classList.add('hidden');
-      document.getElementById('open-guide').classList.add('hidden');
-      document.getElementById('doc-header').classList.remove('hidden');
-      document.getElementById('doc-name').textContent = origName;
-      pushRecent({ name: origName, docId: docId, at: Date.now() });
-      tryRestoreDraft(docId);
-      toast('已打开：' + origName + '（' + count + ' 页）');
     }
 
     /* 覆盖物 id 分配需要持久计数器：nextId 调用方持有 counters。
@@ -273,16 +284,9 @@
         var mins = draft.savedAt ? Math.max(1, Math.round((Date.now() - draft.savedAt) / 60000)) : 0;
         if (!draft.overlays.length) return;
         if (confirmAction('发现 ' + mins + ' 分钟前的未导出编辑草稿（' + draft.overlays.length + ' 个元素），恢复吗？')) {
-          var st = store.get();
-          st.pages = draft.pages;
-          st.overlays = draft.overlays;
-          st.assets = draft.assets;
-          st.counters = draft.counters;
-          store.change('pages-set', { pages: draft.pages });
-          renderer.setOrder(store.get().pages);
+          store.change('draft-restore', { draft: draft });   // 唯一写口：多字段原子替换 + 标脏
+          renderer.setOrder(store.get().pages);              // frame 重建（草稿页 id 与新开页序不同）
           overlayView.syncAll();
-          store.change('save-marked');
-          store.get().dirty = true;              // 恢复即视为有未导出变更
           toast('已恢复草稿');
         }
       } catch (e) {
@@ -402,7 +406,8 @@
         if (result.warnings && result.warnings.length)
           toast('导出完成（' + result.warnings.length + ' 处降级，详见状态）', 4000);
         var blob = new Blob([result.bytes], { type: 'application/pdf' });
-        var suggested = (current.origName || 'document.pdf').replace(/\.pdf$/i, '') + '-编辑.pdf';
+        /* 注意：此处必须调下方 suggested() 函数——若在此声明同名 var 会函数级
+         * 提升遮蔽函数名，调用变成字符串调用 → 保存必炸（真机 P1 实测） */
         var how = await saveBlob(blob, suggested(current.origName));
         if (how === 'saved' || how === 'downloaded') {
           store.change('save-marked');

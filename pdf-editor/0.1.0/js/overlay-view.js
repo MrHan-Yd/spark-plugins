@@ -107,8 +107,13 @@
       var imgs = layer.querySelectorAll('img.ov-img[data-asset-id]:not([src])');
       for (var i = 0; i < imgs.length; i++) {
         if (opts.getAssetDataUrl) {
-          var url = opts.getAssetDataUrl(imgs[i].dataset.assetId);
-          if (url) imgs[i].src = url;
+          /* getAssetDataUrl 是 async（spark.db 读字节）：src 不能直接赋 Promise
+           * （会变 "[object Promise]" 永远裂图），resolve 后回填 */
+          (function (img, assetId) {
+            Promise.resolve(opts.getAssetDataUrl(assetId)).then(function (url) {
+              if (url && !img.src) img.src = url;
+            });
+          })(imgs[i], imgs[i].dataset.assetId);
         }
       }
     }

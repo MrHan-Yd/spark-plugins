@@ -70,8 +70,11 @@
         });
         pg.cleanup();
       }
-      setOrder(pages);
-      setupObserver();
+      /* pages 契约（真机 P0 修复 2026-09-17）：可空——openDocument 只负责解析与
+       * pageParams 提取；调用方（shell.openBytes）拿到 pageCount 构建页模型
+       * （id 必须经 store.counters 分配）后必须显式 setOrder(pages)——
+       * buildFrame 唯一入口在 setOrder，漏调 = 画布静默空白比崩溃更难追。 */
+      if (pages) setOrder(pages);
       return doc;
     }
 

@@ -27,6 +27,7 @@
       overlays: [],                 // model.Overlay[]（数组序 + 显式 z 双轨）
       assets: {},                   // id → Asset 元数据（字节在 spark.db）
       selection: [],                // 选中 overlay id[]
+      counters: { ov: 0, pg: 0, as: 0 },   // id 分配唯一宿主（shell/pages/interact 同源）
       activePageId: null,
       mode: 'start',                // start | text | shape | page | view
       zoom: 1,
@@ -114,6 +115,17 @@
         var keys = Object.keys(p.patch || {});
         keys.forEach(function (k) { state[k] = p.patch[k]; });
       },
+      /* 草稿恢复：多字段原子替换（pages/overlays/assets/counters 同批），
+       * doc-open 会清空编辑态故不能复用；恢复即视为有未导出变更 */
+      'draft-restore': function (p) {
+        var d = p.draft;
+        state.pages = d.pages;
+        state.overlays = d.overlays;
+        state.assets = d.assets;
+        state.counters = d.counters;
+        state.activePageId = state.pages.length ? state.pages[0].id : null;
+        markDirty();
+      },
       'save-marked': function () {
         state.dirty = false;
         state.savedAt = Date.now();
@@ -128,6 +140,7 @@
       switch (kind) {
         case 'doc-open': case 'doc-close': emit('doc'); emit('pages'); emit('overlays'); emit('selection'); break;
         case 'pages-set': emit('pages'); break;
+        case 'draft-restore': emit('pages'); emit('overlays'); emit('selection'); break;
         case 'overlay-add': case 'overlay-remove': case 'overlay-update':
           emit('overlays'); emit('selection'); break;
         case 'selection-set': emit('selection'); break;

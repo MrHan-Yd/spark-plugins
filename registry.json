@@ -518,7 +518,7 @@
           "sha256": null,
           "size": null,
           "released": "2026-09-17",
-          "signature": { "schema": 1, "key_id": "spark-official-v1", "algorithm": "ed25519", "signature": "74QGZIJlysLS1XmGlv6R+cPEc1JuwIgSWKSoYXye+J5MNpfdlm0BJX64Dl7PGQJlqy+1UvW2sjybHAqez0xgDQ==" }
+          "signature": { "schema": 1, "key_id": "spark-official-v1", "algorithm": "ed25519", "signature": "l1yiUwBgqFW91wBMjWeUVGoSCVGaL7KCsRiMtgyViUtNAkyFihJltpTqsjLr9sMpeySDqmQ7Z+0VFaCGkZ/CAw==" }
         }
       ]
     }
