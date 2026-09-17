@@ -46,11 +46,18 @@ var MDV_SOURCE = (function () {
   function err(message, code) {
     var e = new Error(message);
     e.code = code || 'SOURCE_ERROR';
+    /* 自产错误的 message 就是用户可读文案：readableErr 按 code 透传，不二次包装 */
     return e;
   }
 
+  /* 自产错误（TOO_LARGE/NO_PATH/NOT_MD 等）自带用户可读 message，直接透传；
+     只翻译宿主/IO 类错误 */
   function readableErr(e) {
+    if (e && e.info) return e.info;                       // 已是翻译过的 info 对象，不二次包装
     var code = (e && e.code) || String((e && e.message) || e);
+    if (code === 'TOO_LARGE' || code === 'NO_PATH' || code === 'NOT_MD' || code === 'UNAVAILABLE' || code === 'EMPTY') {
+      return { code: code, title: (e && e.message) || '读取失败', body: '可改用手选文件打开，或检查路径后重试。' };
+    }
     if (code === 'PERMISSION_DENIED') return { code: code, title: '未获得读取授权', body: '在 设置 → 插件 → Markdown 查看器 中授权「读取文件」，或手选文件打开。' };
     if (code === 'PERMISSION_SCOPE') return { code: code, title: '文件在授权目录范围外', body: '在 设置 → 插件 → Markdown 查看器 中，把文件所在目录加入读取授权范围，或手选文件打开。' };
     if (/not found|no such|不存在/i.test(String((e && e.message) || ''))) return { code: 'NOT_FOUND', title: '找不到文件', body: '路径不存在。注意需要完整路径（含盘符），或手选文件打开。' };

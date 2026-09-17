@@ -1,11 +1,18 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="dark">
+<html lang="zh-CN">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark light">
 <title>Markdown 查看器</title>
 <link rel="stylesheet" href="style.css">
+<script>
+/* 首帧防闪色：宿主 db 是 async，到达前先按系统偏好同步定主题，initTheme 再以用户存档覆盖 */
+try {
+  document.documentElement.dataset.theme =
+  (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark';
+} catch (e) { document.documentElement.dataset.theme = 'dark'; }
+</script>
 </head>
 <body>
 <div class="app" id="app">
@@ -68,13 +75,6 @@
     </section>
 
     <section class="pane" id="viewDoc" hidden>
-      <div class="banner" id="banner" hidden>
-        <span id="bannerText"></span>
-        <span class="banner-btns">
-          <button id="bannerKeep" class="linkbtn">仍要打开</button>
-          <button id="bannerCancel" class="linkbtn">取消</button>
-        </span>
-      </div>
       <div class="scroller" id="scroller">
         <article class="md" id="article" tabindex="0"></article>
       </div>

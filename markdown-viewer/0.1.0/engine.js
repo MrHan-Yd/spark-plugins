@@ -135,17 +135,20 @@ var MDV_ENGINE = (function () {
     }
 
     /* 图片分流：inline 直接用；relative 视 reader 能力位 → pending（等 app.js 填 objectURL）
-       或 blocked（占位）；remote 禁网必失败 → 占位 + 点击可经 openExternal 在浏览器看 */
-    var imgs = article.querySelectorAll('img[src]');
+       或 blocked（占位）；remote 禁网必失败 → 占位。非 inline 一律摘 src 交给 app.js 落地，
+       挂 md-img 类保证 max-width/圆角约束在任何通道下都生效 */
+    var imgs = article.querySelectorAll('img');
     var pendingImgs = [];
     for (var i = imgs.length - 1; i >= 0; i--) {
       var img = imgs[i];
       var src = img.getAttribute('src') || '';
       var cat = classifyImage(src);
+      img.classList.add('md-img');
       if (cat === 'inline') continue;
       if (cat === 'relative' && reader && reader.canReadBinary()) {
         img.setAttribute('data-img', 'pending');
         img.setAttribute('data-src', src);
+        img.setAttribute('data-pending', '');
       } else if (cat === 'remote') {
         img.setAttribute('data-img', 'remote');
       } else {

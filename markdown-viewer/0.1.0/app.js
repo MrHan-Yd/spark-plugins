@@ -8,11 +8,10 @@
 'use strict';
 
 var $ = function (id) { return document.getElementById(id); };
-var app = $('app'), article = $('article'), scroller = $('scroller');
+var article = $('article'), scroller = $('scroller');
 var tocEl = $('toc'), tocList = $('tocList'), tocMask = $('tocMask');
 var viewHome = $('viewHome'), viewDoc = $('viewDoc'), viewErr = $('viewErr');
 var stL = $('stL'), stR = $('stR'), toastEl = $('toast');
-var hasSpark = !!(window.spark && window.spark.fs && window.spark.db);
 var S = window.MDV_SOURCE, E = window.MDV_ENGINE;
 
 /* ── spark.db 封装（无宿主时退化为内存，浏览器预览用） ── */
@@ -49,10 +48,8 @@ function esc(s) {
 }
 
 /* ── 主题 ── */
-var theme = null;
 function applyTheme(t) {
   document.documentElement.dataset.theme = t;
-  $('btnTheme').classList.toggle('on', false);
 }
 async function initTheme() {
   var saved = await db.get('theme');
@@ -73,6 +70,8 @@ function show(mode) {
   viewHome.hidden = mode !== 'home';
   viewDoc.hidden = mode !== 'doc';
   viewErr.hidden = mode !== 'err';
+  /* 大纲只在 doc 态有意义：home/err 态隐藏，避免空「大纲 0」栏常驻首屏 */
+  tocEl.hidden = mode !== 'doc';
   $('btName').textContent = mode === 'doc' && reader ? (reader.name || reader.label) : 'Markdown 查看器';
   $('btPath').textContent = mode === 'doc' && reader ? reader.label : '查看 .md 文件 · 输入 md <路径> 直开';
   updateTocButton();
@@ -104,11 +103,9 @@ $('btnFontPlus').addEventListener('click', function () { stepFont(1); });
 
 /* ── TOC：渲染 / scroll-spy / 点击滚动 ── */
 var tocItems = [];
-var tocByLevel = [];
 function renderToc(toc) {
   tocList.innerHTML = '';
   tocItems = toc;
-  tocByLevel = toc.map(function () { return null; });
   $('tocCount').textContent = String(toc.length);
   if (!toc.length) {
     tocList.innerHTML = '<div class="toc-empty">此文件没有标题</div>';
@@ -198,8 +195,8 @@ function updateTocButton() {
   var visible = !tocEl.classList.contains('close') && state.mode === 'doc';
   $('btnToc').classList.toggle('on', visible);
 }
+/* 抽屉态收起：仅窄窗（.drawer 已在）时用，宽窗显隐走 btnToc 分支 */
 function toggleDrawer(open) {
-  tocEl.classList.toggle('drawer', open);
   tocEl.classList.toggle('close', !open);
   tocMask.hidden = !open;
   updateTocButton();
@@ -239,22 +236,22 @@ $('btnToc').addEventListener('click', function () {
 tocMask.addEventListener('click', function () { toggleDrawer(false); });
 window.addEventListener('resize', function () { applyTocLayout(); });
 
-/* TOC 拖宽：180–320，双击复位 */
+/* TOC 拖宽：180–320，双击复位。
+ * 宽度持久化走 CSS 自定义属性 --toc-w（.toc 上 width:var(--toc-w)），不写内联
+ * min-width/flex-basis——内联值会压过 .toc.close 的 width:0/min-width:0，关不掉大纲（实测坑）。 */
 (function () {
   var handle = $('tocHandle'), dragging = false, w = 232;
+  function applyW() { tocEl.style.setProperty('--toc-w', w + 'px'); }
   function onMove(e) {
     if (!dragging) return;
     w = Math.min(320, Math.max(180, e.clientX));
-    tocEl.style.width = w + 'px';
+    tocEl.style.setProperty('--toc-w', w + 'px');
     e.preventDefault();
   }
   function onUp() {
     if (!dragging) return;
     dragging = false;
     handle.classList.remove('drag');
-    tocEl.style.width = '';
-    tocEl.style.minWidth = w + 'px';
-    tocEl.style.flexBasis = w + 'px';
     db.set('toc_width', w);
   }
   handle.addEventListener('mousedown', function (e) { dragging = true; handle.classList.add('drag'); e.preventDefault(); });
@@ -262,15 +259,14 @@ window.addEventListener('resize', function () { applyTocLayout(); });
   window.addEventListener('mouseup', onUp);
   handle.addEventListener('dblclick', function () {
     w = 232;
-    tocEl.style.minWidth = ''; tocEl.style.flexBasis = '';
+    tocEl.style.setProperty('--toc-w', w + 'px');
     db.set('toc_width', 232);
   });
   db.get('toc_width').then(function (saved) {
     var n = Number(saved);
     if (n >= 180 && n <= 320) {
       w = n;
-      tocEl.style.minWidth = w + 'px';
-      tocEl.style.flexBasis = w + 'px';
+      tocEl.style.setProperty('--toc-w', w + 'px');
     }
   });
 })();
@@ -282,8 +278,11 @@ function schedulePos() {
   clearTimeout(posTimer);
   posTimer = setTimeout(savePos, 500);
 }
+/* 位置快照的计算是同步的（读 scrollTop/offsetTop），只有 db 读写是 async——
+   onClose flush 把 async 链缩到一次 db.set，回调里同步发起（宿主关窗前能否等
+   async 完成无契约保证，缩链是唯一可控的降级手段） */
 async function savePos() {
-  if (!lastKey || !tocItems.length) return;
+  if (!lastKey || state.mode !== 'doc') return;
   var max = scroller.scrollHeight - scroller.clientHeight;
   var ratio = max > 0 ? scroller.scrollTop / max : 0;
   var slug = '';
@@ -292,14 +291,19 @@ async function savePos() {
     var el = document.getElementById(tocItems[i].id);
     if (el && el.offsetTop <= top) { slug = tocItems[i].id; break; }
   }
-  var pos = (await db.get(KEY_POS)) || {};
-  pos[lastKey] = { slug: slug, ratio: Math.max(0, Math.min(1, ratio)), ts: Date.now() };
-  var keys = Object.keys(pos);
-  if (keys.length > 50) {
-    keys.sort(function (a, b) { return (pos[a].ts || 0) - (pos[b].ts || 0); });
-    for (var k = 0; k < keys.length - 50; k++) delete pos[keys[k]];
-  }
-  await db.set(KEY_POS, pos);
+  writePos(slug, Math.max(0, Math.min(1, ratio)));
+}
+function writePos(slug, ratio) {
+  db.get(KEY_POS).then(function (pos) {
+    pos = pos || {};
+    pos[lastKey] = { slug: slug || '', ratio: ratio, ts: Date.now() };
+    var keys = Object.keys(pos);
+    if (keys.length > 50) {
+      keys.sort(function (a, b) { return (pos[a].ts || 0) - (pos[b].ts || 0); });
+      for (var k = 0; k < keys.length - 50; k++) delete pos[keys[k]];
+    }
+    return db.set(KEY_POS, pos);
+  }).catch(function () {});
 }
 async function restorePos() {
   if (!lastKey) return;
@@ -400,18 +404,22 @@ async function openByPath(raw) {
 async function openReader(r, text) {
   showLoadbar(true);
   try {
-    if (r.pendingFile) { if (r.pendingFile.size > S.MAX_BYTES) throw S.readableErr({ code: 'TOO_LARGE' }); text = await r.pendingFile.text(); }
+    if (r.pendingFile) {
+      if (r.pendingFile.size > S.MAX_BYTES) throw new Error('文件超过 10MB（上限 ' + Math.round(S.MAX_BYTES / 1048576) + 'MB）');
+      text = await r.pendingFile.text();
+    }
     await renderDoc(r, text);
   } catch (e) {
     showErr(S.readableErr(e), r.label);
   }
   showLoadbar(false);
 }
-async function renderDoc(r, text) {
+/* dirMd：dir 通道当前渲染的 .md 相对路径（「重新加载」与站内跳转都要重读它） */
+async function renderDoc(r, text, dirMd) {
   revokeUrls();
   reader = r;
   lastKey = r.key;
-  currentDirMd = '';
+  currentDirMd = dirMd || '';
   var res = E.render(text, r, article);
 
   /* 图片落地：dir 通道 objectURL 加载；remote/ blocked 生成占位 */
@@ -493,8 +501,7 @@ article.addEventListener('click', async function (e) {
   var href = a.getAttribute('href') || a.getAttribute('data-href') || '';
   e.preventDefault();
   if (kind === 'anchor') {
-    var el = document.getElementById(href.replace(/^#/, ''));
-    if (el) { spyLock = true; animateScroll(Math.max(0, el.offsetTop - 8), function () { setTimeout(function () { spyLock = false; }, 80); }); }
+    jumpToAnchor(href);
     return;
   }
   if (kind === 'external') {
@@ -511,11 +518,9 @@ article.addEventListener('click', async function (e) {
     if (reader && reader.kind === 'dir') {
       if (reader.hasFile(target)) {
         var text = await reader.readText(target);
+        currentDirMd = target;
         await renderDoc(reader, text);
-        if (anchor) setTimeout(function () {
-          var el = document.getElementById('md-' + slugOf(anchor));
-          if (el) animateScroll(Math.max(0, el.offsetTop - 8));
-        }, 100);
+        if (anchor) setTimeout(function () { jumpToAnchor('#' + decodeURIComponent(anchor)); }, 120);
       } else toast('目录内找不到：' + target, true);
     } else if (reader && reader.kind === 'fs') {
       var joined = S.joinPath(reader.dir, target);
@@ -526,6 +531,22 @@ article.addEventListener('click', async function (e) {
     return;
   }
 });
+/* 文内锚点跳转：引擎给标题生成的 id 带 md- 前缀（GitHub slug），md 作者手写的 #锚点
+   可能是原文 id、可能是百分号编码——按序兜底查，全 miss 提示。 */
+function jumpToAnchor(href) {
+  var raw = String(href || '').replace(/^#/, '');
+  if (!raw) return;
+  var cands = [raw, decodeURIComponent(raw), 'md-' + raw, 'md-' + slugOf(raw.replace(/%[0-9a-f]{2}/gi, ''))];
+  for (var i = 0; i < cands.length; i++) {
+    var el = document.getElementById(cands[i]);
+    if (el) {
+      spyLock = true;
+      animateScroll(Math.max(0, el.offsetTop - 8), function () { setTimeout(function () { spyLock = false; }, 80); });
+      return;
+    }
+  }
+  toast('锚点不存在：#' + raw, true);
+}
 function slugOf(text) {
   var s = String(text).trim().toLowerCase().replace(/[^\p{L}\p{N}\s_-]/gu, '').replace(/\s+/g, '-').replace(/^-+|-+$/g, '');
   return s || 'section';
@@ -544,8 +565,11 @@ async function copyText(text) {
   } catch (e) { return false; }
 }
 function flashClass(btn, cls) {
+  /* 连点防护：先清上一轮定时器，反馈不被前一次的恢复截断 */
+  clearTimeout(btn._flashT);
+  btn.classList.remove('ok', 'bad');
   btn.classList.add(cls);
-  setTimeout(function () { btn.classList.remove(cls); }, 1400);
+  btn._flashT = setTimeout(function () { btn.classList.remove(cls); }, 1400);
 }
 function flashCopy(btn, ok, msg) {
   flashClass(btn, ok ? 'ok' : 'bad');
@@ -576,11 +600,10 @@ $('dirInput').addEventListener('change', async function () {
   this.value = '';
   try {
     var r = S.pickDir(files);
-    /* 目录模式默认开目录里第一个 .md；记录它供「重新加载」用 */
+    /* 目录模式默认开目录里第一个 .md；当前 md 由 renderDoc 的 dirMd 参数维护 */
     var mds = r.listMd();
     if (!mds.length) { toast('所选目录里没有 .md 文件', true); return; }
-    currentDirMd = mds[0];
-    await renderDoc(r, await r.readText(currentDirMd));
+    await renderDoc(r, await r.readText(mds[0]), mds[0]);
   } catch (e) {
     if (e && e.code !== 'CANCELLED') showErr(S.readableErr(e));
   }
@@ -593,7 +616,7 @@ $('btnReload').addEventListener('click', async function () {
   if (!reader) return;
   if (reader.kind === 'fs') openByPath(reader.label);
   else if (reader.pendingFile) openReader(reader, null);
-  else if (reader.kind === 'dir' && currentDirMd) renderDoc(reader, await reader.readText(currentDirMd));
+  else if (reader.kind === 'dir' && currentDirMd) renderDoc(reader, await reader.readText(currentDirMd), currentDirMd);
 });
 $('btnErrRetry').addEventListener('click', function () {
   if (state.lastRaw) openByPath(state.lastRaw);
@@ -655,17 +678,15 @@ function boot() {
   loadRecent();
   applyTocLayout();
   if (bootRaw) {
-    /* 带路径进来：直接开；纯空参：主页空态（手选入口在空态里） */
-    S.openByPath(bootRaw).then(function (r) {
-      return renderDoc(r, r.text);
-    }).catch(function (e) {
-      var cands = S.extractCandidates(bootRaw);
-      showErr(S.readableErr(e), cands[0] || bootRaw);
-    });
+    /* 带路径进来：直接开（与页内 openByPath 同一条链，含渲染库预检与加载条）；
+       纯空参：主页空态（手选入口在空态里） */
+    openByPath(bootRaw);
   }
 }
 if (window.spark && window.spark.onClose) {
+  /* 关窗前 flush：滚动位置快照同步计算、writePos 同步发起（async 链已缩到一次 set） */
   window.spark.onClose(function () {
+    clearTimeout(posTimer);
     try { savePos(); } catch (e) {}
   });
 }
