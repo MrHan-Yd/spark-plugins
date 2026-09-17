@@ -112,7 +112,7 @@
     <p class="sub">点击顶部左侧的按钮打开<b>数据源库</b>：最近打开过的来源都在这里，本地与远程混在一起按标签区分，
     置顶的排在前面。选过的会自动记住，下次开窗直接继续看。顶栏搜索框（按 <code>/</code> 聚焦）全局过滤笔记。</p>
     <table class="help-table"><tbody>
-      <tr><td>本地目录</td><td>「选择项目目录…」选项目根即可，<b>不需要授权</b>。目录句柄会记住（IndexedDB），刷新后点一下直接重开；浏览器可能再弹一次授权，点允许即可。不支持句柄记忆的老内核才需要重选。</td></tr>
+      <tr><td>本地目录</td><td>「选择项目目录…」选项目根即可，<b>不需要授权</b>。在 Spark 宿主（WebView2）里每次开窗要重新选一次目录；浏览器直开（Chrome/Edge）才会记住目录句柄（IndexedDB），刷新后点一下直接重开，可能再弹一次授权，点允许即可。</td></tr>
       <tr><td>本地路径</td><td>填绝对路径给 <code>spark.fs</code> 读，能记住并一键重开；需要先在 <b>设置 → 插件</b> 里授权该目录范围，否则报 <code>PERMISSION_SCOPE</code>。</td></tr>
       <tr><td>远程库</td><td>填 <code>index.json</code> 或 <code>bundle.json</code> 的完整 URL。</td></tr>
       <tr><td>粘贴数据</td><td>把导出的 JSON 直接贴进来，适合离线传阅与归档。</td></tr>

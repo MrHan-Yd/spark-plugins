@@ -655,9 +655,12 @@ console.log('\n【目录句柄直达（FSA）】');
     return true;
   })()`);
   // 桩掉选择器：把 OPFS 目录句柄当「用户选中」喂给看板（无头浏览器出不了真实选择器 UI）
+  // FSA 分支现在只在无宿主时走（宿主一律 webkitdirectory），摘掉 spark 桩模拟浏览器直开；
+  // 后面的 Page.reload 会重新注入 STUB，spark 桩自动回来，无需手工恢复
   await ev(`(function(){
     var p = navigator.storage.getDirectory().then(function(r){ return r.getDirectoryHandle('fsa-proj'); });
     window.showDirectoryPicker = function(){ return p; };
+    delete window.spark;
     return true;
   })()`);
   await ev("document.getElementById('btn-lib').click()");

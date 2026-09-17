@@ -582,13 +582,26 @@
     return Math.floor(diff / 86400000) + ' 天前';
   }
 
-  // 选择目录优先走 File System Access API：返回的目录句柄能进 IndexedDB，刷新后免重选直达；
-  // webkitdirectory 的 File 句柄刷新即失效，只配当老内核兜底
+  // 选择目录的双通道取舍：FSA（showDirectoryPicker）句柄能进 IndexedDB、刷新后免重选直达，
+  // 但这条链路只在无头 Chrome 的 file:// 源验证过；Spark 宿主（WebView2）真机实测「弹了框、
+  // 选完没反应」——选完目录后回调静默挂起，不兑现也不报错。宿主环境一律直接走已实测的
+  // webkitdirectory 通道（File 句柄刷新即失效，代价是刷新后要重选一次）；
+  // FSA 只留给无宿主的浏览器预览模式，另加看门狗兜底：promise 不 settle 也不许哑等。
+  // @see [Agent Note: 看板宿主环境跳过 FSA 选择器](../../.agents/notes/implemented/bug-fix/2026-09-17-看板宿主环境跳过FSA选择器.md)
   function pickDirectory() {
-    if (window.showDirectoryPicker) {
+    if (!window.spark && window.showDirectoryPicker) {
+      var fell = false;                            // 看门狗触发后，迟到的 settle 一律丢弃，防二次弹框
+      var watchdog = setTimeout(function () {
+        fell = true;
+        pickDirectoryLegacy();
+      }, 60000);
       window.showDirectoryPicker({ mode: 'read' }).then(function (handle) {
+        if (fell) return;
+        clearTimeout(watchdog);
         if (handle) loadFrom({ kind: 'dir', handle: handle });
       }).catch(function (e) {
+        if (fell) return;
+        clearTimeout(watchdog);
         if (e && e.name === 'AbortError') return;   // 用户取消，不当作故障
         pickDirectoryLegacy();                       // webview 有函数但被禁：退回 input 选择器
       });
