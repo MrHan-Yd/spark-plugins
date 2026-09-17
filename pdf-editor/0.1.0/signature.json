@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "algorithm": "ed25519",
   "key_id": "spark-official-v1",
-  "signed_at": "2026-09-17T02:49:29Z",
+  "signed_at": "2026-09-17T02:59:29Z",
   "files": [
     {
       "path": "assets/vendor/VENDORS.md",
@@ -816,11 +816,11 @@
     },
     {
       "path": "js/render.js",
-      "sha256": "7ba23589767df50fbbc8ff02bbf2043a33b691735a06bba9f120adbfd570ddc4"
+      "sha256": "1c1fc09e3290ba9401ee90876d9bd71df305f34bb96e1c3f24d88b58b8d05174"
     },
     {
       "path": "js/shell.js",
-      "sha256": "50a3143e66b27be6a120698675171c0376a067d043a255c6b5dcab78a8091828"
+      "sha256": "83d6b3f261a1d5060c377e98b01946447972c56e3320e67c1e32d1b4ddb5e86e"
     },
     {
       "path": "js/store.js",
@@ -839,5 +839,5 @@
       "sha256": "617149e77104093e9e966b91b70a83fb989a6d7b38904d0cf367f7717c8ec73b"
     }
   ],
-  "signature": "l1yiUwBgqFW91wBMjWeUVGoSCVGaL7KCsRiMtgyViUtNAkyFihJltpTqsjLr9sMpeySDqmQ7Z+0VFaCGkZ/CAw=="
+  "signature": "yGGaii45PjoaMCpo0Hq+Ra0Ov0D19PFFruFDnnEdTzMCzxYg4SK3Fj0oD78mMkpjMVWetD3PU7LutT7z/+KLAA=="
 }

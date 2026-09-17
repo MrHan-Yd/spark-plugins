@@ -186,9 +186,23 @@
         renderPage(job.pageIndex);
       }
     }
+    /** 视口中心对应的页序（渲染优先级依据）；空文档返回 0。 */
+    function viewportCenterIndex() {
+      var center = scrollEl.scrollTop + scrollEl.clientHeight / 2;
+      var best = 0, bestD = Infinity;
+      for (var i = 0; i < pageOrder.length; i++) {
+        var f = pagesLayer.children[i];
+        if (!f) continue;
+        var d = Math.abs(f.offsetTop + f.offsetHeight / 2 - center);
+        if (d < bestD) { bestD = d; best = i; }
+      }
+      return best + 0.5;
+    }
     function rendering() {
+      /* pending 计入 getPage 阶段（renderTask 尚未创建）：否则 pump 同步循环
+       * 视其在途为空闲，一次 while 清空整条队列，虚拟化失效全页渲染 */
       var n = 0;
-      active.forEach(function (st) { if (st.renderTask) n++; });
+      active.forEach(function (st) { if (st.renderTask || st.pending) n++; });
       return n;
     }
 
@@ -199,7 +213,7 @@
       if (!frame) return;
       var canvas = frame.querySelector('canvas');
       var seq = ((active.get(orderIndex) || {}).seq || 0) + 1;
-      active.set(orderIndex, { renderTask: null, seq: seq, canvas: canvas });
+      active.set(orderIndex, { renderTask: null, seq: seq, canvas: canvas, pending: true });
       var ctx = pageCtxOf(orderIndex);
       var pdfPage = await pdfDoc.getPage(it.srcIndex + 1);
       var viewport = pdfPage.getViewport({ scale: scale });
@@ -217,7 +231,9 @@
         transform: useDpr !== 1 ? [useDpr, 0, 0, useDpr, 0, 0] : null
       });
       var st = active.get(orderIndex);
+      if (!st) { try { task.cancel(); } catch (e) { } return; }   // 等待期已被 evict
       st.renderTask = task;
+      st.pending = false;
       try {
         await task.promise;
       } catch (e) {
@@ -235,12 +251,10 @@
     function notifyViewport() {
       var center = viewportCenter();
       var cur = null, best = Infinity;
-      var y = 0;
       for (var i = 0; i < pageOrder.length; i++) {
         var frame = pagesLayer.children[i];
         if (!frame) continue;
-        var top = frame.offsetTop, bottom = top + frame.offsetHeight;
-        var mid = (top + bottom) / 2;
+        var mid = frame.offsetTop + frame.offsetHeight / 2;
         var d = Math.abs(mid - center);
         if (d < best) { best = d; cur = pageOrder[i].id; }
       }

@@ -58,6 +58,10 @@
     };
   }
 
+  function clamp(v, lo, hi) {
+    return Math.min(hi, Math.max(lo, v));
+  }
+
   async function sha256Hex16(bytes) {
     var buf = await crypto.subtle.digest('SHA-256', bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes));
     var a = new Uint8Array(buf), s = '';
