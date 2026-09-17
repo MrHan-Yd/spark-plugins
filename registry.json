@@ -498,29 +498,6 @@
           }
         }
       ]
-    },
-    {
-      "id": "com.spark.pdf-editor",
-      "name": "PDF编辑器",
-      "description": "类 Word 的离线 PDF 编辑器：文本框改写、白盒遮盖原文、高亮、图片插入、页面旋转删除重排，草稿自动保存，全程本地处理不出电脑",
-      "author": "Spark",
-      "homepage": "https://github.com/MrHan-Yd/spark-plugins/tree/master/pdf-editor",
-      "icon": "https://raw.githubusercontent.com/MrHan-Yd/spark-plugins/master/pdf-editor/0.1.0/icon.svg",
-      "runtime": "webview",
-      "latest": "0.1.0",
-      "permissions": ["notify", "clipboard"],
-      "tags": ["文档", "实用工具"],
-      "versions": [
-        {
-          "version": "0.1.0",
-          "path": "pdf-editor/0.1.0",
-          "url": null,
-          "sha256": null,
-          "size": null,
-          "released": "2026-09-17",
-          "signature": { "schema": 1, "key_id": "spark-official-v1", "algorithm": "ed25519", "signature": "qltPC/9hwhUWNxTwftfbVHVlovIrJIfoqjunuT1nn7PeS4pT9ge//yGO5/ek8IsViGC0AbuDqWesZ8BUGWZFDw==" }
-        }
-      ]
     }
   ]
 }

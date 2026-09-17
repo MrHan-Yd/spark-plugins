@@ -1,7 +1,9 @@
 # Agent Note: pdf-editor 新插件立项设计——覆盖式编辑路线 + 青碧视觉拍板
 
-Status: implemented
+Status: rejected
 Class: architecture
+
+> **否决记录（2026-09-17 当日，owner 拍板）**：插件完整施工（4 commit）并真机三轮修复后，owner 得知「类 Word 直接改字」受 mupdf AGPL 许可与开源库能力边界双重封印、无法在免授权前提下实现，判断「白盒预填式编辑」不满足核心诉求，**整个插件移除**（pdf-editor/ 目录与 registry 条目已删，commit 92bbb73..7a9adc8 保留于历史，未来若购买 mupdf 商业授权可整体复活）。本笔记转 rejected 防重犯：**立项前必须先验证「owner 的核心体验诉求在当前技术/许可约束下可达」**——本插件架构与施工质量没有问题，问题在于产品核心诉求超出了约束可达的范围。施工期技术沉淀（坐标局部语义、双实例 copyPages、check-undef 静态扫描、blur 提交等）见 bug-fix 笔记两篇（保留 implemented，教训通用）。
 
 ## 背景
 
