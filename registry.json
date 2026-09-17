@@ -2,7 +2,7 @@
   "schema": 1,
   "name": "Spark 官方插件仓库",
   "zipball_url": "https://github.com/MrHan-Yd/spark-plugins/archive/refs/heads/master.zip",
-  "updated": "2026-09-15T08:15:00Z",
+  "updated": "2026-09-17T00:47:40Z",
   "plugins": [
     {
       "id": "com.spark.json-formatter",
@@ -460,6 +460,41 @@
             "key_id": "spark-official-v1",
             "algorithm": "ed25519",
             "signature": "llcWAmpE/DAKSQluYTaRpcOQUG0Vdp5UExOykUo3eCdkSAZtJiA50rXg+6d8OvwAtLBtKs3YMIG5D2B2B2NtBw=="
+          }
+        }
+      ]
+    },
+    {
+      "id": "com.spark.markdown-viewer",
+      "name": "Markdown 查看器",
+      "description": "打开渲染 Markdown 文件：GFM 表格/任务列表、代码高亮、大纲导航、阅读位置记忆；输入路径直开，或手动选择文件/目录",
+      "author": "Spark",
+      "homepage": "https://github.com/MrHan-Yd/spark-plugins/tree/master/markdown-viewer",
+      "icon": "https://raw.githubusercontent.com/MrHan-Yd/spark-plugins/master/markdown-viewer/0.1.0/icon.svg",
+      "runtime": "webview",
+      "latest": "0.1.0",
+      "permissions": [
+        "fs.read",
+        "shell.open",
+        "clipboard"
+      ],
+      "tags": [
+        "文档",
+        "实用工具"
+      ],
+      "versions": [
+        {
+          "version": "0.1.0",
+          "path": "markdown-viewer/0.1.0",
+          "url": null,
+          "sha256": null,
+          "size": null,
+          "released": "2026-09-17",
+          "signature": {
+            "schema": 1,
+            "key_id": "spark-official-v1",
+            "algorithm": "ed25519",
+            "signature": "WJZu7N4VC/BJem0I3i7kJc08nl5phm8YTT9nCVZ/eB9FjACT0X4E52PzSpVP57P7hqkHUTdtjD1Rt542JCLjCw=="
           }
         }
       ]

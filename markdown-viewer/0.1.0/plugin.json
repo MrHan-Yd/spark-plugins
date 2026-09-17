@@ -28,7 +28,7 @@
     },
     {
       "type": "keyword",
-      "keyword": "查看文档",
+      "keyword": "Markdown查看器",
       "title": "Markdown 查看器",
       "subtitle": "输入 .md 文件路径 · 留空回车手动选择",
       "mode": "page",
