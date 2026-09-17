@@ -1,0 +1,90 @@
+/* overlay.css — 覆盖编辑层（L2/L3）：覆盖元素 / 选中框与手柄 / 幽灵矩形 / 就地编辑态
+ * @see [UI 设计蓝图 §3.3-§3.5/§5](../../../docs/插件开发/PDF编辑器-UI设计蓝图.md)
+ */
+
+/* ── L2 页面三明治 ── */
+.pdf-page {
+  position: relative;
+  background: var(--page-face);
+  border-radius: 2px;
+  box-shadow: var(--page-shadow);
+  isolation: isolate;             /* 页内独立层叠上下文（z 序硬规则） */
+  flex: none;
+}
+.pdf-canvas { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.overlay-layer { position: absolute; inset: 0; z-index: 2; }
+
+/* ── 覆盖元素通用 ── */
+.ov {
+  position: absolute;
+  border-radius: 3px;
+  border: 1px solid var(--overlay-border);
+  background: var(--overlay-fill);
+  cursor: move;
+}
+.ov:hover { border-width: 1.5px; }
+.ov-locked { cursor: default; }
+.ov-selected { border: 1.5px solid var(--accent) !important; }
+
+/* 文本框 */
+.ov-text {
+  position: absolute; inset: 0;
+  padding: 6px;
+  font-family: var(--font-ui);
+  white-space: pre-wrap;
+  overflow: hidden;
+  outline: none;
+  cursor: text;
+}
+.ov-text.editing {
+  background: rgba(255, 255, 255, .92);
+  caret-color: var(--accent);
+  cursor: text;
+}
+.ov-text:empty::before { content: '输入文字…'; color: var(--text-3); font-size: 12px; }
+
+/* 图片 */
+.ov-image { background: transparent; border-style: dashed; }
+.ov-img { position: absolute; inset: 0; width: 100%; height: 100%; -webkit-user-drag: none; }
+
+/* 形状 */
+.ov-shape-ellipse { border-radius: 50%; }
+.ov-shape-highlight { background: rgba(255, 224, 102, .35); }
+
+/* 笔迹 */
+.ov-ink { border: 0; background: transparent; }
+.ov-ink-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+
+/* 白盒视觉提示：纯白 + 细虚框（导出为不透明白矩形） */
+.ov-shape-rect { background: #fff; border: 1px dashed rgba(14,116,144,.45); }
+.ov-shape-rect:hover { border-color: rgba(14,116,144,.75); }
+
+/* ── 选中框与手柄（L3） ── */
+.ov-selected { box-shadow: 0 0 0 1px rgba(14,116,144,.28), 0 1px 3px rgba(14,116,144,.30); }
+.ov-handles { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+.ov-handle {
+  position: absolute; width: 10px; height: 10px;
+  background: var(--page-face);
+  border: 1.5px solid var(--accent); border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(14,116,144,.28), 0 1px 3px rgba(14,116,144,.30);
+  pointer-events: auto;
+  transition: transform 100ms var(--ease-out-expo);
+}
+.ov-handle:hover { transform: scale(1.3); }
+.ov-handle-nw { left: -5px; top: -5px; cursor: nwse-resize; }
+.ov-handle-n  { left: 50%; top: -5px; margin-left: -5px; cursor: ns-resize; }
+.ov-handle-ne { right: -5px; top: -5px; cursor: nesw-resize; }
+.ov-handle-e  { right: -5px; top: 50%; margin-top: -5px; cursor: ew-resize; }
+.ov-handle-se { right: -5px; bottom: -5px; cursor: nwse-resize; }
+.ov-handle-s  { left: 50%; bottom: -5px; margin-left: -5px; cursor: ns-resize; }
+.ov-handle-sw { left: -5px; bottom: -5px; cursor: nesw-resize; }
+.ov-handle-w  { left: -5px; top: 50%; margin-top: -5px; cursor: ew-resize; }
+
+/* ── 绘制幽灵矩形 ── */
+.ov-ghost {
+  position: absolute; z-index: 3;
+  border: 1.5px dashed var(--accent);
+  background: var(--accent-soft);
+  border-radius: 3px;
+  pointer-events: none;
+}

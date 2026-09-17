@@ -1,0 +1,53 @@
+{
+  "id": "com.spark.pdf-editor",
+  "name": "PDF编辑器",
+  "version": "0.1.0",
+  "api_version": 2,
+  "runtime": "webview",
+  "main": "index.html",
+  "icon": "icon.svg",
+  "author": "Spark",
+  "description": "类 Word 的离线 PDF 编辑器：文本框改写、白盒遮盖、高亮、图片插入、页面旋转删除重排，草稿自动保存，全程本地处理",
+  "permissions": ["notify", "clipboard"],
+  "features": [
+    {
+      "type": "keyword",
+      "keyword": "pdf编辑",
+      "title": "PDF编辑器",
+      "subtitle": "改字 · 贴图 · 高亮 · 页面编排 · 留空回车选择文件",
+      "mode": "page",
+      "placeholder": "拖入或选择 PDF 文件开始编辑…"
+    },
+    {
+      "type": "keyword",
+      "keyword": "编辑PDF",
+      "title": "PDF编辑器",
+      "subtitle": "离线编辑 PDF：改字贴图高亮与页面编排",
+      "mode": "page",
+      "placeholder": "拖入或选择 PDF 文件开始编辑…"
+    },
+    {
+      "type": "keyword",
+      "keyword": "PDF编辑器",
+      "title": "PDF编辑器",
+      "subtitle": "改字 · 贴图 · 高亮 · 页面编排",
+      "mode": "page",
+      "placeholder": "拖入或选择 PDF 文件开始编辑…"
+    },
+    {
+      "type": "regex",
+      "pattern": "(?i)\\.pdf$",
+      "title": "PDF编辑器",
+      "subtitle": "编辑此 PDF 文件（需选择确认）",
+      "mode": "page"
+    }
+  ],
+  "window": {
+    "width": 1280,
+    "height": 860,
+    "min_width": 720,
+    "min_height": 520,
+    "resizable": true,
+    "multi_instance": true
+  }
+}
