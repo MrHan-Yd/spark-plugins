@@ -13,8 +13,8 @@
 **Native 插件是"纯应用"模型**：
 
 - **exe 永不直接应答搜索**——旧 `commands`（`find xx` 式：exe 在搜索链路里实时应答、往结果列表注入动态结果）已移除且清单校验直接拒绝。
-- **搜索框入口与 webview 同构**——native 可声明 `features`（**仅 `mode: "page"`**）：关键字在搜索框产出候选（含真前缀建议），回车/点击打开的正是插件的页面窗口。exe 不参与搜索过程，只服务于页面。
-- **页面即全部 UI**——插件必须提供 HTML 页面（`page` 字段），Spark 用与 webview 插件同款的插件窗口（WebView2）代开；入口 = 搜索框关键字候选 或 设置 → 插件卡片的「打开」按钮（开发者模式另有「调试」）。
+- **搜索框入口与 webview 同构**——native 可声明 `features`（**仅 `mode: "page"`**）：关键字在搜索框产出候选（含真前缀建议），回车/点击打开的正是插件的页面窗口；**按插件名（`name` 子串）也能搜到**，无需声明。exe 不参与搜索过程，只服务于页面。
+- **页面即全部 UI**——插件必须提供 HTML 页面（`page` 字段），Spark 用与 webview 插件同款的插件窗口（WebView2）代开；入口 = 搜索框关键字/插件名候选 或 设置 → 插件卡片的「打开」按钮（开发者模式另有「调试」）。
 - **exe 生命周期 = 页面生命周期**——懒启动（页面首次 RPC 才 spawn + 握手）；**关闭页面 host 即优雅关停进程**。"不打开就是不用"字面成立。
 - 页面 JS 经 `spark.rpc(method, args)` 调用 exe 的原生逻辑（host 转发 `plugin.page` RPC），exe 也可以只用页面本地能力（db/clipboard 等）不实现任何自定义方法。
 
@@ -24,7 +24,7 @@
 | `plugin.page` RPC（页面 → host → exe） | ✅ `crates/ipc/src/protocol.rs` + `crates/plugin-manager/src/native.rs` |
 | 插件 SDK trait（`Plugin::page`） + `run_loop` | ✅ `crates/sdk/src/lib.rs` |
 | host 侧 spawn / 懒启动 / 崩溃重建 / 关窗关停 | ✅ `crates/plugin-manager/src/native.rs`（`NativeRuntime`） |
-| features 关键字进搜索框（page 模式，同 webview 路由） | ✅ `crates/plugin-manager/src/lib.rs`（`find_keyword_match` 等） |
+| features 关键字进搜索框（page 模式，同 webview 路由；含真前缀建议与**插件名**模糊命中） | ✅ `crates/plugin-manager/src/lib.rs`（`find_keyword_match` / `find_keyword_prefix_matches` / `find_name_matches`） |
 | UI 卡片「打开」/「调试」按钮 + `spark.rpc` | ✅ `ui/Spark.UI`（`PluginWindowHost` 复用 webview 窗口基建） |
 | `echo` 示例插件（纯页面） | ✅ `plugins/echo/`（page.html + `page()` 回显 + `echo` 关键字） |
 
